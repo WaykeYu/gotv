@@ -430,6 +430,36 @@
       "changeable": 1
     },
     {
+      "key": "星夜资源",
+      "name": "星夜 | 采集",
+      "type": 1,
+      "api": "https://xyezy.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "嘿嘿资源",
+      "name": "嘿嘿 | 采集",
+      "type": 1,
+      "api": "https://api.heiapi.cc/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "红楼资源",
+      "name": "红楼 | 采集",
+      "type": 1,
+      "api": "https://www.hlzyapi.vip/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
       "key": "色猫资源",
       "name": "色猫 | 采集",
       "type": 1,
