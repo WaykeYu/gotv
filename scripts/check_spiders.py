@@ -1,164 +1,227 @@
-import os
-import sys
-import re
-import importlib.util
-import inspect
-import requests
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+name: Check Spiders & JS Health
 
-PY_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "py")
-REPORT_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "SPIDER_STATUS.md")
-TIMEOUT = 10
-MAX_WORKERS = 8
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'py/**.py'
+      - 'js/**'
 
-def extract_host_from_code(code: str) -> str:
-    """備用方法：從原始碼中尋找可能的根網址"""
-    patterns = [
-        r'''(?:siteUrl|host|baseUrl|url)\s*=\s*['"](https?://[^'"]+)['"]''',
-        r'''['"](https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})['"]'''
-    ]
-    for pattern in patterns:
-        matches = re.findall(pattern, code)
-        for url in matches:
-            if not any(skip in url for skip in ["github", "googlevideo", "w3.org", "schema.org"]):
-                return url
-    return ""
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-def test_url_alive(url: str) -> tuple[bool, str]:
-    """測試網址連線是否正常"""
-    try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        resp = requests.head(url, headers=headers, timeout=TIMEOUT, allow_redirects=True)
-        if resp.status_code >= 400:
-            resp = requests.get(url, headers=headers, timeout=TIMEOUT, stream=True)
-        if resp.status_code < 400:
-            return True, f"HTTP {resp.status_code}"
-        return False, f"HTTP {resp.status_code}"
-    except Exception as e:
-        return False, str(e)[:40]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-def check_single_spider(py_path: str) -> dict:
-    filename = os.path.basename(py_path)
-    result = {
-        "file": filename,
-        "name": filename.replace(".py", ""),
-        "status": "❌ 異常",
-        "detail": "未知錯誤",
-        "latency_ms": 0
-    }
-    
-    start_time = datetime.now()
-    
-    # 1. 嘗試動態載入模組
-    try:
-        spec = importlib.util.spec_from_file_location(filename[:-3], py_path)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[filename[:-3]] = module
-        spec.loader.exec_module(module)
-        
-        spider_instance = None
-        # 尋找繼承或命名的 Spider 類別
-        for attr_name in dir(module):
-            attr = getattr(module, attr_name)
-            if inspect.isclass(attr) and attr.__module__ == module.__name__:
-                if "Spider" in attr_name or hasattr(attr, "homeContent"):
-                    spider_instance = attr()
-                    break
-        
-        # 嘗試執行介面方法檢驗數據
-        if spider_instance:
-            if hasattr(spider_instance, "init"):
-                try:
-                    spider_instance.init()
-                except Exception:
-                    pass
-            
-            # 優先測試首頁內容
-            if hasattr(spider_instance, "homeContent"):
-                home_res = spider_instance.homeContent(True)
-                if home_res and isinstance(home_res, (dict, list, str)):
-                    cost = int((datetime.now() - start_time).total_seconds() * 1000)
-                    return {"file": filename, "name": spider_instance.getName() if hasattr(spider_instance, "getName") else filename, "status": "✅ 正常", "detail": "homeContent 響應成功", "latency_ms": cost}
-            
-            if hasattr(spider_instance, "homeVideoContent"):
-                vod_res = spider_instance.homeVideoContent()
-                if vod_res:
-                    cost = int((datetime.now() - start_time).total_seconds() * 1000)
-                    return {"file": filename, "name": filename, "status": "✅ 正常", "detail": "homeVideoContent 響應成功", "latency_ms": cost}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    except Exception as e:
-        # 動態載入失敗，轉為靜態分析網址測試
-        pass
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests bs4 lxml pycryptodome urllib3
 
-    # 2. 備援策略：靜態擷取 Host 連線測試
-    try:
-        with open(py_path, "r", encoding="utf-8", errors="ignore") as f:
-            code = f.read()
-        target_url = extract_host_from_code(code)
-        
-        if target_url:
-            alive, msg = test_url_alive(target_url)
-            cost = int((datetime.now() - start_time).total_seconds() * 1000)
-            if alive:
-                result["status"] = "⚠️ 站點存活(腳本載入受限)"
-                result["detail"] = f"站點可連線 ({msg}): {target_url[:30]}"
-            else:
-                result["status"] = "❌ 失效"
-                result["detail"] = f"連線失敗 ({msg})"
-            result["latency_ms"] = cost
-        else:
-            result["detail"] = "無明確 host 且模組無法呼叫"
-    except Exception as e:
-        result["detail"] = str(e)[:40]
-        
-    return result
+      - name: Run Unified Health Checker
+        run: |
+          python - << 'EOF'
+          import os
+          import sys
+          import re
+          import importlib.util
+          import inspect
+          import requests
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from datetime import datetime
 
-def main():
-    if not os.path.exists(PY_DIR):
-        print(f"Directory {PY_DIR} not found.")
-        sys.exit(1)
+          BASE_DIR = os.getcwd()
+          PY_DIR = os.path.join(BASE_DIR, "py")
+          JS_DIR = os.path.join(BASE_DIR, "js")
+          REPORT_FILE = os.path.join(BASE_DIR, "SPIDER_STATUS.md")
+          TIMEOUT = 10
+          MAX_WORKERS = 10
 
-    py_files = [os.path.join(PY_DIR, f) for f in os.listdir(PY_DIR) if f.endswith(".py") and not f.startswith("__")]
-    
-    print(f"找到 {len(py_files)} 個爬蟲腳本，開始並行檢測...")
-    results = []
-    
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_map = {executor.submit(check_single_spider, path): path for path in py_files}
-        for future in as_completed(future_map):
-            res = future.result()
-            results.append(res)
-            print(f"[{res['status']}] {res['file']} - {res['detail']}")
+          def extract_urls(code: str) -> list:
+              """精確匹配 Python 與 JS 常見的站點宣告語法"""
+              patterns = [
+                  r'''(?:host|site|siteUrl|baseUrl|url|WEB_SITE)\s*[:=]\s*['"](https?://[^'"]+)['"]''',
+                  r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?)['"]'''
+              ]
+              urls = []
+              # 排除內部常見非目標網址
+              skip_hosts = ["github.com", "googlevideo", "w3.org", "schema.org", "jsdelivr.net", "baidu.com", "qq.com", "unpkg.com"]
+              for pat in patterns:
+                  found = re.findall(pat, code, re.IGNORECASE)
+                  for u in found:
+                      if not any(skip in u for skip in skip_hosts) and u not in urls:
+                          urls.append(u)
+              return urls
 
-    # 排序：依狀態與檔名
-    results.sort(key=lambda x: (x["status"], x["file"]))
-    
-    # 統計數量
-    total = len(results)
-    success_count = sum(1 for r in results if "✅" in r["status"])
-    warning_count = sum(1 for r in results if "⚠️" in r["status"])
-    failed_count = sum(1 for r in results if "❌" in r["status"])
-    success_rate = round(((success_count + warning_count) / total * 100), 2) if total > 0 else 0
+          def test_url_alive(url: str) -> tuple:
+              try:
+                  headers = {
+                      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                      "Referer": url
+                  }
+                  resp = requests.head(url, headers=headers, timeout=TIMEOUT, allow_redirects=True)
+                  if resp.status_code >= 400:
+                      resp = requests.get(url, headers=headers, timeout=TIMEOUT, stream=True)
+                  if resp.status_code < 400:
+                      return True, f"HTTP {resp.status_code}"
+                  return False, f"HTTP {resp.status_code}"
+              except Exception as e:
+                  return False, str(e)[:35]
 
-    # 建立 Markdown 報告
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
-    md = []
-    md.append("# 🕷️ 影音網站爬蟲有效性檢測報告\n")
-    md.append(f"> **檢測時間**：`{now_str}`  \n")
-    md.append(f"> **統計概況**：共檢測 **{total}** 個腳本 ｜ ✅ 正常：**{success_count}** ｜ ⚠️ 站點存活：**{warning_count}** ｜ ❌ 失效：**{failed_count}** ｜ 可用率：**{success_rate}%**\n")
-    md.append("\n| 腳本名稱 | 檢測狀態 | 耗時 (ms) | 檢測資訊 |")
-    md.append("| :--- | :---: | :---: | :--- |")
-    
-    for r in results:
-        md.append(f"| `{r['file']}` | {r['status']} | {r['latency_ms']} | {r['detail']} |")
+          def check_spider_file(file_info: tuple) -> dict:
+              file_type, rel_path, full_path = file_info
+              start_time = datetime.now()
+              result = {
+                  "type": file_type,
+                  "file": rel_path,
+                  "status": "❌ 異常",
+                  "detail": "未知錯誤",
+                  "latency_ms": 0
+              }
 
-    content = "\n".join(md)
-    
-    with open(REPORT_FILE, "w", encoding="utf-8") as f:
-        f.write(content)
-        
-    print(f"\n報告已產生至 {REPORT_FILE}")
+              # 讀取檔案內容
+              try:
+                  with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+                      code = f.read()
+              except Exception as e:
+                  result["detail"] = f"無法讀取: {str(e)[:30]}"
+                  return result
 
-if __name__ == "__main__":
-    main()
+              # 1. 若為 Python 腳本，優先嘗試動態執行模組介面
+              if file_type == "Python":
+                  filename = os.path.basename(full_path)
+                  try:
+                      mod_name = f"mod_{os.path.splitext(filename)[0]}"
+                      spec = importlib.util.spec_from_file_location(mod_name, full_path)
+                      module = importlib.util.module_from_spec(spec)
+                      sys.modules[mod_name] = module
+                      spec.loader.exec_module(module)
+
+                      spider = None
+                      for attr in dir(module):
+                          obj = getattr(module, attr)
+                          if inspect.isclass(obj) and obj.__module__ == module.__name__:
+                              if "Spider" in attr or hasattr(obj, "homeContent"):
+                                  spider = obj()
+                                  break
+
+                      if spider:
+                          if hasattr(spider, "init"):
+                              try: spider.init()
+                              except Exception: pass
+                          if hasattr(spider, "homeContent"):
+                              res = spider.homeContent(True)
+                              if res and isinstance(res, (dict, list, str)):
+                                  cost = int((datetime.now() - start_time).total_seconds() * 1000)
+                                  return {**result, "status": "✅ 正常", "detail": "homeContent 響應成功", "latency_ms": cost}
+                  except Exception:
+                      pass
+
+              # 2. 靜態提取 URL 連線測試（適用 JS 腳本與動態執行受限的 Python）
+              urls = extract_urls(code)
+              if urls:
+                  target_url = urls[0]
+                  alive, msg = test_url_alive(target_url)
+                  cost = int((datetime.now() - start_time).total_seconds() * 1000)
+                  if alive:
+                      result["status"] = "✅ 正常" if file_type == "JS" else "⚠️ 站點存活(載入受限)"
+                      result["detail"] = f"站點可連線 ({msg}): {target_url}"
+                  else:
+                      result["status"] = "❌ 失效"
+                      result["detail"] = f"連線失敗 ({msg}): {target_url}"
+                  result["latency_ms"] = cost
+              else:
+                  result["detail"] = "未偵測到有效網站 URL"
+
+              return result
+
+          # 收集所有檔案清單
+          target_files = []
+
+          # py/ 目錄掃描
+          if os.path.exists(PY_DIR):
+              for root, _, files in os.walk(PY_DIR):
+                  for f in files:
+                      if f.endswith(".py") and not f.startswith("__"):
+                          full = os.path.join(root, f)
+                          target_files.append(("Python", os.path.relpath(full, BASE_DIR), full))
+
+          # js/ 目錄與所有子資料夾掃描
+          if os.path.exists(JS_DIR):
+              for root, _, files in os.walk(JS_DIR):
+                  for f in files:
+                      if f.endswith(".js"):
+                          full = os.path.join(root, f)
+                          target_files.append(("JS", os.path.relpath(full, BASE_DIR), full))
+
+          if not target_files:
+              print("未找到任何 py 或 js 檔案，結束檢測。")
+              sys.exit(0)
+
+          print(f"共發現 {len(target_files)} 個目標腳本，開始並行檢測...")
+          results = []
+          with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+              future_map = {executor.submit(check_spider_file, item): item for item in target_files}
+              for future in as_completed(future_map):
+                  r = future.result()
+                  results.append(r)
+                  print(f"[{r['type']}][{r['status']}] {r['file']} -> {r['detail']}")
+
+          # 依類型與狀態排序
+          results.sort(key=lambda x: (x["type"], x["status"], x["file"]))
+
+          # 數據統計
+          def calc_stats(sub_list):
+              total = len(sub_list)
+              ok = sum(1 for r in sub_list if "✅" in r["status"])
+              warn = sum(1 for r in sub_list if "⚠️" in r["status"])
+              fail = sum(1 for r in sub_list if "❌" in r["status"])
+              rate = round(((ok + warn) / total * 100), 2) if total > 0 else 0
+              return total, ok, warn, fail, rate
+
+          tot_all, ok_all, warn_all, fail_all, rate_all = calc_stats(results)
+          py_stats = calc_stats([r for r in results if r["type"] == "Python"])
+          js_stats = calc_stats([r for r in results if r["type"] == "JS"])
+
+          now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+          md = [
+              "# 🕷️ 影音網站爬蟲 (PY & JS) 有效性檢測報告\n",
+              f"> **檢測時間**：`{now_str}`  \n",
+              f"> **總體概況**：共檢測 **{tot_all}** 個檔案 ｜ ✅ 正常：**{ok_all}** ｜ ⚠️ 警告：**{warn_all}** ｜ ❌ 失效：**{fail_all}** ｜ **總可用率：{rate_all}%**\n",
+              "### 📊 分類統計\n",
+              f"- **Python (`py/`)**：共 **{py_stats[0]}** 個 ｜ 可用 **{py_stats[1] + py_stats[2]}** ｜ 失效 **{py_stats[3]}** ｜ 可用率 **{py_stats[4]}%**",
+              f"- **JavaScript (`js/`)**：共 **{js_stats[0]}** 個 ｜ 可用 **{js_stats[1] + js_stats[2]}** ｜ 失效 **{js_stats[3]}** ｜ 可用率 **{js_stats[4]}%**\n",
+              "### 📝 詳細檢測結果\n",
+              "| 類型 | 檔案路徑 | 狀態 | 耗時 (ms) | 檢測資訊 |",
+              "| :---: | :--- | :---: | :---: | :--- |"
+          ]
+
+          for r in results:
+              md.append(f"| {r['type']} | `{r['file']}` | {r['status']} | {r['latency_ms']} | {r['detail']} |")
+
+          with open(REPORT_FILE, "w", encoding="utf-8") as f:
+              f.write("\n".join(md))
+          EOF
+
+      - name: Commit & Push Report
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add SPIDER_STATUS.md
+          if git diff --staged --quiet; then
+            echo "報告無任何變動，跳過提交。"
+          else
+            git commit -m "chore(auto): 更新 py 及 js 影音網站有效性報告 [skip ci]"
+            git push
+          fi
