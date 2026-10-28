@@ -20,24 +20,15 @@ on:
         required: true
         default: "main"
         type: string
-      sync_strategy:
-        description: "同步策略"
-        required: true
-        default: "discard"
-        type: choice
-        options:
-          - discard # 强制同步：丢弃本地修改，完全复制上游 (推荐)
-          - merge   # 尝试合并：如果有冲突会报错
 
 env:
   UPSTREAM_REPO: "cluntop/tvbox"
   UPSTREAM_BRANCH: ${{ github.event.inputs.upstream_branch || 'main' }}
   TARGET_BRANCH: ${{ github.event.inputs.target_branch || 'main' }}
-  SYNC_STRATEGY: ${{ github.event.inputs.sync_strategy || 'discard' }}
 
 jobs:
   sync_upstream:
-    name: Sync and Notify
+    name: Sync Upstream (Hard Reset)
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
 
@@ -50,17 +41,22 @@ jobs:
           persist-credentials: true
           fetch-depth: 0
 
-      - name: Sync Upstream Changes
-        id: sync
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.3
-        with:
-          upstream_sync_repo: ${{ env.UPSTREAM_REPO }}
-          upstream_sync_branch: ${{ env.UPSTREAM_BRANCH }}
-          target_sync_branch: ${{ env.TARGET_BRANCH }}
-          target_repo_token: ${{ secrets.GIT_TOKEN || secrets.GITHUB_TOKEN }}
-          upstream_pull_args: ${{ env.SYNC_STRATEGY == 'discard' && '--allow-unrelated-histories --force' || '' }}
-          target_branch_push_args: ${{ env.SYNC_STRATEGY == 'discard' && '--force' || '' }}
-          test_mode: false
+      - name: Force Sync from Upstream
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 1. 添加上游远程仓库
+          git remote add upstream https://github.com/${{ env.UPSTREAM_REPO }}.git || true
+
+          # 2. 获取上游最新所有提交
+          git fetch upstream ${{ env.UPSTREAM_BRANCH }}
+
+          # 3. 强制重置当前分支到上游，丢弃一切本地冲突与修改
+          git reset --hard upstream/${{ env.UPSTREAM_BRANCH }}
+
+          # 4. 强制推送到当前仓库的目标分支
+          git push origin ${{ env.TARGET_BRANCH }} --force
 
       - name: Generate Summary
         if: always()
@@ -69,7 +65,7 @@ jobs:
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
           echo "| **源仓库** | [${{ env.UPSTREAM_REPO }}](https://github.com/${{ env.UPSTREAM_REPO }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **结果** | ${{ steps.sync.outputs.has_new_commits == 'true' && '✅ 已同步最新提交' || (steps.sync.outcome == 'success' && '✨ 已经是最新状态' || '❌ 失败') }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **状态** | ✅ 强制同步成功（已覆盖本地冲突） |" >> $GITHUB_STEP_SUMMARY
 
       - name: Delete Old Workflows
         if: always()
