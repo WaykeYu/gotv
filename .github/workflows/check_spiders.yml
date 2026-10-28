@@ -1,13 +1,13 @@
-name: Check Spiders Health
+name: Check Spiders & JS Health
 
 on:
   schedule:
-    # 每天 UTC 02:00（台灣時間上午 10:00）自動執行
     - cron: '0 2 * * *'
-  workflow_dispatch: # 支援在 GitHub 頁面手動點擊執行
+  workflow_dispatch:
   push:
     paths:
-      - 'py/**.py' # 當有新腳本變更或新增時觸發
+      - 'py/**.py'
+      - 'js/**'
 
 jobs:
   check:
@@ -23,7 +23,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
 
       - name: Install Dependencies
         run: |
@@ -40,8 +39,8 @@ jobs:
           git config --local user.name "GitHub Action"
           git add SPIDER_STATUS.md
           if git diff --staged --quiet; then
-            echo "沒有狀態變更，無需提交。"
+            echo "報告無任何變動，跳過提交。"
           else
-            git commit -m "chore(auto): 更新影音網站有效性統計報告 [skip ci]"
+            git commit -m "chore(auto): 更新 py 及 js 影音網站有效性報告 [skip ci]"
             git push
           fi
