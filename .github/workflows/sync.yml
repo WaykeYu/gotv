@@ -3,7 +3,7 @@ name: Upstream Sync
 permissions:
   contents: write
   actions: write
-  pull-requests: write      # 'write' access to pull requests
+  pull-requests: write
 
 on:
   schedule:
@@ -43,13 +43,12 @@ jobs:
 
     steps:
       - name: Checkout Target Repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_BRANCH }}
-          repository: cluntop/tvbox
-          token: ${{ secrets.GIT_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN || secrets.GITHUB_TOKEN }}
           persist-credentials: true
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Sync Upstream Changes
         id: sync
@@ -58,20 +57,22 @@ jobs:
           upstream_sync_repo: ${{ env.UPSTREAM_REPO }}
           upstream_sync_branch: ${{ env.UPSTREAM_BRANCH }}
           target_sync_branch: ${{ env.TARGET_BRANCH }}
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          target_repo_token: ${{ secrets.GIT_TOKEN || secrets.GITHUB_TOKEN }}
           upstream_pull_args: ${{ env.SYNC_STRATEGY == 'discard' && '--allow-unrelated-histories --force' || '' }}
           target_branch_push_args: ${{ env.SYNC_STRATEGY == 'discard' && '--force' || '' }}
           test_mode: false
 
       - name: Generate Summary
+        if: always()
         run: |
           echo "### 🔄 同步报告 (Sync Report)" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
           echo "| **源仓库** | [${{ env.UPSTREAM_REPO }}](https://github.com/${{ env.UPSTREAM_REPO }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "| **结果** | ${{ steps.sync.outputs.sync_status == 'success' && '✅ 成功 (Success)' || '❌ 失败 (Failed)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **结果** | ${{ steps.sync.outputs.has_new_commits == 'true' && '✅ 已同步最新提交' || (steps.sync.outcome == 'success' && '✨ 已经是最新状态' || '❌ 失败') }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Delete Old Workflows
+        if: always()
         uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
