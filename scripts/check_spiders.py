@@ -15,7 +15,7 @@ REPORT_FILE = os.path.join(BASE_DIR, "SPIDER_STATUS.md")
 TIMEOUT = 12
 MAX_WORKERS = 10
 
-# 建立基礎環境路徑
+# 加入 Python 模組搜尋路徑
 for p in [BASE_DIR, PY_DIR, os.path.join(PY_DIR, "base")]:
     if os.path.exists(p) and p not in sys.path:
         sys.path.insert(0, p)
@@ -26,14 +26,14 @@ BROWSER_HEADERS = {
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7"
 }
 
-# 建立模擬基礎 Spider 類別，避免缺少 base.spider 導致載入失敗
+# 注入相容的 Mock Spider 基底類別，確保繼承 base.spider.Spider 的腳本能順利載入
 try:
     import base.spider
 except ImportError:
     import types
     base_module = types.ModuleType("base")
     spider_module = types.ModuleType("base.spider")
-    
+
     class MockSpider:
         def __init__(self):
             self.headers = dict(BROWSER_HEADERS)
@@ -53,6 +53,7 @@ except ImportError:
     sys.modules["base.spider"] = spider_module
 
 def extract_urls(code: str) -> list:
+    """提取程式碼內所有宣告的目標網址"""
     patterns = [
         r'''(?:host|site|siteUrl|baseUrl|url|WEB_SITE|header_url)\s*[:=]\s*['"](https?://[^'"]+)['"]''',
         r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?)['"]'''
@@ -67,12 +68,11 @@ def extract_urls(code: str) -> list:
     return urls
 
 def test_url_alive(url: str) -> tuple[bool, str]:
+    """測試網址連線狀態（403/503 或 SSL 異常視為伺服器存活）"""
     try:
         headers = dict(BROWSER_HEADERS)
         headers["Referer"] = url + "/"
         resp = requests.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
-        
-        # 200, 30x, 403, 503 等狀態皆表示站點伺服器與域名仍活著（包含防爬牆）
         if resp.status_code < 400 or resp.status_code in [403, 503]:
             return True, f"HTTP {resp.status_code}"
         return False, f"HTTP {resp.status_code}"
@@ -101,7 +101,7 @@ def check_spider_file(file_info: tuple) -> dict:
         result["detail"] = f"無法讀取: {str(e)[:30]}"
         return result
 
-    # 1. 動態執行驗證
+    # 1. Python 腳本優先執行介面驗證
     if file_type == "Python":
         filename = os.path.basename(full_path)
         mod_name = f"mod_{os.path.splitext(filename)[0]}"
@@ -121,19 +121,17 @@ def check_spider_file(file_info: tuple) -> dict:
 
             if spider_cls:
                 spider = spider_cls()
-                # 必須先執行 init 以取得動態 host
+                # 執行初始化以獲取動態 host（如騷火影視）
                 if hasattr(spider, "init"):
                     try:
                         spider.init()
                     except Exception:
                         pass
-                
-                # 若取得 host，記錄測試
+
                 if hasattr(spider, "host") and spider.host:
                     cost = int((datetime.now() - start_time).total_seconds() * 1000)
                     return {**result, "status": "✅ 正常", "detail": f"動態取得主站: {spider.host}", "latency_ms": cost}
 
-                # 測試 homeContent
                 if hasattr(spider, "homeContent"):
                     res = spider.homeContent(True)
                     if res and isinstance(res, (dict, list, str)):
@@ -142,7 +140,7 @@ def check_spider_file(file_info: tuple) -> dict:
         except Exception:
             pass
 
-    # 2. 靜態提取 URL 測試
+    # 2. 靜態提取 URL 連線測試（適用 JS 腳本與動態載入受限的 Python）
     urls = extract_urls(code)
     if urls:
         alive_info = None
@@ -168,6 +166,7 @@ def check_spider_file(file_info: tuple) -> dict:
     return result
 
 def move_to_ng(full_path: str) -> str:
+    """將失效檔案移至所屬目錄下的 NG 資料夾"""
     parent_dir = os.path.dirname(full_path)
     ng_dir = os.path.join(parent_dir, "NG")
     os.makedirs(ng_dir, exist_ok=True)
@@ -181,6 +180,7 @@ def main():
 
     target_files = []
 
+    # 收集 py 檔案（排除 NG 資料夾）
     if os.path.exists(PY_DIR):
         for root, dirs, files in os.walk(PY_DIR):
             if "NG" in dirs:
@@ -190,6 +190,7 @@ def main():
                     full = os.path.join(root, f)
                     target_files.append(("Python", os.path.relpath(full, BASE_DIR), full))
 
+    # 收集 js 檔案（遞迴所有子目錄，排除 NG 資料夾）
     if os.path.exists(JS_DIR):
         for root, dirs, files in os.walk(JS_DIR):
             if "NG" in dirs:
@@ -212,7 +213,7 @@ def main():
             results.append(r)
             print(f"[{r['type']}][{r['status']}] {r['file']} -> {r['detail']}")
 
-    # 僅針對 ❌ 執行移動
+    # 僅針對確定的 ❌ 執行隔離移動
     moved_count = 0
     for r in results:
         if "❌" in r["status"]:
