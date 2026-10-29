@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,18 +31,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests bs4 lxml pycryptodome urllib3
 
+      - name: Ensure NG Folders Exist
+        run: |
+          mkdir -p py/NG js/NG
+          touch py/NG/.gitkeep js/NG/.gitkeep
+
       - name: Run Spider Checker
         run: |
           python scripts/check_spiders.py
 
-      - name: Commit & Push Report
+      - name: Commit & Push Changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add SPIDER_STATUS.md
+          git add -A
           if git diff --staged --quiet; then
-            echo "報告無任何變動，跳過提交。"
+            echo "沒有任何檔案變動，無需提交。"
           else
-            git commit -m "chore(auto): 更新 py 及 js 影音網站有效性報告 [skip ci]"
-            git push
+            git commit -m "chore(auto): 建立/隔離失效腳本至 NG 目錄 [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
           fi
