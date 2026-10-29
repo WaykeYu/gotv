@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout Target Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.TARGET_BRANCH }}
           token: ${{ secrets.GIT_TOKEN || secrets.GITHUB_TOKEN }}
