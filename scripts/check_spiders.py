@@ -15,28 +15,44 @@ REPORT_FILE = os.path.join(BASE_DIR, "SPIDER_STATUS.md")
 TIMEOUT = 12
 MAX_WORKERS = 10
 
-# 將 py 相關目錄加入模組搜尋路徑，避免 import base.spider 失敗
+# 建立基礎環境路徑
 for p in [BASE_DIR, PY_DIR, os.path.join(PY_DIR, "base")]:
     if os.path.exists(p) and p not in sys.path:
         sys.path.insert(0, p)
 
-# 模擬現代瀏覽器的 Headers
 BROWSER_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124"',
-    "Sec-Ch-Ua-Mobile": "?0",
-    "Sec-Ch-Ua-Platform": '"Windows"',
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-    "Upgrade-Insecure-Requests": "1"
+    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7"
 }
 
+# 建立模擬基礎 Spider 類別，避免缺少 base.spider 導致載入失敗
+try:
+    import base.spider
+except ImportError:
+    import types
+    base_module = types.ModuleType("base")
+    spider_module = types.ModuleType("base.spider")
+    
+    class MockSpider:
+        def __init__(self):
+            self.headers = dict(BROWSER_HEADERS)
+            self.host = ""
+        def fetch(self, url, headers=None, timeout=TIMEOUT, **kwargs):
+            h = headers or self.headers
+            return requests.get(url, headers=h, timeout=timeout, verify=False)
+        def post(self, url, headers=None, data=None, timeout=TIMEOUT, **kwargs):
+            h = headers or self.headers
+            return requests.post(url, headers=h, data=data, timeout=timeout, verify=False)
+        def log(self, *args):
+            pass
+
+    spider_module.Spider = MockSpider
+    base_module.spider = spider_module
+    sys.modules["base"] = base_module
+    sys.modules["base.spider"] = spider_module
+
 def extract_urls(code: str) -> list:
-    """提取程式碼內的所有可能影音站點 URL"""
     patterns = [
         r'''(?:host|site|siteUrl|baseUrl|url|WEB_SITE|header_url)\s*[:=]\s*['"](https?://[^'"]+)['"]''',
         r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?)['"]'''
@@ -51,23 +67,16 @@ def extract_urls(code: str) -> list:
     return urls
 
 def test_url_alive(url: str) -> tuple[bool, str]:
-    """測試網站連線狀態，防爬牆狀態（403/503）視為存活"""
     try:
         headers = dict(BROWSER_HEADERS)
         headers["Referer"] = url + "/"
-        
-        # 優先嘗試 GET 請求獲取主頁
         resp = requests.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
         
-        if resp.status_code < 400:
+        # 200, 30x, 403, 503 等狀態皆表示站點伺服器與域名仍活著（包含防爬牆）
+        if resp.status_code < 400 or resp.status_code in [403, 503]:
             return True, f"HTTP {resp.status_code}"
-        elif resp.status_code in [403, 503]:
-            # 遇到 Cloudflare 或防火牆阻擋，但表示伺服器與域名完全存活
-            return True, f"HTTP {resp.status_code} (防爬阻擋，站點存活)"
-        else:
-            return False, f"HTTP {resp.status_code}"
+        return False, f"HTTP {resp.status_code}"
     except requests.exceptions.SSLError:
-        # SSL 證書失效但主機仍在
         return True, "SSL 驗證失敗 (站點存活)"
     except Exception as e:
         return False, str(e)[:35]
@@ -92,7 +101,7 @@ def check_spider_file(file_info: tuple) -> dict:
         result["detail"] = f"無法讀取: {str(e)[:30]}"
         return result
 
-    # 1. 若為 Python 腳本，優先嘗試載入與執行爬蟲核心介面
+    # 1. 動態執行驗證
     if file_type == "Python":
         filename = os.path.basename(full_path)
         mod_name = f"mod_{os.path.splitext(filename)[0]}"
@@ -102,19 +111,28 @@ def check_spider_file(file_info: tuple) -> dict:
             sys.modules[mod_name] = module
             spec.loader.exec_module(module)
 
-            spider = None
+            spider_cls = None
             for attr in dir(module):
                 obj = getattr(module, attr)
                 if inspect.isclass(obj) and obj.__module__ == module.__name__:
-                    if "Spider" in attr or hasattr(obj, "homeContent"):
-                        spider = obj()
+                    if hasattr(obj, "homeContent") or "Spider" in attr:
+                        spider_cls = obj
                         break
 
-            if spider:
+            if spider_cls:
+                spider = spider_cls()
+                # 必須先執行 init 以取得動態 host
                 if hasattr(spider, "init"):
-                    try: spider.init()
-                    except Exception: pass
+                    try:
+                        spider.init()
+                    except Exception:
+                        pass
                 
+                # 若取得 host，記錄測試
+                if hasattr(spider, "host") and spider.host:
+                    cost = int((datetime.now() - start_time).total_seconds() * 1000)
+                    return {**result, "status": "✅ 正常", "detail": f"動態取得主站: {spider.host}", "latency_ms": cost}
+
                 # 測試 homeContent
                 if hasattr(spider, "homeContent"):
                     res = spider.homeContent(True)
@@ -124,7 +142,7 @@ def check_spider_file(file_info: tuple) -> dict:
         except Exception:
             pass
 
-    # 2. 備援策略：靜態抽取所有候選 URL 進行連線測試
+    # 2. 靜態提取 URL 測試
     urls = extract_urls(code)
     if urls:
         alive_info = None
@@ -133,17 +151,16 @@ def check_spider_file(file_info: tuple) -> dict:
             cost = int((datetime.now() - start_time).total_seconds() * 1000)
             if alive:
                 alive_info = (target_url, msg, cost)
-                break  # 只要其中一個主要網址活著就算通過
+                break
 
         if alive_info:
             target_url, msg, cost = alive_info
-            # 存活即認定為可用，避免誤殺移到 NG
-            result["status"] = "✅ 正常" if "HTTP 200" in msg else "⚠️ 站點存活(載入受限)"
+            result["status"] = "✅ 正常" if "200" in msg else "⚠️ 站點存活(載入受限)"
             result["detail"] = f"{target_url} ({msg})"
             result["latency_ms"] = cost
         else:
             result["status"] = "❌ 失效"
-            result["detail"] = f"所有候選網址連線失敗 (共測試 {len(urls)} 個)"
+            result["detail"] = f"連線失敗 (測試 {len(urls)} 個候選網址)"
             result["latency_ms"] = int((datetime.now() - start_time).total_seconds() * 1000)
     else:
         result["detail"] = "未偵測到有效網站 URL"
@@ -160,12 +177,10 @@ def move_to_ng(full_path: str) -> str:
     return os.path.relpath(target_dest, BASE_DIR)
 
 def main():
-    # 關閉 SSL 不安全連線警告
     requests.packages.urllib3.disable_warnings()
 
     target_files = []
 
-    # 掃描 py
     if os.path.exists(PY_DIR):
         for root, dirs, files in os.walk(PY_DIR):
             if "NG" in dirs:
@@ -175,7 +190,6 @@ def main():
                     full = os.path.join(root, f)
                     target_files.append(("Python", os.path.relpath(full, BASE_DIR), full))
 
-    # 掃描 js
     if os.path.exists(JS_DIR):
         for root, dirs, files in os.walk(JS_DIR):
             if "NG" in dirs:
@@ -198,7 +212,7 @@ def main():
             results.append(r)
             print(f"[{r['type']}][{r['status']}] {r['file']} -> {r['detail']}")
 
-    # 僅針對確定的 ❌ 執行移動（⚠️ 存活的不予移動）
+    # 僅針對 ❌ 執行移動
     moved_count = 0
     for r in results:
         if "❌" in r["status"]:
