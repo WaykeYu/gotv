@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# by @嗷呜
+
 import re
 import sys
 from urllib.parse import urlparse
@@ -137,7 +137,7 @@ class Spider(Spider):
         pass
 
     def gethost(self):
-        data=pq(self.fetch("https://shdy2.com",headers=self.headers).text)
+        data=pq(self.fetch("http://shapp.us",headers=self.headers).text)
         for i in data('.content-top ul li').items():
             h=i('a').attr('href')
             if h:
