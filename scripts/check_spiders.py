@@ -12,35 +12,63 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY_DIR = os.path.join(BASE_DIR, "py")
 JS_DIR = os.path.join(BASE_DIR, "js")
 REPORT_FILE = os.path.join(BASE_DIR, "SPIDER_STATUS.md")
-TIMEOUT = 10
+TIMEOUT = 12
 MAX_WORKERS = 10
 
+# 將 py 相關目錄加入模組搜尋路徑，避免 import base.spider 失敗
+for p in [BASE_DIR, PY_DIR, os.path.join(PY_DIR, "base")]:
+    if os.path.exists(p) and p not in sys.path:
+        sys.path.insert(0, p)
+
+# 模擬現代瀏覽器的 Headers
+BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": '"Windows"',
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1"
+}
+
 def extract_urls(code: str) -> list:
+    """提取程式碼內的所有可能影音站點 URL"""
     patterns = [
-        r'''(?:host|site|siteUrl|baseUrl|url|WEB_SITE)\s*[:=]\s*['"](https?://[^'"]+)['"]''',
+        r'''(?:host|site|siteUrl|baseUrl|url|WEB_SITE|header_url)\s*[:=]\s*['"](https?://[^'"]+)['"]''',
         r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?)['"]'''
     ]
     urls = []
-    skip_hosts = ["github.com", "googlevideo", "w3.org", "schema.org", "jsdelivr.net", "baidu.com", "qq.com", "unpkg.com"]
+    skip_keywords = ["github", "googlevideo", "w3.org", "schema.org", "jsdelivr", "baidu", "qq.com", "unpkg", "api.turing"]
     for pat in patterns:
-        found = re.findall(pat, code, re.IGNORECASE)
-        for u in found:
-            if not any(skip in u for skip in skip_hosts) and u not in urls:
-                urls.append(u)
+        for u in re.findall(pat, code, re.IGNORECASE):
+            u_clean = u.rstrip("/")
+            if not any(skip in u_clean.lower() for skip in skip_keywords) and u_clean not in urls:
+                urls.append(u_clean)
     return urls
 
-def test_url_alive(url: str) -> tuple:
+def test_url_alive(url: str) -> tuple[bool, str]:
+    """測試網站連線狀態，防爬牆狀態（403/503）視為存活"""
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Referer": url
-        }
-        resp = requests.head(url, headers=headers, timeout=TIMEOUT, allow_redirects=True)
-        if resp.status_code >= 400:
-            resp = requests.get(url, headers=headers, timeout=TIMEOUT, stream=True)
+        headers = dict(BROWSER_HEADERS)
+        headers["Referer"] = url + "/"
+        
+        # 優先嘗試 GET 請求獲取主頁
+        resp = requests.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
+        
         if resp.status_code < 400:
             return True, f"HTTP {resp.status_code}"
-        return False, f"HTTP {resp.status_code}"
+        elif resp.status_code in [403, 503]:
+            # 遇到 Cloudflare 或防火牆阻擋，但表示伺服器與域名完全存活
+            return True, f"HTTP {resp.status_code} (防爬阻擋，站點存活)"
+        else:
+            return False, f"HTTP {resp.status_code}"
+    except requests.exceptions.SSLError:
+        # SSL 證書失效但主機仍在
+        return True, "SSL 驗證失敗 (站點存活)"
     except Exception as e:
         return False, str(e)[:35]
 
@@ -64,10 +92,11 @@ def check_spider_file(file_info: tuple) -> dict:
         result["detail"] = f"無法讀取: {str(e)[:30]}"
         return result
 
+    # 1. 若為 Python 腳本，優先嘗試載入與執行爬蟲核心介面
     if file_type == "Python":
         filename = os.path.basename(full_path)
+        mod_name = f"mod_{os.path.splitext(filename)[0]}"
         try:
-            mod_name = f"mod_{os.path.splitext(filename)[0]}"
             spec = importlib.util.spec_from_file_location(mod_name, full_path)
             module = importlib.util.module_from_spec(spec)
             sys.modules[mod_name] = module
@@ -85,6 +114,8 @@ def check_spider_file(file_info: tuple) -> dict:
                 if hasattr(spider, "init"):
                     try: spider.init()
                     except Exception: pass
+                
+                # 測試 homeContent
                 if hasattr(spider, "homeContent"):
                     res = spider.homeContent(True)
                     if res and isinstance(res, (dict, list, str)):
@@ -93,48 +124,58 @@ def check_spider_file(file_info: tuple) -> dict:
         except Exception:
             pass
 
+    # 2. 備援策略：靜態抽取所有候選 URL 進行連線測試
     urls = extract_urls(code)
     if urls:
-        target_url = urls[0]
-        alive, msg = test_url_alive(target_url)
-        cost = int((datetime.now() - start_time).total_seconds() * 1000)
-        if alive:
-            result["status"] = "✅ 正常" if file_type == "JS" else "⚠️ 站點存活(載入受限)"
-            result["detail"] = f"站點可連線 ({msg}): {target_url}"
+        alive_info = None
+        for target_url in urls:
+            alive, msg = test_url_alive(target_url)
+            cost = int((datetime.now() - start_time).total_seconds() * 1000)
+            if alive:
+                alive_info = (target_url, msg, cost)
+                break  # 只要其中一個主要網址活著就算通過
+
+        if alive_info:
+            target_url, msg, cost = alive_info
+            # 存活即認定為可用，避免誤殺移到 NG
+            result["status"] = "✅ 正常" if "HTTP 200" in msg else "⚠️ 站點存活(載入受限)"
+            result["detail"] = f"{target_url} ({msg})"
+            result["latency_ms"] = cost
         else:
             result["status"] = "❌ 失效"
-            result["detail"] = f"連線失敗 ({msg}): {target_url}"
-        result["latency_ms"] = cost
+            result["detail"] = f"所有候選網址連線失敗 (共測試 {len(urls)} 個)"
+            result["latency_ms"] = int((datetime.now() - start_time).total_seconds() * 1000)
     else:
         result["detail"] = "未偵測到有效網站 URL"
 
     return result
 
 def move_to_ng(full_path: str) -> str:
-    """將檔案移動到該檔案所在資料夾底下的 NG 資料夾"""
     parent_dir = os.path.dirname(full_path)
     ng_dir = os.path.join(parent_dir, "NG")
     os.makedirs(ng_dir, exist_ok=True)
-    
     file_name = os.path.basename(full_path)
     target_dest = os.path.join(ng_dir, file_name)
     shutil.move(full_path, target_dest)
     return os.path.relpath(target_dest, BASE_DIR)
 
 def main():
+    # 關閉 SSL 不安全連線警告
+    requests.packages.urllib3.disable_warnings()
+
     target_files = []
 
-    # 掃描 py 目錄（自動排除已經在 NG 目錄內的檔案）
+    # 掃描 py
     if os.path.exists(PY_DIR):
         for root, dirs, files in os.walk(PY_DIR):
             if "NG" in dirs:
-                dirs.remove("NG")  # 避免往下遍歷 NG 目錄
+                dirs.remove("NG")
             for f in files:
                 if f.endswith(".py") and not f.startswith("__"):
                     full = os.path.join(root, f)
                     target_files.append(("Python", os.path.relpath(full, BASE_DIR), full))
 
-    # 掃描 js 目錄（自動排除已經在 NG 目錄內的檔案）
+    # 掃描 js
     if os.path.exists(JS_DIR):
         for root, dirs, files in os.walk(JS_DIR):
             if "NG" in dirs:
@@ -145,7 +186,7 @@ def main():
                     target_files.append(("JS", os.path.relpath(full, BASE_DIR), full))
 
     if not target_files:
-        print("未找到任何待測 py 或 js 檔案（或檔案皆已在 NG 目錄）。")
+        print("未找到任何待測 py 或 js 檔案。")
         sys.exit(0)
 
     print(f"共發現 {len(target_files)} 個待測腳本，開始並行檢測...")
@@ -157,7 +198,7 @@ def main():
             results.append(r)
             print(f"[{r['type']}][{r['status']}] {r['file']} -> {r['detail']}")
 
-    # 針對失效/異常的腳本執行移動操作
+    # 僅針對確定的 ❌ 執行移動（⚠️ 存活的不予移動）
     moved_count = 0
     for r in results:
         if "❌" in r["status"]:
@@ -187,7 +228,7 @@ def main():
     md = [
         "# 🕷️ 影音網站爬蟲有效性檢測與歸檔報告\n",
         f"> **檢測時間**：`{now_str}`  \n",
-        f"> **總體概況**：檢測 **{tot_all}** 個檔案 ｜ ✅ 正常：**{ok_all}** ｜ ⚠️ 警告：**{warn_all}** ｜ ❌ 失效/已隔離：**{fail_all}** ｜ **可用率：{rate_all}%**\n",
+        f"> **總體概況**：檢測 **{tot_all}** 個檔案 ｜ ✅ 正常：**{ok_all}** ｜ ⚠️ 警告(存活)：**{warn_all}** ｜ ❌ 失效已隔離：**{fail_all}** ｜ **可用率：{rate_all}%**\n",
         "### 📊 分類統計\n",
         f"- **Python (`py/`)**：共 **{py_stats[0]}** 個 ｜ 可用 **{py_stats[1] + py_stats[2]}** ｜ 失效已移至 NG **{py_stats[3]}** ｜ 可用率 **{py_stats[4]}%**",
         f"- **JavaScript (`js/`)**：共 **{js_stats[0]}** 個 ｜ 可用 **{js_stats[1] + js_stats[2]}** ｜ 失效已移至 NG **{js_stats[3]}** ｜ 可用率 **{js_stats[4]}%**\n",
