@@ -22,6 +22,36 @@
       "ext": "https://hanime1.best"
     },
     {
+      "key": "py_樱花传媒",
+      "name": "[PY] 樱花传媒 (2ms)",
+      "type": 3,
+      "api": "./py/樱花传媒.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://x3av.com"
+    },
+    {
+      "key": "py_VHUB[成人]",
+      "name": "[PY] VHUB[成人] (2ms)",
+      "type": 3,
+      "api": "./py/VHUB[成人].py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://newxvideos.pages.dev"
+    },
+    {
+      "key": "py_四虎视频",
+      "name": "[PY] 四虎视频 (2ms)",
+      "type": 3,
+      "api": "./py/四虎视频.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.sihuhu.xyz"
+    },
+    {
       "key": "py_萝莉AV",
       "name": "[PY] 萝莉AV (2ms)",
       "type": 3,
@@ -42,26 +72,6 @@
       "ext": "https://koreanpornmovie.com"
     },
     {
-      "key": "py_樱花传媒",
-      "name": "[PY] 樱花传媒 (3ms)",
-      "type": 3,
-      "api": "./py/樱花传媒.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://x3av.com"
-    },
-    {
-      "key": "py_香蕉视频",
-      "name": "[PY] 香蕉视频 (3ms)",
-      "type": 3,
-      "api": "./py/香蕉视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://618013.xyz"
-    },
-    {
       "key": "py_久久視頻 (1)",
       "name": "[PY] 久久視頻 (1) (3ms)",
       "type": 3,
@@ -72,18 +82,18 @@
       "ext": "https://ww.jiujiu.one"
     },
     {
-      "key": "py_四虎视频",
-      "name": "[PY] 四虎视频 (4ms)",
+      "key": "py_香蕉视频",
+      "name": "[PY] 香蕉视频 (4ms)",
       "type": 3,
-      "api": "./py/四虎视频.py",
+      "api": "./py/香蕉视频.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.sihuhu.xyz"
+      "ext": "https://618013.xyz"
     },
     {
       "key": "py_huavod",
-      "name": "[PY] huavod (5ms)",
+      "name": "[PY] huavod (9ms)",
       "type": 3,
       "api": "./py/huavod.py",
       "searchable": 1,
@@ -92,18 +102,8 @@
       "ext": "https://huavod.com"
     },
     {
-      "key": "py_VHUB[成人]",
-      "name": "[PY] VHUB[成人] (8ms)",
-      "type": 3,
-      "api": "./py/VHUB[成人].py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://newxvideos.pages.dev"
-    },
-    {
       "key": "py_麻豆社",
-      "name": "[PY] 麻豆社 (107ms)",
+      "name": "[PY] 麻豆社 (128ms)",
       "type": 3,
       "api": "./py/麻豆社.py",
       "searchable": 1,
@@ -113,7 +113,7 @@
     },
     {
       "key": "py_优视频",
-      "name": "[PY] 优视频 (232ms)",
+      "name": "[PY] 优视频 (221ms)",
       "type": 3,
       "api": "./py/优视频.py",
       "searchable": 1,
@@ -123,7 +123,7 @@
     },
     {
       "key": "py_亚色影库",
-      "name": "[PY] 亚色影库 (336ms)",
+      "name": "[PY] 亚色影库 (349ms)",
       "type": 3,
       "api": "./py/亚色影库.py",
       "searchable": 1,
@@ -133,7 +133,7 @@
     },
     {
       "key": "py_4KAV",
-      "name": "[PY] 4KAV (370ms)",
+      "name": "[PY] 4KAV (454ms)",
       "type": 3,
       "api": "./py/4KAV.py",
       "searchable": 1,
@@ -143,7 +143,7 @@
     },
     {
       "key": "py_AV大平台",
-      "name": "[PY] AV大平台 (509ms)",
+      "name": "[PY] AV大平台 (554ms)",
       "type": 3,
       "api": "./py/AV大平台.py",
       "searchable": 1,
@@ -153,7 +153,7 @@
     },
     {
       "key": "py_Pornhub",
-      "name": "[PY] Pornhub (909ms)",
+      "name": "[PY] Pornhub (883ms)",
       "type": 3,
       "api": "./py/Pornhub.py",
       "searchable": 1,
@@ -163,7 +163,7 @@
     },
     {
       "key": "py_啪啪视频",
-      "name": "[PY] 啪啪视频 (1637ms)",
+      "name": "[PY] 啪啪视频 (1822ms)",
       "type": 3,
       "api": "./py/啪啪视频.py",
       "searchable": 1,
@@ -172,18 +172,8 @@
       "ext": "https://4.pp795pp.cc:88"
     },
     {
-      "key": "py_Phb",
-      "name": "[PY] Phb (2826ms)",
-      "type": 3,
-      "api": "./py/Phb.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.pornhub.com"
-    },
-    {
       "key": "py_黄豆短剧",
-      "name": "[PY] 黄豆短剧 (3057ms)",
+      "name": "[PY] 黄豆短剧 (2744ms)",
       "type": 3,
       "api": "./py/黄豆短剧.py",
       "searchable": 1,
@@ -192,8 +182,18 @@
       "ext": "https://xqjzvcvt.top"
     },
     {
+      "key": "py_Phb",
+      "name": "[PY] Phb (2836ms)",
+      "type": 3,
+      "api": "./py/Phb.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.pornhub.com"
+    },
+    {
       "key": "py_shortfilm",
-      "name": "[PY] shortfilm (3753ms)",
+      "name": "[PY] shortfilm (5913ms)",
       "type": 3,
       "api": "./py/shortfilm.py",
       "searchable": 1,
