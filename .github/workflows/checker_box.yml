@@ -34,10 +34,15 @@ jobs:
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add box1.json box_STATUS.md collect/NG/
+
+          # 檢查檔案存在才加入暫存區，避免 Git 報錯退出
+          [ -f box1.json ] && git add box1.json
+          [ -f box_STATUS.md ] && git add box_STATUS.md
+          [ -d collect/NG ] && git add collect/NG/
+
           if git diff --staged --quiet; then
             echo "沒有任何內容變動，跳過 Commit。"
           else
-            git commit -m "chore: auto filter, latency sort and update box_STATUS.md [$(date +'%Y-%m-%d')]"
+            git commit -m "chore: auto filter, latency sort and update status [$(date +'%Y-%m-%d')]"
             git push
           fi
