@@ -1,0 +1,20 @@
+[
+  {
+    "name": "豆瓣 | 采集",
+    "url": "https://caiji.dbzy5.com/api.php/provide/vod/",
+    "error": "連線中斷 (ConnectionError)",
+    "checked_at": "2026-10-30 10:57:12"
+  },
+  {
+    "name": "飄零 | 采集",
+    "url": "https://p2100.net/api.php/provide/vod/",
+    "error": "HTTP 403",
+    "checked_at": "2026-10-30 10:57:12"
+  },
+  {
+    "name": "非凡 | 采集",
+    "url": "https://liuyan.ffzy3.tv/api.php/provide/vod/",
+    "error": "HTTP 403",
+    "checked_at": "2026-10-30 10:57:12"
+  }
+]
