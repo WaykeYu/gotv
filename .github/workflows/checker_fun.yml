@@ -1,0 +1,48 @@
+name: Daily Fun URL Checker
+
+on:
+  schedule:
+    # UTC 16:00 = 台灣時間 00:00
+    - cron: '0 16 * * *'
+  workflow_dispatch: # 支援手動隨時觸發測試
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-filter-fun:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests urllib3
+
+      - name: Run Fun1 URL Checker & Latency Sort
+        run: |
+          python scripts/check_fun.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 容錯 add：檔案存在才納入暫存區
+          [ -f fun1.json ] && git add fun1.json
+          [ -f fun_STATUS.md ] && git add fun_STATUS.md
+          [ -d collect/NG ] && git add collect/NG/
+
+          if git diff --staged --quiet; then
+            echo "沒有任何內容變動，跳過 Commit。"
+          else
+            git commit -m "chore: auto filter, latency sort and update fun_STATUS.md [$(date +'%Y-%m-%d')]"
+            git push
+          fi
