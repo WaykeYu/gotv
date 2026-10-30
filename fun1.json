@@ -18,17 +18,17 @@
     "open.73836.com",
     "tg.73836.com",
     "v.tianyicdn.com",
-    "*.tycdn.net",
-    "*.qipaiguanggao.*",
-    "*.bocai.*",
-    "*.cp.*",
-    "*.bet.*",
-    "*.casino.*",
-    "*.macau.*",
-    "*.wnsr.*",
-    "*.amjs.*",
+    "tycdn.net",
+    "qipaiguanggao",
+    "bocai",
+    ".cp.",
+    ".bet.",
+    "casino",
+    "macau",
+    "wnsr",
+    "amjs",
     "p1.pstatp.com",
-    "*.toutiaoimg.com"
+    "toutiaoimg.com"
   ],
   "rules": [
     {
