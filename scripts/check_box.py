@@ -7,18 +7,21 @@ import urllib3
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 
-# 抑制忽略 SSL 憑證警告
+# 關閉 SSL 不安全警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 BOX_FILE = "box1.json"
 NG_DIR = "collect/NG"
 STATUS_FILE = "box_STATUS.md"
 
-TIMEOUT = 8        # 請求逾時秒數 (給予足夠握手時間)
+TIMEOUT = 8        # 請求逾時秒數
 MAX_WORKERS = 10    # 平行檢測線程數
-HEADERS = {
-    "User-Agent": "okhttp/3.15.0; TVBox/1.0",
-    "Accept": "*/*",
+
+# 使用真實 Chrome 瀏覽器請求標頭，避開 WAF / Cloudflare 403 與 503 阻擋
+BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
     "Connection": "keep-alive"
 }
 
@@ -37,22 +40,21 @@ def write_status_and_summary(content: str):
 
 def clean_json_content(raw: str) -> str:
     """清理 TVBox 常見非標準 JSON 語法 (NBSP、全形空格、註解、尾隨逗號)"""
-    # 1. 替換各類非標準空白與 BOM
     text = (
-        raw.replace("\u00a0", " ")   # Non-breaking space
-        .replace("\u3000", " ")     # 全形空白
-        .replace("\ufeff", "")      # UTF-8 BOM
-        .replace("\u200b", "")      # 零寬空格
+        raw.replace("\u00a0", " ")   # 替換 Non-breaking space
+        .replace("\u3000", " ")     # 替換全形空白
+        .replace("\ufeff", "")      # 移除 UTF-8 BOM
+        .replace("\u200b", "")      # 移除零寬空格
         .replace("\r\n", "\n")
     )
 
-    # 2. 移除 /* ... */ 多行註解
+    # 移除 /* ... */ 多行註解
     text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
 
-    # 3. 移除 // 單行註解 (使用負向後行斷言，避免誤殺 http:// 或 https://)
+    # 移除 // 單行註解 (保留 http:// 與 https://)
     text = re.sub(r'(?<!:)\/\/.*$', '', text, flags=re.MULTILINE)
 
-    # 4. 移除物件或陣列末尾多餘的逗號 (Trailing commas, 如 {"a": 1, })
+    # 移除陣列或物件結尾的尾隨逗號 (Trailing commas)
     text = re.sub(r',\s*([\]}])', r'\1', text)
 
     return text.strip()
@@ -67,8 +69,17 @@ def extract_target_url(item):
         return str(url).strip(), str(name).strip()
     return "", "未知"
 
+def build_probe_url(url: str) -> str:
+    """針對 MacCMS 採集接口構造有效測試路徑"""
+    # 若為 MacCMS 採集源 API，直接根目錄常被 403 阻擋，需加上 list 參數探針
+    if "api.php/provide/vod" in url:
+        sep = "&" if "?" in url else "?"
+        if "ac=" not in url:
+            return f"{url}{sep}ac=list&pagesize=1"
+    return url
+
 def test_url_latency(item):
-    """使用 GET stream 方式測試連線與回應時間 (ms)，避免 HEAD 被 CDN 阻擋"""
+    """檢測 URL 連線並計算回應時間 (ms)"""
     url, name = extract_target_url(item)
 
     if not url or not url.startswith(("http://", "https://")):
@@ -77,11 +88,13 @@ def test_url_latency(item):
             "latency": 99999, "error": f"非有效網址格式 [{url[:25]}]"
         }
 
+    probe_url = build_probe_url(url)
     start_time = time.perf_counter()
+
     try:
         resp = requests.get(
-            url,
-            headers=HEADERS,
+            probe_url,
+            headers=BROWSER_HEADERS,
             timeout=TIMEOUT,
             stream=True,
             verify=False,
@@ -89,18 +102,39 @@ def test_url_latency(item):
         )
         elapsed = round((time.perf_counter() - start_time) * 1000, 1)
 
+        # 狀態碼 < 400 即視為有效服務
         if resp.status_code < 400:
             resp.close()
             return {
                 "valid": True, "item": item, "name": name, "url": url,
                 "latency": elapsed, "status_code": resp.status_code
             }
-        else:
+
+        # 二次容錯：若帶參數探針遇到 403/503，嘗試原始 URL 連線一次
+        if probe_url != url:
             resp.close()
-            return {
-                "valid": False, "item": item, "name": name, "url": url,
-                "latency": 99999, "error": f"HTTP {resp.status_code}"
-            }
+            resp_fallback = requests.get(
+                url,
+                headers=BROWSER_HEADERS,
+                timeout=TIMEOUT,
+                stream=True,
+                verify=False,
+                allow_redirects=True
+            )
+            if resp_fallback.status_code < 400:
+                elapsed_fb = round((time.perf_counter() - start_time) * 1000, 1)
+                resp_fallback.close()
+                return {
+                    "valid": True, "item": item, "name": name, "url": url,
+                    "latency": elapsed_fb, "status_code": resp_fallback.status_code
+                }
+            resp_fallback.close()
+
+        resp.close()
+        return {
+            "valid": False, "item": item, "name": name, "url": url,
+            "latency": 99999, "error": f"HTTP {resp.status_code}"
+        }
     except requests.exceptions.Timeout:
         return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "連線逾時 (Timeout)"}
     except requests.exceptions.SSLError:
@@ -156,7 +190,7 @@ def check_and_sort():
 
     print(f"[{check_time_str}] 命中欄位 [{target_key or 'ROOT_LIST'}]，共 {len(items)} 筆項目，開始檢測...")
 
-    # 4. 多線程檢測連線
+    # 4. 多線程連線檢測
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(test_url_latency, item) for item in items]
@@ -169,10 +203,10 @@ def check_and_sort():
     valid_results = [r for r in results if r["valid"]]
     invalid_results = [r for r in results if not r["valid"]]
 
-    # 5. 依回應速度由快到慢排序
+    # 5. 依響應時間由快到慢排序
     valid_results.sort(key=lambda x: x["latency"])
 
-    # 6. 回存至原本的 JSON 格式
+    # 6. 回存至原始格式 (網址仍保持原始形式，不污染 box1.json)
     if target_key:
         data[target_key] = [r["item"] for r in valid_results]
         with open(BOX_FILE, "w", encoding="utf-8") as f:
