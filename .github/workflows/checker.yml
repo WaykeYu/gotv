@@ -1,0 +1,43 @@
+name: Daily Box URL Checker
+
+on:
+  schedule:
+    # UTC 16:00 = 台灣時間 00:00
+    - cron: '0 16 * * *'
+  workflow_dispatch: # 支援手動立即觸發執行
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-filter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests
+
+      - name: Run URL Checker
+        run: |
+          python scripts/check_box.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add box1.json collect/NG/
+          if git diff --staged --quiet; then
+            echo "沒有任何網址變動，跳過 Commit。"
+          else
+            git commit -m "chore: auto filter invalid urls [$(date +'%Y-%m-%d')]"
+            git push
+          fi
