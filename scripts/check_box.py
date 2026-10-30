@@ -14,28 +14,19 @@ BOX_FILE = "box1.json"
 NG_DIR = "collect/NG"
 STATUS_FILE = "box_STATUS.md"
 
-TIMEOUT = 12       # 提高至 12 秒，給跨國連線充足緩衝
-MAX_WORKERS = 8     # 降至 8，避免被站點 WAF 限速觸發 403/逾時
-
-# 完整高仿真瀏覽器標頭 (含 Sec-CH 與 Sec-Fetch，可大幅突破防禦)
+TIMEOUT = 12       # 提高逾時秒數以包容延遲
+MAX_WORKERS = 8    # 避免過多線程遭限速
 BROWSER_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,application/json,*/*;q=0.8",
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-    "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"Windows"',
-    "sec-fetch-dest": "document",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-site": "none",
-    "sec-fetch-user": "?1",
-    "upgrade-insecure-requests": "1",
     "Connection": "keep-alive"
 }
 
 tz_tw = timezone(timedelta(hours=8))
 
 def write_status_and_summary(content: str):
+    """將報告同步寫入 box_STATUS.md 與 GitHub Actions Summary"""
     with open(STATUS_FILE, "w", encoding="utf-8") as f:
         f.write(content)
 
@@ -68,17 +59,12 @@ def extract_target_url(item):
     return "", "未知"
 
 def build_probe_url(url: str) -> str:
-    """構造 MacCMS 測試路徑：帶入 ac=list 才能正確觸發 API 回應"""
+    """構造 MacCMS 測試路徑：帶入 ac=list 提升探針連線品質"""
     if "api.php/provide/vod" in url:
         sep = "&" if "?" in url else "?"
         if "ac=" not in url:
             return f"{url}{sep}ac=list&pagesize=1"
     return url
-
-def is_maccms_alive_content(text: str) -> bool:
-    """即使 HTTP 回傳 403/500，只要含有 CMS 特徵字眼，代表伺服器正常運作"""
-    keywords = ["\"code\"", "\"msg\"", "mac_", "provide/vod", "\"list\":", "vod_name", "type_name"]
-    return any(k in text for k in keywords)
 
 def test_url_latency(item):
     url, name = extract_target_url(item)
@@ -91,11 +77,9 @@ def test_url_latency(item):
 
     probe_url = build_probe_url(url)
     
-    # 進行兩次嘗試（防止網路瞬斷或冷啟動 Timeout）
     for attempt in range(2):
         start_time = time.perf_counter()
         try:
-            # 建立獨立 session 模擬乾淨連線
             with requests.Session() as s:
                 resp = s.get(
                     probe_url,
@@ -106,22 +90,21 @@ def test_url_latency(item):
                 )
                 elapsed = round((time.perf_counter() - start_time) * 1000, 1)
 
-                # 條件 1：標準狀態碼 < 400
+                # 規則 1：狀態碼小於 400 視為正常有效
                 if resp.status_code < 400:
                     return {
                         "valid": True, "item": item, "name": name, "url": url,
                         "latency": elapsed, "status_code": resp.status_code
                     }
 
-                # 條件 2：若遇到 403、503，檢查內文是否為有效的 CMS 回應
-                body_sample = resp.text[:1000] if resp.text else ""
-                if is_maccms_alive_content(body_sample):
+                # 規則 2：HTTP 403 視為有效網址（防爬/WAF 阻擋，但伺服器與接口在線）
+                if resp.status_code == 403:
                     return {
                         "valid": True, "item": item, "name": name, "url": url,
-                        "latency": elapsed, "status_code": f"{resp.status_code}(放行)"
+                        "latency": elapsed, "status_code": "403(保留)"
                     }
 
-                # 若是最後一次嘗試依然失敗
+                # 最後一次嘗試若仍是其他錯誤碼 (如 404, 502 等) 視為無效
                 if attempt == 1:
                     return {
                         "valid": False, "item": item, "name": name, "url": url,
@@ -131,7 +114,7 @@ def test_url_latency(item):
         except requests.exceptions.Timeout:
             if attempt == 1:
                 return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "連線逾時 (Timeout)"}
-            time.sleep(1)  # 遇超時等待 1 秒後重試第二次
+            time.sleep(1)
         except requests.exceptions.SSLError:
             return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "SSL憑證錯誤"}
         except requests.exceptions.ConnectionError as ce:
@@ -200,8 +183,10 @@ def check_and_sort():
     valid_results = [r for r in results if r["valid"]]
     invalid_results = [r for r in results if not r["valid"]]
 
+    # 排序：依響應速度由快到慢排序
     valid_results.sort(key=lambda x: x["latency"])
 
+    # 回存有效清單至 box1.json
     if target_key:
         data[target_key] = [r["item"] for r in valid_results]
         with open(BOX_FILE, "w", encoding="utf-8") as f:
@@ -211,6 +196,7 @@ def check_and_sort():
         with open(BOX_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
+    # 封存失效項目至 NG 資料夾
     ng_filename = ""
     if invalid_results:
         ng_filename = f"{NG_DIR}/ng_{datetime.now(tz_tw).strftime('%Y%m%d_%H%M%S')}.json"
@@ -229,10 +215,12 @@ def check_and_sort():
     survival_rate = (ok_count / total * 100) if total > 0 else 0
     avg_latency = round(sum(r["latency"] for r in valid_results) / ok_count, 1) if ok_count > 0 else 0
 
+    # 產出 Markdown 統計表
     md_content = f"""# 📊 box1.json 影音來源檢測與響應統計表
 
 > 🕒 **最後更新時間 (UTC+8)**：`{check_time_str}`  
-> ⚡ **排序規則**：已依連線響應延遲時間（由快到慢）完成重新排序回存。
+> ⚡ **排序規則**：已依連線響應延遲時間（由快到慢）完成重新排序回存。  
+> 🛡️ **放行規則**：狀態碼 `403`（權限/防爬限制但伺服器在線）已判定為有效保留。
 
 ---
 
