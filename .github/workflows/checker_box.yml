@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install requests
+          pip install requests urllib3
 
       - name: Run URL Checker & Latency Sort
         run: |
@@ -35,7 +35,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 檢查檔案存在才加入暫存區，避免 Git 報錯退出
           [ -f box1.json ] && git add box1.json
           [ -f box_STATUS.md ] && git add box_STATUS.md
           [ -d collect/NG ] && git add collect/NG/
