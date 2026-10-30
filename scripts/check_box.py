@@ -1,34 +1,47 @@
 import os
 import json
+import time
 import requests
-from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone, timedelta
 
-# 目標檔案路徑
 BOX_FILE = "box1.json"
 NG_DIR = "collect/NG"
+STATUS_FILE = "box_STATUS.md"
 
-TIMEOUT = 5  # 逾時秒數 (可依需求調整)
+TIMEOUT = 5  # 單一請求超時秒數
+MAX_WORKERS = 15  # 同時檢測的線程數
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
-def is_valid_url(url: str) -> bool:
-    """檢測 URL 是否有效 (支援 http/https)"""
-    if not url or not url.startswith(("http://", "https://")):
-        return False
-    try:
-        # 先用 HEAD 請求快速檢查，若不支援則退回 GET (只讀開頭)
-        resp = requests.head(url, headers=HEADERS, timeout=TIMEOUT, allow_redirects=True)
-        if resp.status_code < 400:
-            return True
-        if resp.status_code in [403, 405]:
-            resp = requests.get(url, headers=HEADERS, timeout=TIMEOUT, stream=True, allow_redirects=True)
-            return resp.status_code < 400
-    except Exception:
-        return False
-    return False
+# 取得台灣時間 (UTC+8)
+tz_tw = timezone(timedelta(hours=8))
 
-def check_channels():
+def test_url_latency(item):
+    """檢測 URL 有效性並計算回應時間 (ms)"""
+    url = item.get("url") if isinstance(item, dict) else item
+    name = item.get("name", "未知") if isinstance(item, dict) else url
+
+    if not url or not str(url).startswith(("http://", "https://")):
+        return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "Invalid URL Protocol"}
+
+    start_time = time.perf_counter()
+    try:
+        # 優先使用 HEAD 請求驗證速度
+        resp = requests.head(url, headers=HEADERS, timeout=TIMEOUT, allow_redirects=True)
+        if resp.status_code >= 400 and resp.status_code in [403, 405]:
+            resp = requests.get(url, headers=HEADERS, timeout=TIMEOUT, stream=True, allow_redirects=True)
+
+        if resp.status_code < 400:
+            elapsed = round((time.perf_counter() - start_time) * 1000, 1)
+            return {"valid": True, "item": item, "name": name, "url": url, "latency": elapsed, "status_code": resp.status_code}
+        else:
+            return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": f"HTTP {resp.status_code}"}
+    except Exception as e:
+        return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": type(e).__name__}
+
+def check_and_sort():
     if not os.path.exists(BOX_FILE):
         print(f"錯誤：找不到 {BOX_FILE}")
         return
@@ -42,67 +55,104 @@ def check_channels():
 
     os.makedirs(NG_DIR, exist_ok=True)
 
-    # 針對 TVBox 常見的 channels / urls 結構進行過濾
-    # 若 JSON 結構不同，可調整此處 key (例如 data.get("lives", []))
-    items = data.get("channels") or data.get("urls") or []
-    
-    valid_items = []
-    invalid_items = []
+    # 抓取清單欄位 (相容 channels / urls / lives)
+    target_key = "channels" if "channels" in data else ("urls" if "urls" in data else "lives")
+    items = data.get(target_key, [])
+    if not items:
+        print("未在 JSON 中找到可檢測的清單欄位 (channels / urls / lives)")
+        return
 
-    print(f"[{datetime.now()}] 開始檢測...")
+    check_time_str = datetime.now(tz_tw).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{check_time_str}] 開始多線程檢測 (共 {len(items)} 筆)...")
 
-    for item in items:
-        # 相容字典形式 ({"name": "...", "url": "..."}) 或純字串形式
-        url = item.get("url") if isinstance(item, dict) else item
-        name = item.get("name", "未知") if isinstance(item, dict) else url
+    results = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(test_url_latency, item) for item in items]
+        for future in as_completed(futures):
+            results.append(future.result())
 
-        if is_valid_url(url):
-            valid_items.append(item)
-            print(f"[OK] {name}")
-        else:
-            invalid_items.append({
-                "item": item,
-                "checked_at": datetime.now().isoformat()
-            })
-            print(f"[NG] {name} -> {url}")
+    # 分流有效與無效
+    valid_results = [r for r in results if r["valid"]]
+    invalid_results = [r for r in results if not r["valid"]]
 
-    # 更新過濾後的資料
-    if "channels" in data:
-        data["channels"] = valid_items
-    elif "urls" in data:
-        data["urls"] = valid_items
+    # 依回應時間由小到大 (由快到慢) 排序
+    valid_results.sort(key=lambda x: x["latency"])
 
+    # 抽出重新排序後的原始 item 資料寫回 JSON
+    data[target_key] = [r["item"] for r in valid_results]
     with open(BOX_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    # 儲存失效網址到 collect/NG/
-    ng_filename = f"{NG_DIR}/ng_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    if invalid_items:
+    # 封存失效網址到 NG 資料夾
+    ng_filename = ""
+    if invalid_results:
+        ng_filename = f"{NG_DIR}/ng_{datetime.now(tz_tw).strftime('%Y%m%d_%H%M%S')}.json"
+        ng_data = [{
+            "name": r["name"],
+            "url": r["url"],
+            "error": r.get("error", "Failed"),
+            "checked_at": check_time_str
+        } for r in invalid_results]
         with open(ng_filename, "w", encoding="utf-8") as f:
-            json.dump(invalid_items, f, ensure_ascii=False, indent=2)
+            json.dump(ng_data, f, ensure_ascii=False, indent=2)
 
-    # 輸出統計報告 (供 GitHub Actions Job Summary 呈現)
+    # 產出 box_STATUS.md 統計表
     total = len(items)
-    ok_count = len(valid_items)
-    ng_count = len(invalid_items)
+    ok_count = len(valid_results)
+    ng_count = len(invalid_results)
     survival_rate = (ok_count / total * 100) if total > 0 else 0
+    avg_latency = round(sum(r["latency"] for r in valid_results) / ok_count, 1) if ok_count > 0 else 0
 
-    summary = f"""
-### 📊 影音網址定時檢測報告
-- **檢測時間**：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-- **總檢查數**：{total}
-- **有效數 (存活)**：{ok_count}
-- **失效數 (移入 NG)**：{ng_count}
-- **存活率**：{survival_rate:.2f}%
-- **失效記錄檔**：`{ng_filename if invalid_items else '無新增失效網址'}`
+    # 組合 Markdown 內容
+    md_content = f"""# 📊 box1.json 影音來源檢測與響應統計表
+
+> 🕒 **最後更新時間 (UTC+8)**：`{check_time_str}`  
+> ⚡ **排序規則**：已依連線響應延遲時間（由快到慢）完成重新排序回存。
+
+---
+
+### 📈 綜合健康指標
+
+| 總檢測數 | 存活數量 | 失效數量 (移至 NG) | 存活率 | 平均響應時間 |
+| :---: | :---: | :---: | :---: | :---: |
+| **{total}** | **{ok_count}** | **{ng_count}** | **{survival_rate:.2f}%** | **{avg_latency} ms** |
+
+---
+
+### 🚀 有效來源排行榜（已按響應速度排序回存）
+
+| 排名 | 名稱 | 響應時間 (ms) | 狀態碼 | 網址預覽 |
+| :---: | :--- | :---: | :---: | :--- |
 """
-    print(summary)
+    for idx, r in enumerate(valid_results, 1):
+        clean_url = r['url'][:55] + "..." if len(r['url']) > 55 else r['url']
+        md_content += f"| {idx} | `{r['name']}` | **{r['latency']}** | `{r.get('status_code', 200)}` | `{clean_url}` |\n"
 
-    # 寫入 GitHub Step Summary
+    if invalid_results:
+        md_content += f"""
+---
+
+### ⚠️ 本次失效來源（已移出）
+- **NG 封存檔**：`{ng_filename}`
+
+| 名稱 | 錯誤類型 | 網址預覽 |
+| :--- | :--- | :--- |
+"""
+        for r in invalid_results:
+            clean_url = r['url'][:60] + "..." if len(r['url']) > 60 else r['url']
+            md_content += f"| `{r['name']}` | `{r.get('error', 'Error')}` | `{clean_url}` |\n"
+
+    # 寫入 box_STATUS.md
+    with open(STATUS_FILE, "w", encoding="utf-8") as f:
+        f.write(md_content)
+
+    print(f"✅ 檢測完畢！已排序回存 {BOX_FILE}，並成功產生 {STATUS_FILE}")
+
+    # 同步寫入 GitHub Actions Summary
     summary_file = os.getenv("GITHUB_STEP_SUMMARY")
     if summary_file:
         with open(summary_file, "a", encoding="utf-8") as f:
-            f.write(summary)
+            f.write(md_content)
 
 if __name__ == "__main__":
-    check_channels()
+    check_and_sort()
