@@ -14,8 +14,10 @@ BOX_FILE = "box1.json"
 NG_DIR = "collect/NG"
 STATUS_FILE = "box_STATUS.md"
 
-TIMEOUT = 12       # 提高逾時秒數以包容延遲
-MAX_WORKERS = 8    # 避免過多線程遭限速
+TIMEOUT = 12       # 請求逾時秒數
+MAX_WORKERS = 10   # 平行檢測線程數
+
+# 高仿真瀏覽器標頭，避免遭 WAF 阻擋
 BROWSER_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,application/json,*/*;q=0.8",
@@ -59,7 +61,7 @@ def extract_target_url(item):
     return "", "未知"
 
 def build_probe_url(url: str) -> str:
-    """構造 MacCMS 測試路徑：帶入 ac=list 提升探針連線品質"""
+    """構造 MacCMS 採集源 API 測試路徑：帶入 ac=list 獲取帶有 "code":1 的回應"""
     if "api.php/provide/vod" in url:
         sep = "&" if "?" in url else "?"
         if "ac=" not in url:
@@ -76,7 +78,8 @@ def test_url_latency(item):
         }
 
     probe_url = build_probe_url(url)
-    
+
+    # 執行兩次嘗試，防止網路瞬斷
     for attempt in range(2):
         start_time = time.perf_counter()
         try:
@@ -89,22 +92,31 @@ def test_url_latency(item):
                     allow_redirects=True
                 )
                 elapsed = round((time.perf_counter() - start_time) * 1000, 1)
+                
+                # 取得回應前段文字 (採集站 JSON 的 code:1 通常在前 200 字元內)
+                body_sample = resp.text[:2000] if resp.text else ""
 
-                # 規則 1：狀態碼小於 400 視為正常有效
+                # 核心條件 1：只要內文出現 "code":1, 直接判定有效
+                if '"code":1,' in body_sample or '"code": 1,' in body_sample:
+                    return {
+                        "valid": True, "item": item, "name": name, "url": url,
+                        "latency": elapsed, "status_code": "code:1 (成功)"
+                    }
+
+                # 核心條件 2：標準 HTTP 狀態碼 < 400
                 if resp.status_code < 400:
                     return {
                         "valid": True, "item": item, "name": name, "url": url,
                         "latency": elapsed, "status_code": resp.status_code
                     }
 
-                # 規則 2：HTTP 403 視為有效網址（防爬/WAF 阻擋，但伺服器與接口在線）
+                # 核心條件 3：HTTP 403 (防爬盾攔截但伺服器在線)
                 if resp.status_code == 403:
                     return {
                         "valid": True, "item": item, "name": name, "url": url,
-                        "latency": elapsed, "status_code": "403(保留)"
+                        "latency": elapsed, "status_code": "403 (防護放行)"
                     }
 
-                # 最後一次嘗試若仍是其他錯誤碼 (如 404, 502 等) 視為無效
                 if attempt == 1:
                     return {
                         "valid": False, "item": item, "name": name, "url": url,
@@ -131,12 +143,14 @@ def test_url_latency(item):
 def check_and_sort():
     check_time_str = datetime.now(tz_tw).strftime("%Y-%m-%d %H:%M:%S")
 
+    # 1. 檢查檔案存在
     if not os.path.exists(BOX_FILE):
         err = f"# ❌ 檢測失敗\n\n- **時間**：`{check_time_str}`\n- **原因**：找不到 `{BOX_FILE}`。"
         print(err)
         write_status_and_summary(err)
         return
 
+    # 2. 讀取並清洗 JSON
     try:
         with open(BOX_FILE, "r", encoding="utf-8") as f:
             raw_text = f.read()
@@ -151,6 +165,7 @@ def check_and_sort():
 
     os.makedirs(NG_DIR, exist_ok=True)
 
+    # 3. 識別清單欄位
     target_key = None
     items = []
     if isinstance(data, list):
@@ -164,13 +179,14 @@ def check_and_sort():
 
     if not items:
         available_keys = list(data.keys()) if isinstance(data, dict) else "非字典格式"
-        err = f"# ⚠️ 檢測跳過\n\n- **時間**：`{check_time_str}`\n- **原因**：未在 `{BOX_FILE}` 找到包含網址的陣列欄位 (urls, channels, lives, sites)。\n- **目前欄位**：`{available_keys}`"
+        err = f"# ⚠️ 檢測跳過\n\n- **時間**：`{check_time_str}`\n- **原因**：未在 `{BOX_FILE}` 找到包含網址的陣列欄位。\n- **目前欄位**：`{available_keys}`"
         print(err)
         write_status_and_summary(err)
         return
 
     print(f"[{check_time_str}] 命中欄位 [{target_key or 'ROOT_LIST'}]，共 {len(items)} 筆項目，開始檢測...")
 
+    # 4. 多線程連線檢測
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(test_url_latency, item) for item in items]
@@ -183,10 +199,10 @@ def check_and_sort():
     valid_results = [r for r in results if r["valid"]]
     invalid_results = [r for r in results if not r["valid"]]
 
-    # 排序：依響應速度由快到慢排序
+    # 5. 排序：依響應時間由快到慢排序
     valid_results.sort(key=lambda x: x["latency"])
 
-    # 回存有效清單至 box1.json
+    # 6. 回存至原本的 JSON
     if target_key:
         data[target_key] = [r["item"] for r in valid_results]
         with open(BOX_FILE, "w", encoding="utf-8") as f:
@@ -196,7 +212,7 @@ def check_and_sort():
         with open(BOX_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    # 封存失效項目至 NG 資料夾
+    # 7. 失效項目存至 collect/NG/
     ng_filename = ""
     if invalid_results:
         ng_filename = f"{NG_DIR}/ng_{datetime.now(tz_tw).strftime('%Y%m%d_%H%M%S')}.json"
@@ -212,29 +228,30 @@ def check_and_sort():
     total = len(items)
     ok_count = len(valid_results)
     ng_count = len(invalid_results)
+    code1_count = sum(1 for r in valid_results if "code:1" in str(r.get("status_code", "")))
     survival_rate = (ok_count / total * 100) if total > 0 else 0
     avg_latency = round(sum(r["latency"] for r in valid_results) / ok_count, 1) if ok_count > 0 else 0
 
-    # 產出 Markdown 統計表
+    # 8. 建立 box_STATUS.md
     md_content = f"""# 📊 box1.json 影音來源檢測與響應統計表
 
 > 🕒 **最後更新時間 (UTC+8)**：`{check_time_str}`  
 > ⚡ **排序規則**：已依連線響應延遲時間（由快到慢）完成重新排序回存。  
-> 🛡️ **放行規則**：狀態碼 `403`（權限/防爬限制但伺服器在線）已判定為有效保留。
+> 🎯 **成功特徵命中**：檢測內文包含 `"code":1,` 的採集源共有 **{code1_count}** 個。
 
 ---
 
 ### 📈 綜合健康指標
 
-| 總檢測數 | 存活數量 | 失效數量 (移至 NG) | 存活率 | 平均響應時間 |
-| :---: | :---: | :---: | :---: | :---: |
-| **{total}** | **{ok_count}** | **{ng_count}** | **{survival_rate:.2f}%** | **{avg_latency} ms** |
+| 總檢測數 | 存活數量 | 命中 code:1 數 | 失效數量 (移至 NG) | 存活率 | 平均響應時間 |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| **{total}** | **{ok_count}** | **{code1_count}** | **{ng_count}** | **{survival_rate:.2f}%** | **{avg_latency} ms** |
 
 ---
 
 ### 🚀 有效來源排行榜（已按響應速度排序回存）
 
-| 排名 | 名稱 | 響應時間 (ms) | 狀態碼 | 網址預覽 |
+| 排名 | 名稱 | 響應時間 (ms) | 狀態碼 / 特徵 | 網址預覽 |
 | :---: | :--- | :---: | :---: | :--- |
 """
     for idx, r in enumerate(valid_results, 1):
@@ -256,7 +273,7 @@ def check_and_sort():
             md_content += f"| `{r['name']}` | `{r.get('error', 'Error')}` | `{clean_url}` |\n"
 
     write_status_and_summary(md_content)
-    print(f"檢測完成！存活: {ok_count}, 失效: {ng_count}，已回存 {BOX_FILE} 與 {STATUS_FILE}")
+    print(f"檢測完成！存活: {ok_count} (code:1 特徵: {code1_count}), 失效: {ng_count}，已回存。")
 
 if __name__ == "__main__":
     check_and_sort()
