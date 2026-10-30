@@ -14,22 +14,28 @@ BOX_FILE = "box1.json"
 NG_DIR = "collect/NG"
 STATUS_FILE = "box_STATUS.md"
 
-TIMEOUT = 8        # 請求逾時秒數
-MAX_WORKERS = 10    # 平行檢測線程數
+TIMEOUT = 12       # 提高至 12 秒，給跨國連線充足緩衝
+MAX_WORKERS = 8     # 降至 8，避免被站點 WAF 限速觸發 403/逾時
 
-# 使用真實 Chrome 瀏覽器請求標頭，避開 WAF / Cloudflare 403 與 503 阻擋
+# 完整高仿真瀏覽器標頭 (含 Sec-CH 與 Sec-Fetch，可大幅突破防禦)
 BROWSER_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,application/json,*/*;q=0.8",
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+    "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "none",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1",
     "Connection": "keep-alive"
 }
 
-# 台灣時間 (UTC+8)
 tz_tw = timezone(timedelta(hours=8))
 
 def write_status_and_summary(content: str):
-    """將報告同步寫入 box_STATUS.md 與 GitHub Actions Summary"""
     with open(STATUS_FILE, "w", encoding="utf-8") as f:
         f.write(content)
 
@@ -41,26 +47,18 @@ def write_status_and_summary(content: str):
 def clean_json_content(raw: str) -> str:
     """清理 TVBox 常見非標準 JSON 語法 (NBSP、全形空格、註解、尾隨逗號)"""
     text = (
-        raw.replace("\u00a0", " ")   # 替換 Non-breaking space
-        .replace("\u3000", " ")     # 替換全形空白
-        .replace("\ufeff", "")      # 移除 UTF-8 BOM
-        .replace("\u200b", "")      # 移除零寬空格
+        raw.replace("\u00a0", " ")
+        .replace("\u3000", " ")
+        .replace("\ufeff", "")
+        .replace("\u200b", "")
         .replace("\r\n", "\n")
     )
-
-    # 移除 /* ... */ 多行註解
     text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
-
-    # 移除 // 單行註解 (保留 http:// 與 https://)
     text = re.sub(r'(?<!:)\/\/.*$', '', text, flags=re.MULTILINE)
-
-    # 移除陣列或物件結尾的尾隨逗號 (Trailing commas)
     text = re.sub(r',\s*([\]}])', r'\1', text)
-
     return text.strip()
 
 def extract_target_url(item):
-    """自適應提取各類 TVBox 格式下的 URL 與名稱"""
     if isinstance(item, str):
         return item.strip(), item.strip()
     if isinstance(item, dict):
@@ -70,16 +68,19 @@ def extract_target_url(item):
     return "", "未知"
 
 def build_probe_url(url: str) -> str:
-    """針對 MacCMS 採集接口構造有效測試路徑"""
-    # 若為 MacCMS 採集源 API，直接根目錄常被 403 阻擋，需加上 list 參數探針
+    """構造 MacCMS 測試路徑：帶入 ac=list 才能正確觸發 API 回應"""
     if "api.php/provide/vod" in url:
         sep = "&" if "?" in url else "?"
         if "ac=" not in url:
             return f"{url}{sep}ac=list&pagesize=1"
     return url
 
+def is_maccms_alive_content(text: str) -> bool:
+    """即使 HTTP 回傳 403/500，只要含有 CMS 特徵字眼，代表伺服器正常運作"""
+    keywords = ["\"code\"", "\"msg\"", "mac_", "provide/vod", "\"list\":", "vod_name", "type_name"]
+    return any(k in text for k in keywords)
+
 def test_url_latency(item):
-    """檢測 URL 連線並計算回應時間 (ms)"""
     url, name = extract_target_url(item)
 
     if not url or not url.startswith(("http://", "https://")):
@@ -89,72 +90,70 @@ def test_url_latency(item):
         }
 
     probe_url = build_probe_url(url)
-    start_time = time.perf_counter()
+    
+    # 進行兩次嘗試（防止網路瞬斷或冷啟動 Timeout）
+    for attempt in range(2):
+        start_time = time.perf_counter()
+        try:
+            # 建立獨立 session 模擬乾淨連線
+            with requests.Session() as s:
+                resp = s.get(
+                    probe_url,
+                    headers=BROWSER_HEADERS,
+                    timeout=TIMEOUT,
+                    verify=False,
+                    allow_redirects=True
+                )
+                elapsed = round((time.perf_counter() - start_time) * 1000, 1)
 
-    try:
-        resp = requests.get(
-            probe_url,
-            headers=BROWSER_HEADERS,
-            timeout=TIMEOUT,
-            stream=True,
-            verify=False,
-            allow_redirects=True
-        )
-        elapsed = round((time.perf_counter() - start_time) * 1000, 1)
+                # 條件 1：標準狀態碼 < 400
+                if resp.status_code < 400:
+                    return {
+                        "valid": True, "item": item, "name": name, "url": url,
+                        "latency": elapsed, "status_code": resp.status_code
+                    }
 
-        # 狀態碼 < 400 即視為有效服務
-        if resp.status_code < 400:
-            resp.close()
-            return {
-                "valid": True, "item": item, "name": name, "url": url,
-                "latency": elapsed, "status_code": resp.status_code
-            }
+                # 條件 2：若遇到 403、503，檢查內文是否為有效的 CMS 回應
+                body_sample = resp.text[:1000] if resp.text else ""
+                if is_maccms_alive_content(body_sample):
+                    return {
+                        "valid": True, "item": item, "name": name, "url": url,
+                        "latency": elapsed, "status_code": f"{resp.status_code}(放行)"
+                    }
 
-        # 二次容錯：若帶參數探針遇到 403/503，嘗試原始 URL 連線一次
-        if probe_url != url:
-            resp.close()
-            resp_fallback = requests.get(
-                url,
-                headers=BROWSER_HEADERS,
-                timeout=TIMEOUT,
-                stream=True,
-                verify=False,
-                allow_redirects=True
-            )
-            if resp_fallback.status_code < 400:
-                elapsed_fb = round((time.perf_counter() - start_time) * 1000, 1)
-                resp_fallback.close()
-                return {
-                    "valid": True, "item": item, "name": name, "url": url,
-                    "latency": elapsed_fb, "status_code": resp_fallback.status_code
-                }
-            resp_fallback.close()
+                # 若是最後一次嘗試依然失敗
+                if attempt == 1:
+                    return {
+                        "valid": False, "item": item, "name": name, "url": url,
+                        "latency": 99999, "error": f"HTTP {resp.status_code}"
+                    }
 
-        resp.close()
-        return {
-            "valid": False, "item": item, "name": name, "url": url,
-            "latency": 99999, "error": f"HTTP {resp.status_code}"
-        }
-    except requests.exceptions.Timeout:
-        return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "連線逾時 (Timeout)"}
-    except requests.exceptions.SSLError:
-        return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "SSL憑證錯誤"}
-    except requests.exceptions.ConnectionError as ce:
-        return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": f"連線中斷 ({type(ce).__name__})"}
-    except Exception as e:
-        return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": f"例外: {type(e).__name__}"}
+        except requests.exceptions.Timeout:
+            if attempt == 1:
+                return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "連線逾時 (Timeout)"}
+            time.sleep(1)  # 遇超時等待 1 秒後重試第二次
+        except requests.exceptions.SSLError:
+            return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "SSL憑證錯誤"}
+        except requests.exceptions.ConnectionError as ce:
+            if attempt == 1:
+                return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": f"連線中斷 ({type(ce).__name__})"}
+            time.sleep(1)
+        except Exception as e:
+            if attempt == 1:
+                return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": f"例外: {type(e).__name__}"}
+            time.sleep(1)
+
+    return {"valid": False, "item": item, "name": name, "url": url, "latency": 99999, "error": "未知異常"}
 
 def check_and_sort():
     check_time_str = datetime.now(tz_tw).strftime("%Y-%m-%d %H:%M:%S")
 
-    # 1. 檢查檔案存在
     if not os.path.exists(BOX_FILE):
-        err = f"# ❌ 檢測失敗\n\n- **時間**：`{check_time_str}`\n- **原因**：找不到 `{BOX_FILE}`，請確認檔案已放置在倉庫根目錄。"
+        err = f"# ❌ 檢測失敗\n\n- **時間**：`{check_time_str}`\n- **原因**：找不到 `{BOX_FILE}`。"
         print(err)
         write_status_and_summary(err)
         return
 
-    # 2. 讀取並執行字元與語法清洗
     try:
         with open(BOX_FILE, "r", encoding="utf-8") as f:
             raw_text = f.read()
@@ -169,7 +168,6 @@ def check_and_sort():
 
     os.makedirs(NG_DIR, exist_ok=True)
 
-    # 3. 識別 TVBox JSON 清單鍵值 (urls / channels / lives / sites)
     target_key = None
     items = []
     if isinstance(data, list):
@@ -190,7 +188,6 @@ def check_and_sort():
 
     print(f"[{check_time_str}] 命中欄位 [{target_key or 'ROOT_LIST'}]，共 {len(items)} 筆項目，開始檢測...")
 
-    # 4. 多線程連線檢測
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(test_url_latency, item) for item in items]
@@ -203,10 +200,8 @@ def check_and_sort():
     valid_results = [r for r in results if r["valid"]]
     invalid_results = [r for r in results if not r["valid"]]
 
-    # 5. 依響應時間由快到慢排序
     valid_results.sort(key=lambda x: x["latency"])
 
-    # 6. 回存至原始格式 (網址仍保持原始形式，不污染 box1.json)
     if target_key:
         data[target_key] = [r["item"] for r in valid_results]
         with open(BOX_FILE, "w", encoding="utf-8") as f:
@@ -216,7 +211,6 @@ def check_and_sort():
         with open(BOX_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    # 7. 失效項目存至 collect/NG/
     ng_filename = ""
     if invalid_results:
         ng_filename = f"{NG_DIR}/ng_{datetime.now(tz_tw).strftime('%Y%m%d_%H%M%S')}.json"
@@ -235,7 +229,6 @@ def check_and_sort():
     survival_rate = (ok_count / total * 100) if total > 0 else 0
     avg_latency = round(sum(r["latency"] for r in valid_results) / ok_count, 1) if ok_count > 0 else 0
 
-    # 8. 建立 box_STATUS.md 統計表
     md_content = f"""# 📊 box1.json 影音來源檢測與響應統計表
 
 > 🕒 **最後更新時間 (UTC+8)**：`{check_time_str}`  
