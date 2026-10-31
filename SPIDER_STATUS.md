@@ -1,283 +1,283 @@
 # 🕷️ 影音網站爬蟲有效性檢測與配置生成報告
 
-> **檢測時間**：`2026-10-31 08:32:59 UTC`  
+> **檢測時間**：`2026-10-31 08:33:30 UTC`  
 
-> **總站點數**：258 ｜ ✅ 有效可用：**258** (一般: **233**, 成人: **25**) ｜ ❌ 已隔離至 NG：**0**
+> **總站點數**：258 ｜ ✅ 有效可用：**257** (一般: **233**, 成人: **24**) ｜ ❌ 已隔離至 NG：**1**
 
 ### 📦 主目錄設定檔匯總
 
 - 📺 一般類影音配置：[`box_py.json`](./box_py.json) (共 **233** 筆，依 py/js 及響應速度排序)
-- 🔞 成人類影音配置：[`fun_py.json`](./fun_py.json) (共 **25** 筆，依 py/js 及響應速度排序)
+- 🔞 成人類影音配置：[`fun_py.json`](./fun_py.json) (共 **24** 筆，依 py/js 及響應速度排序)
 
 ### 📝 詳細檢測結果
 
 | 類型 | 副檔 | 檔案路徑 | 狀態 | 耗時 (ms) | 分類 | 檢測資訊 |
 | :---: | :---: | :--- | :---: | :---: | :---: | :--- |
-| JS | `js` | `js/锦鲤短剧.js` | ⚠️ 站點存活(載入受限) | 140 | 🎬 一般 | https://api.jinlidj.com (SSL 驗證失敗 (站點存活)) |
-| JS | `js` | `js/聚合短剧.js` | ⚠️ 站點存活(載入受限) | 198 | 🎬 一般 | https://api.jinlidj.com (SSL 驗證失敗 (站點存活)) |
-| JS | `js` | `js/鬼片之家.js` | ⚠️ 站點存活(載入受限) | 309 | 🎬 一般 | https://www.guipian360.com (HTTP 403) |
-| JS | `js` | `js/aipanso.js` | ⚠️ 站點存活(載入受限) | 336 | 🎬 一般 | https://aipanso.com (HTTP 403) |
-| JS | `js` | `js/厂长资源.js` | ⚠️ 站點存活(載入受限) | 364 | 🎬 一般 | https://www.czzymovie.com (HTTP 403) |
-| JS | `js` | `js/海龟.js` | ⚠️ 站點存活(載入受限) | 628 | 🎬 一般 | https://www.haigui.tv (HTTP 403) |
-| JS | `js` | `js/金牌影院.js` | ⚠️ 站點存活(載入受限) | 677 | 🎬 一般 | https://hnytxj.com (SSL 驗證失敗 (站點存活)) |
-| JS | `js` | `js/dygang.js` | ✅ 正常 | 77 | 🎬 一般 | https://www.dygang.tv (HTTP 200) |
-| JS | `js` | `js/欧乐影院.js` | ✅ 正常 | 135 | 🎬 一般 | https://www.oleol.com (HTTP 200) |
-| JS | `js` | `js/yyets.js` | ✅ 正常 | 136 | 🎬 一般 | https://yyets.click (HTTP 200) |
-| JS | `js` | `js/555影视.js` | ✅ 正常 | 153 | 🎬 一般 | https://www.55i5m2t9p6.shop (HTTP 200) |
-| JS | `js` | `js/子子影视.js` | ✅ 正常 | 154 | 🎬 一般 | https://www.rebozj.pro (HTTP 200) |
-| JS | `js` | `js/apple.js` | ✅ 正常 | 161 | 🎬 一般 | http://asp.xpgtv.com (HTTP 200) |
-| JS | `js` | `js/ss/xp天堂.js` | ✅ 正常 | 170 | 🎬 一般 | https://dzsx5k01kgm6y.cloudfront.net (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/动漫巴士.js` | ✅ 正常 | 202 | 🎬 一般 | http://dm84.site (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/异世界.js` | ✅ 正常 | 221 | 🎬 一般 | https://www.dmmiku.com (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/奇米动漫.js` | ✅ 正常 | 228 | 🎬 一般 | http://www.qimiqimi.net (HTTP 200) |
-| JS | `js` | `js/index.config.js` | ✅ 正常 | 246 | 🎬 一般 | https://www.labi88.sbs (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/爱动漫.js` | ✅ 正常 | 249 | 🎬 一般 | https://bgm.girigirilove.com (HTTP 200) |
-| JS | `js` | `js/cilixiong.js` | ✅ 正常 | 261 | 🎬 一般 | https://www.cilixiong.com (HTTP 200) |
-| JS | `js` | `js/cilixiongp.js` | ✅ 正常 | 294 | 🎬 一般 | https://www.cilixiong.com (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/Anime1.js` | ✅ 正常 | 301 | 🎬 一般 | https://anime1.me (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/人人电影网.js` | ✅ 正常 | 441 | 🎬 一般 | https://www.rrdynb.com (HTTP 200) |
-| JS | `js` | `js/meow.js` | ✅ 正常 | 465 | 🎬 一般 | https://meow.tg (HTTP 200) |
-| JS | `js` | `js/嘀嗒影视.js` | ✅ 正常 | 474 | 🎬 一般 | https://www.didahd.pro (HTTP 200) |
-| JS | `js` | `js/huya.js` | ✅ 正常 | 490 | 🎬 一般 | https://www.huya.com (HTTP 200) |
-| JS | `js` | `js/热播之家.js` | ✅ 正常 | 505 | 🎬 一般 | https://www.rebozj.pro (HTTP 200) |
-| JS | `js` | `js/rrdyw.js` | ✅ 正常 | 514 | 🎬 一般 | https://www.rrdynb.com (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/路漫漫.js` | ✅ 正常 | 559 | 🎬 一般 | https://www.lmm85.com (HTTP 200) |
-| JS | `js` | `js/tzfile.js` | ✅ 正常 | 633 | 🎬 一般 | https://t-rex.tzfile.com (HTTP 200) |
-| JS | `js` | `js/kkpans.js` | ✅ 正常 | 735 | 🎬 一般 | https://www.kkpans.com (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/全盘.js` | ✅ 正常 | 797 | 🎬 一般 | https://so.yuneu.com (HTTP 200) |
-| JS | `js` | `js/ddys.js` | ✅ 正常 | 955 | 🎬 一般 | https://ddys.wiki (HTTP 200) |
-| JS | `js` | `js/新韩剧网.js` | ✅ 正常 | 957 | 🎬 一般 | https://www.hanju7.com (HTTP 200) |
-| JS | `js` | `js/央视频.js` | ✅ 正常 | 988 | 🎬 一般 | https://m.yangshipin.cn (HTTP 200) |
-| JS | `js` | `js/meijumi.js` | ✅ 正常 | 1012 | 🎬 一般 | https://www.meijumi.net (HTTP 200) |
-| JS | `js` | `js/funletu.js` | ✅ 正常 | 1054 | 🎬 一般 | https://v.funletu.com (HTTP 200) |
-| JS | `js` | `js/注视影视.js` | ✅ 正常 | 1088 | 🎬 一般 | https://gaze.run (HTTP 200) |
-| JS | `js` | `js/dydhhy.js` | ✅ 正常 | 1105 | 🎬 一般 | http://www.dydhhy.com (HTTP 200) |
-| JS | `js` | `js/xb6v.js` | ✅ 正常 | 1230 | 🎬 一般 | http://www.xb6v.com (HTTP 200) |
-| JS | `js` | `js/xzys.js` | ✅ 正常 | 1239 | 🎬 一般 | https://xzys.fun (HTTP 200) |
-| JS | `js` | `js/B站.js` | ✅ 正常 | 1263 | 🎬 一般 | https://www.bilibili.com (HTTP 200) |
-| JS | `js` | `js/meijumip.js` | ✅ 正常 | 1277 | 🎬 一般 | https://www.meijumi.xyz (HTTP 200) |
-| JS | `js` | `js/低端影视.js` | ✅ 正常 | 1403 | 🎬 一般 | https://www.ddys.run (HTTP 200) |
-| JS | `js` | `js/荐片.js` | ✅ 正常 | 1966 | 🎬 一般 | https://api.ztcgi.com (HTTP 200) |
-| JS | `js` | `js/金牌影视.js` | ✅ 正常 | 2548 | 🎬 一般 | https://www.x8kb9k8.com (HTTP 200) |
-| JS | `js` | `js/飞快TV.js` | ✅ 正常 | 2550 | 🎬 一般 | https://feikuai.tv (HTTP 200) |
-| JS | `js` | `js/tuxiaobei.js` | ✅ 正常 | 2693 | 🎬 一般 | https://www.tuxiaobei.com (HTTP 200) |
-| JS | `js` | `js/蛋蛋鱼.js` | ✅ 正常 | 2702 | 🎬 一般 | https://www.jqqzx.top/index.php/verify/index.html? (HTTP 200) |
-| JS | `js` | `js/金牌影视-DS.js` | ✅ 正常 | 2725 | 🎬 一般 | https://www.sizhengxt.com (HTTP 200) |
-| JS | `js` | `js/lx-music.js` | ✅ 正常 | 2905 | 🎬 一般 | https://88.lxmusic.xn--fiqs8s (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/88看球.js` | ✅ 正常 | 5582 | 🎬 一般 | http://www.88kanqiu.cc (HTTP 200) |
-| JS | `js` | `js/88ball.js` | ✅ 正常 | 6471 | 🎬 一般 | http://www.88kanqiu.cc (HTTP 200) |
-| JS | `js` | `js/index.js` | ✅ 正常 | 7156 | 🎬 一般 | https://www.123684.com/b/api/video/play/info (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/动漫岛.js` | ✅ 正常 | 8368 | 🎬 一般 | http://www.dmd85.com (HTTP 200) |
-| Python | `py` | `py/红果网页.py` | ⚠️ 站點存活(載入受限) | 147 | 🎬 一般 | https://www.hongguodj.cc (HTTP 403) |
-| Python | `py` | `py/木兮.py` | ⚠️ 站點存活(載入受限) | 702 | 🎬 一般 | https://gcaptcha4.geetest.com (HTTP 403) |
-| Python | `py` | `py/零度影视.py` | ⚠️ 站點存活(載入受限) | 707 | 🎬 一般 | http://ldys.sq1005.top (HTTP 403) |
-| Python | `py` | `py/边缘影视.py` | ⚠️ 站點存活(載入受限) | 2332 | 🎬 一般 | https://bianyuan001.oss-cn-beijing.aliyuncs.com/huidu1.0.0.json (HTTP 403) |
-| Python | `py` | `py/爱看短剧.py` | ⚠️ 站點存活(載入受限) | 12132 | 🎬 一般 | https://dbtp.tgydy.com (HTTP 403) |
-| Python | `py` | `py/剧多短剧APP.py` | ⚠️ 站點存活(載入受限) | 12224 | 🎬 一般 | https://dbtp.tgydy.com (HTTP 403) |
-| Python | `py` | `py/剧多短剧.py` | ⚠️ 站點存活(載入受限) | 12257 | 🎬 一般 | https://dbtp.tgydy.com (HTTP 403) |
+| JS | `js` | `js/锦鲤短剧.js` | ⚠️ 站點存活(載入受限) | 92 | 🎬 一般 | https://api.jinlidj.com (SSL 驗證失敗 (站點存活)) |
+| JS | `js` | `js/聚合短剧.js` | ⚠️ 站點存活(載入受限) | 253 | 🎬 一般 | https://api.jinlidj.com (SSL 驗證失敗 (站點存活)) |
+| JS | `js` | `js/aipanso.js` | ⚠️ 站點存活(載入受限) | 309 | 🎬 一般 | https://aipanso.com (HTTP 403) |
+| JS | `js` | `js/厂长资源.js` | ⚠️ 站點存活(載入受限) | 416 | 🎬 一般 | https://www.czzymovie.com (HTTP 403) |
+| JS | `js` | `js/鬼片之家.js` | ⚠️ 站點存活(載入受限) | 420 | 🎬 一般 | https://www.guipian360.com (HTTP 403) |
+| JS | `js` | `js/海龟.js` | ⚠️ 站點存活(載入受限) | 541 | 🎬 一般 | https://www.haigui.tv (HTTP 403) |
+| JS | `js` | `js/金牌影院.js` | ⚠️ 站點存活(載入受限) | 3007 | 🎬 一般 | https://hnytxj.com (SSL 驗證失敗 (站點存活)) |
+| JS | `js` | `js/xiaosa/js/Anime1.js` | ✅ 正常 | 85 | 🎬 一般 | https://anime1.me (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/动漫巴士.js` | ✅ 正常 | 106 | 🎬 一般 | http://dm84.site (HTTP 200) |
+| JS | `js` | `js/欧乐影院.js` | ✅ 正常 | 107 | 🎬 一般 | https://www.oleol.com (HTTP 200) |
+| JS | `js` | `js/index.config.js` | ✅ 正常 | 135 | 🎬 一般 | https://www.labi88.sbs (HTTP 200) |
+| JS | `js` | `js/555影视.js` | ✅ 正常 | 137 | 🎬 一般 | https://www.55i5m2t9p6.shop (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/奇米动漫.js` | ✅ 正常 | 147 | 🎬 一般 | http://www.qimiqimi.net (HTTP 200) |
+| JS | `js` | `js/子子影视.js` | ✅ 正常 | 164 | 🎬 一般 | https://www.rebozj.pro (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/异世界.js` | ✅ 正常 | 176 | 🎬 一般 | https://www.dmmiku.com (HTTP 200) |
+| JS | `js` | `js/apple.js` | ✅ 正常 | 196 | 🎬 一般 | http://asp.xpgtv.com (HTTP 200) |
+| JS | `js` | `js/cilixiong.js` | ✅ 正常 | 198 | 🎬 一般 | https://www.cilixiong.com (HTTP 200) |
+| JS | `js` | `js/cilixiongp.js` | ✅ 正常 | 214 | 🎬 一般 | https://www.cilixiong.com (HTTP 200) |
+| JS | `js` | `js/热播之家.js` | ✅ 正常 | 284 | 🎬 一般 | https://www.rebozj.pro (HTTP 200) |
+| JS | `js` | `js/yyets.js` | ✅ 正常 | 284 | 🎬 一般 | https://yyets.click (HTTP 200) |
+| JS | `js` | `js/meow.js` | ✅ 正常 | 321 | 🎬 一般 | https://meow.tg (HTTP 200) |
+| JS | `js` | `js/dygang.js` | ✅ 正常 | 334 | 🎬 一般 | https://www.dygang.tv (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/路漫漫.js` | ✅ 正常 | 375 | 🎬 一般 | https://www.lmm85.com (HTTP 200) |
+| JS | `js` | `js/央视频.js` | ✅ 正常 | 401 | 🎬 一般 | https://m.yangshipin.cn (HTTP 200) |
+| JS | `js` | `js/ss/xp天堂.js` | ✅ 正常 | 475 | 🎬 一般 | https://dzsx5k01kgm6y.cloudfront.net (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/爱动漫.js` | ✅ 正常 | 487 | 🎬 一般 | https://bgm.girigirilove.com (HTTP 200) |
+| JS | `js` | `js/huya.js` | ✅ 正常 | 533 | 🎬 一般 | https://www.huya.com (HTTP 200) |
+| JS | `js` | `js/tzfile.js` | ✅ 正常 | 545 | 🎬 一般 | https://t-rex.tzfile.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/人人电影网.js` | ✅ 正常 | 563 | 🎬 一般 | https://www.rrdynb.com (HTTP 200) |
+| JS | `js` | `js/rrdyw.js` | ✅ 正常 | 614 | 🎬 一般 | https://www.rrdynb.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/全盘.js` | ✅ 正常 | 841 | 🎬 一般 | https://so.yuneu.com (HTTP 200) |
+| JS | `js` | `js/meijumi.js` | ✅ 正常 | 864 | 🎬 一般 | https://www.meijumi.net (HTTP 200) |
+| JS | `js` | `js/meijumip.js` | ✅ 正常 | 876 | 🎬 一般 | https://www.meijumi.xyz (HTTP 200) |
+| JS | `js` | `js/funletu.js` | ✅ 正常 | 898 | 🎬 一般 | https://v.funletu.com (HTTP 200) |
+| JS | `js` | `js/lx-music.js` | ✅ 正常 | 933 | 🎬 一般 | https://88.lxmusic.xn--fiqs8s (HTTP 200) |
+| JS | `js` | `js/kkpans.js` | ✅ 正常 | 943 | 🎬 一般 | https://www.kkpans.com (HTTP 200) |
+| JS | `js` | `js/ddys.js` | ✅ 正常 | 1017 | 🎬 一般 | https://ddys.wiki (HTTP 200) |
+| JS | `js` | `js/dydhhy.js` | ✅ 正常 | 1020 | 🎬 一般 | http://www.dydhhy.com (HTTP 200) |
+| JS | `js` | `js/新韩剧网.js` | ✅ 正常 | 1058 | 🎬 一般 | https://www.hanju7.com (HTTP 200) |
+| JS | `js` | `js/低端影视.js` | ✅ 正常 | 1138 | 🎬 一般 | https://www.ddys.run (HTTP 200) |
+| JS | `js` | `js/B站.js` | ✅ 正常 | 1142 | 🎬 一般 | https://www.bilibili.com (HTTP 200) |
+| JS | `js` | `js/tuxiaobei.js` | ✅ 正常 | 1155 | 🎬 一般 | https://www.tuxiaobei.com (HTTP 200) |
+| JS | `js` | `js/荐片.js` | ✅ 正常 | 1197 | 🎬 一般 | https://api.ztcgi.com (HTTP 200) |
+| JS | `js` | `js/xzys.js` | ✅ 正常 | 1231 | 🎬 一般 | https://xzys.fun (HTTP 200) |
+| JS | `js` | `js/xb6v.js` | ✅ 正常 | 1474 | 🎬 一般 | http://www.xb6v.com (HTTP 200) |
+| JS | `js` | `js/嘀嗒影视.js` | ✅ 正常 | 1497 | 🎬 一般 | https://www.didahd.pro (HTTP 200) |
+| JS | `js` | `js/蛋蛋鱼.js` | ✅ 正常 | 1784 | 🎬 一般 | https://www.jqqzx.top/index.php/verify/index.html? (HTTP 200) |
+| JS | `js` | `js/注视影视.js` | ✅ 正常 | 1915 | 🎬 一般 | https://gaze.run (HTTP 200) |
+| JS | `js` | `js/金牌影视.js` | ✅ 正常 | 2327 | 🎬 一般 | https://www.x8kb9k8.com (HTTP 200) |
+| JS | `js` | `js/飞快TV.js` | ✅ 正常 | 2384 | 🎬 一般 | https://feikuai.tv (HTTP 200) |
+| JS | `js` | `js/金牌影视-DS.js` | ✅ 正常 | 3488 | 🎬 一般 | https://www.sizhengxt.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/88看球.js` | ✅ 正常 | 4366 | 🎬 一般 | http://www.88kanqiu.cc (HTTP 200) |
+| JS | `js` | `js/88ball.js` | ✅ 正常 | 4769 | 🎬 一般 | http://www.88kanqiu.cc (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/动漫岛.js` | ✅ 正常 | 6139 | 🎬 一般 | http://www.dmd85.com (HTTP 200) |
+| JS | `js` | `js/index.js` | ✅ 正常 | 9196 | 🎬 一般 | https://www.123684.com/b/api/video/play/info (HTTP 200) |
+| Python | `py` | `py/红果网页.py` | ⚠️ 站點存活(載入受限) | 348 | 🎬 一般 | https://www.hongguodj.cc (HTTP 403) |
+| Python | `py` | `py/木兮.py` | ⚠️ 站點存活(載入受限) | 757 | 🎬 一般 | https://gcaptcha4.geetest.com (HTTP 403) |
+| Python | `py` | `py/零度影视.py` | ⚠️ 站點存活(載入受限) | 941 | 🎬 一般 | http://ldys.sq1005.top (HTTP 403) |
+| Python | `py` | `py/星芽短剧.py` | ⚠️ 站點存活(載入受限) | 1718 | 🎬 一般 | https://app.whjzjx.cn (HTTP 503) |
+| Python | `py` | `py/边缘影视.py` | ⚠️ 站點存活(載入受限) | 2304 | 🎬 一般 | https://bianyuan001.oss-cn-beijing.aliyuncs.com/huidu1.0.0.json (HTTP 403) |
+| Python | `py` | `py/爱看短剧.py` | ⚠️ 站點存活(載入受限) | 12092 | 🎬 一般 | https://dbtp.tgydy.com (HTTP 403) |
+| Python | `py` | `py/剧多短剧APP.py` | ⚠️ 站點存活(載入受限) | 12192 | 🎬 一般 | https://dbtp.tgydy.com (HTTP 403) |
+| Python | `py` | `py/剧多短剧.py` | ⚠️ 站點存活(載入受限) | 12224 | 🎬 一般 | https://dbtp.tgydy.com (HTTP 403) |
+| Python | `py` | `py/茶杯狐.py` | ✅ 正常 | 0 | 🎬 一般 | 動態取得主站: https://citapa.com |
 | Python | `py` | `py/色播聚合.py` | ✅ 正常 | 0 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/Hanime<18+>.py` | ✅ 正常 | 0 | 🔞 成人 | 動態取得主站: https://hanime1.best |
+| Python | `py` | `py/TOPTV.py` | ✅ 正常 | 0 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/界影视.py` | ✅ 正常 | 0 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/hitvAPP.py` | ✅ 正常 | 0 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/低端影视.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://www.ddys24.com |
 | Python | `py` | `py/禁片天堂.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/茶杯狐.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://citapa.com |
+| Python | `py` | `py/咖啡体育.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://kafeizhibo.com |
 | Python | `py` | `py/dantatv.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://www.dantatv.cc |
+| Python | `py` | `py/心跳.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/pansou1.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/韩小圈.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/观风影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/高清电影.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/Hanime<18+>.py` | ✅ 正常 | 1 | 🔞 成人 | 動態取得主站: https://hanime1.best |
+| Python | `py` | `py/樱花传媒.py` | ✅ 正常 | 1 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/奇优动漫.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/VHUB<18+>.py` | ✅ 正常 | 1 | 🔞 成人 | homeContent 響應成功 |
 | Python | `py` | `py/四虎视频.py` | ✅ 正常 | 1 | 🔞 成人 | homeContent 響應成功 |
 | Python | `py` | `py/yangguang.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://www.yangguangbd.com |
 | Python | `py` | `py/萝莉AV.py` | ✅ 正常 | 1 | 🔞 成人 | 動態取得主站: https://212602.luoliav.cc |
 | Python | `py` | `py/香肠派对.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://xiang512.xiang.party/xcpd |
+| Python | `py` | `py/奇库影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/恋鱼影视.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: http://47.122.22.78 |
+| Python | `py` | `py/奇优影院.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/juzong.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://www.juzong01.me |
 | Python | `py` | `py/哔哩直播.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/球球.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/央视影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/茄子(谨慎).py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/TOPTV.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/泥视频.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/怦然心动.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://prshinezenx.blog |
+| Python | `py` | `py/Xvd<18+>.py` | ✅ 正常 | 1 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/pansou.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/神秘电影.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://h4ivs.sm431.vip |
 | Python | `py` | `py/星辰影院.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/guowaiju.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://guowaiju.com |
 | Python | `py` | `py/ptt_red.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://ptt.red |
-| Python | `py` | `py/界影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/hitvAPP.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/麻花影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/Pandalive直播.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://5721004.xyz |
 | Python | `py` | `py/Xvideos<18+>.py` | ✅ 正常 | 1 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/韩国色情电影.py` | ✅ 正常 | 1 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/久久視頻 (1).py` | ✅ 正常 | 1 | 🔞 成人 | 動態取得主站: https://ww.jiujiu.one |
 | Python | `py` | `py/嗨皮影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/七猫影视.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/爱壹帆影视.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://www.iyf.lv |
 | Python | `py` | `py/蛋挞TV.py` | ✅ 正常 | 1 | 🎬 一般 | 動態取得主站: https://www.dantatv.cc |
-| Python | `py` | `py/咖啡体育.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://kafeizhibo.com |
-| Python | `py` | `py/心跳.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/pansou1.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/韩小圈.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/甜圈短剧.py` | ✅ 正常 | 1 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/酷我音乐.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/心跳不跳.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/6v.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/樱花传媒.py` | ✅ 正常 | 2 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/豆瓣.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/奇优动漫.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/嘀嗒影视.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.didahd.xyz |
+| Python | `py` | `py/麦田影院.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.mtyy1.com |
 | Python | `py` | `py/275听书.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/奇库影视.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/奇优影院.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/juzong.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.juzong01.me |
 | Python | `py` | `py/两个BT.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.bttwoo.com |
-| Python | `py` | `py/泥视频.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/怦然心动.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://prshinezenx.blog |
-| Python | `py` | `py/Xvd<18+>.py` | ✅ 正常 | 2 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/dsystv.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://dsystv.com |
+| Python | `py` | `py/瓜子.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://api.w32z7vtd.com |
+| Python | `py` | `py/香蕉视频<18+>.py` | ✅ 正常 | 2 | 🔞 成人 | 動態取得主站: https://618013.xyz |
+| Python | `py` | `py/pianku4k.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://4k01.pianku.online |
+| Python | `py` | `py/青桔短剧.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://xqjzvcvt.top |
 | Python | `py` | `py/光鸭社区.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://gy.lubao2.de5.net |
 | Python | `py` | `py/pansou.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/神秘电影.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://h4ivs.sm431.vip |
 | Python | `py` | `py/yysub.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://m.yysub.cc |
 | Python | `py` | `py/ppnix.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.ppnix.com |
+| Python | `py` | `py/bubuzhuiju.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://323433ssdfd.top |
 | Python | `py` | `py/yunduo.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: http://154.21.198.181:8002 |
-| Python | `py` | `py/麻花影视.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/ddmf.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.ddmf.net |
+| Python | `py` | `py/枫叶影院 (4).py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://maihaolian.com |
+| Python | `py` | `py/guazi.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://apinew.uozvr.com |
 | Python | `py` | `py/永乐视频.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/咖啡直播.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://kafeizhibo.com |
-| Python | `py` | `py/香蕉视频.py` | ✅ 正常 | 2 | 🔞 成人 | 動態取得主站: https://618013.xyz |
+| Python | `py` | `py/py_aigua.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/aigua.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/可可影视.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/stripchat<18+>.py` | ✅ 正常 | 2 | 🔞 成人 | 動態取得主站: https://zh.stripchat.com |
-| Python | `py` | `py/久久視頻 (1).py` | ✅ 正常 | 2 | 🔞 成人 | 動態取得主站: https://ww.jiujiu.one |
+| Python | `py` | `py/心跳盘搜.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/小熊猫影视.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/盘链.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/七猫影视.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/爱壹帆影视.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.iyf.lv |
+| Python | `py` | `py/goldmedal.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/奇迹影视.py` | ✅ 正常 | 2 | 🎬 一般 | 動態取得主站: https://www.qj1080.top |
-| Python | `py` | `py/甜圈短剧.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/酷我音乐.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/心跳不跳.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/金牌APP.py` | ✅ 正常 | 2 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/douban.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/小鸭子看看.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/oule.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://www.olevod.one |
-| Python | `py` | `py/麦田影院.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://www.mtyy1.com |
+| Python | `py` | `py/爱听音乐.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://www.22a5.com |
 | Python | `py` | `py/哔哩.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/dsystv.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://dsystv.com |
-| Python | `py` | `py/瓜子.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://api.w32z7vtd.com |
-| Python | `py` | `py/pianku4k.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://4k01.pianku.online |
-| Python | `py` | `py/青桔短剧.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://xqjzvcvt.top |
-| Python | `py` | `py/bubuzhuiju.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://323433ssdfd.top |
 | Python | `py` | `py/星河影视.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/ddmf.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://www.ddmf.net |
-| Python | `py` | `py/guazi.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://apinew.uozvr.com |
-| Python | `py` | `py/py_aigua.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/huavod.py` | ✅ 正常 | 3 | 🔞 成人 | 動態取得主站: https://huavod.com |
 | Python | `py` | `py/枫叶.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: https://www.cd-zj.com |
-| Python | `py` | `py/aigua.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/心跳盘搜.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/小熊猫影视.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/goldmedal.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/金牌APP.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/douban.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/jieyingshi.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/华数TV.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/饭团影视.py` | ✅ 正常 | 3 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/ysttv.py` | ✅ 正常 | 3 | 🎬 一般 | 動態取得主站: http://ysttv.com |
 | Python | `py` | `py/hongguo_fixed.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: https://www.hongguoapp.cn |
-| Python | `py` | `py/apples.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/爱听音乐.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: https://www.22a5.com |
+| Python | `py` | `py/wbbb.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/LIVES.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/oule.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: https://www.olevod.one |
 | Python | `py` | `py/8kvod.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: https://www.8kvod.com |
-| Python | `py` | `py/huavod.py` | ✅ 正常 | 4 | 🔞 成人 | 動態取得主站: https://huavod.com |
-| Python | `py` | `py/华数TV.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/ysttv.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: http://ysttv.com |
-| Python | `py` | `py/韩国色情电影.py` | ✅ 正常 | 4 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/yinhuaone.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: https://www.yinhuaone.net |
+| Python | `py` | `py/libvio.py` | ✅ 正常 | 4 | 🎬 一般 | 動態取得主站: https://www.libvio.cam |
+| Python | `py` | `py/youtubelive.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/广东荔枝.py` | ✅ 正常 | 4 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/短剧聚合1.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
 | Python | `py` | `py/短剧聚合2.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/嘀嗒影视.py` | ✅ 正常 | 5 | 🎬 一般 | 動態取得主站: https://www.didahd.xyz |
-| Python | `py` | `py/wbbb.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/yinhuaone.py` | ✅ 正常 | 5 | 🎬 一般 | 動態取得主站: https://www.yinhuaone.net |
-| Python | `py` | `py/jieyingshi.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/饭团影视.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/youtubelive.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/广东荔枝.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/短剧聚合1.py` | ✅ 正常 | 6 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/dandanqi.py` | ✅ 正常 | 6 | 🎬 一般 | 動態取得主站: https://www.dandanqi.cc |
-| Python | `py` | `py/duoduo.py` | ✅ 正常 | 6 | 🎬 一般 | 動態取得主站: https://duoduosdf12223234334.top |
-| Python | `py` | `py/libvio.py` | ✅ 正常 | 6 | 🎬 一般 | 動態取得主站: https://www.libvio.cam |
-| Python | `py` | `py/全球更新.py` | ✅ 正常 | 7 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/网络直播.py` | ✅ 正常 | 7 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/低端影视.py` | ✅ 正常 | 11 | 🎬 一般 | 動態取得主站: https://www.ddys24.com |
-| Python | `py` | `py/茶杯狐影视.py` | ✅ 正常 | 11 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/xlys.py` | ✅ 正常 | 12 | 🎬 一般 | 動態取得主站: https://v.xl.in.ua |
-| Python | `py` | `py/juok3.py` | ✅ 正常 | 12 | 🎬 一般 | 動態取得主站: https://juok3.top |
-| Python | `py` | `py/LIVES.py` | ✅ 正常 | 13 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/枫叶影院 (4).py` | ✅ 正常 | 14 | 🎬 一般 | 動態取得主站: https://maihaolian.com |
-| Python | `py` | `py/275tingshu.py` | ✅ 正常 | 15 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/短剧聚合.py` | ✅ 正常 | 16 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/douban2.py` | ✅ 正常 | 16 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/youtube.py` | ✅ 正常 | 18 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/哔哩视频.py` | ✅ 正常 | 21 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/ruyishipin.py` | ✅ 正常 | 25 | 🎬 一般 | 動態取得主站: https://rysp.tv |
-| Python | `py` | `py/yangshipin.py` | ✅ 正常 | 29 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/hongguo.py` | ✅ 正常 | 31 | 🎬 一般 | 動態取得主站: https://hongguoduanju.com |
-| Python | `py` | `py/fqdm.py` | ✅ 正常 | 54 | 🎬 一般 | 動態取得主站: https://www.fqdm.cc |
-| Python | `py` | `py/saohuo.py` | ✅ 正常 | 68 | 🎬 一般 | 動態取得主站: https://shdy5.us |
-| Python | `py` | `py/麻豆社<18+>.py` | ✅ 正常 | 76 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/国外剧.py` | ✅ 正常 | 102 | 🎬 一般 | 動態取得主站: https://guowaiju.com |
-| Python | `py` | `py/粤漫.py` | ✅ 正常 | 105 | 🎬 一般 | 動態取得主站: https://www.ymvid.com |
+| Python | `py` | `py/dandanqi.py` | ✅ 正常 | 5 | 🎬 一般 | 動態取得主站: https://www.dandanqi.cc |
+| Python | `py` | `py/网络直播.py` | ✅ 正常 | 5 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/duoduo.py` | ✅ 正常 | 5 | 🎬 一般 | 動態取得主站: https://duoduosdf12223234334.top |
+| Python | `py` | `py/juok3.py` | ✅ 正常 | 7 | 🎬 一般 | 動態取得主站: https://juok3.top |
+| Python | `py` | `py/xlys.py` | ✅ 正常 | 8 | 🎬 一般 | 動態取得主站: https://v.xl.in.ua |
+| Python | `py` | `py/短剧聚合.py` | ✅ 正常 | 8 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/apples.py` | ✅ 正常 | 8 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/全球更新.py` | ✅ 正常 | 10 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/275tingshu.py` | ✅ 正常 | 11 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/哔哩视频.py` | ✅ 正常 | 13 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/豆瓣.py` | ✅ 正常 | 14 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/youtube.py` | ✅ 正常 | 16 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/douban2.py` | ✅ 正常 | 17 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/ruyishipin.py` | ✅ 正常 | 19 | 🎬 一般 | 動態取得主站: https://rysp.tv |
+| Python | `py` | `py/yangshipin.py` | ✅ 正常 | 22 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/hongguo.py` | ✅ 正常 | 27 | 🎬 一般 | 動態取得主站: https://hongguoduanju.com |
+| Python | `py` | `py/fqdm.py` | ✅ 正常 | 36 | 🎬 一般 | 動態取得主站: https://www.fqdm.cc |
+| Python | `py` | `py/saohuo.py` | ✅ 正常 | 43 | 🎬 一般 | 動態取得主站: https://shdy5.us |
+| Python | `py` | `py/茶杯狐影视.py` | ✅ 正常 | 75 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/粤漫.py` | ✅ 正常 | 81 | 🎬 一般 | 動態取得主站: https://www.ymvid.com |
+| Python | `py` | `py/麻豆社<18+>.py` | ✅ 正常 | 89 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/撸一天.py` | ✅ 正常 | 104 | 🎬 一般 | 動態取得主站: https://luyitian.com |
 | Python | `py` | `py/aikanbot.py` | ✅ 正常 | 107 | 🎬 一般 | https://www1.aikanbot.com (HTTP 200) |
-| Python | `py` | `py/qiyoudy.py` | ✅ 正常 | 122 | 🎬 一般 | http://www.qiyoudy2.com (HTTP 200) |
-| Python | `py` | `py/黑料不打烊<18+>.py` | ✅ 正常 | 128 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/爱瓜影视.py` | ✅ 正常 | 132 | 🎬 一般 | https://tvapi211.magicetech.com (HTTP 200) |
-| Python | `py` | `py/盘友圈.py` | ✅ 正常 | 137 | 🎬 一般 | https://panyq.com (HTTP 200) |
-| Python | `py` | `py/每日大赛.py` | ✅ 正常 | 140 | 🎬 一般 | 動態取得主站: https://www.mrds66.com |
-| Python | `py` | `py/撸一天.py` | ✅ 正常 | 142 | 🎬 一般 | 動態取得主站: https://luyitian.com |
-| Python | `py` | `py/小苹果APP.py` | ✅ 正常 | 146 | 🎬 一般 | http://item.xpgtv.com (HTTP 200) |
-| Python | `py` | `py/4KAV.py` | ✅ 正常 | 176 | 🔞 成人 | https://4k-av.com (HTTP 200) |
-| Python | `py` | `py/亚色影库.py` | ✅ 正常 | 178 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/maple.py` | ✅ 正常 | 191 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/Mang.py` | ✅ 正常 | 230 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
-| Python | `py` | `py/小红薯APP.py` | ✅ 正常 | 233 | 🎬 一般 | https://jhfkdnov21vfd.dyfcbkggxn.work (HTTP 200) |
-| Python | `py` | `py/共青春影院.py` | ✅ 正常 | 248 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/猫咪TV.py` | ✅ 正常 | 259 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/like.py` | ✅ 正常 | 283 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/聚合直播.py` | ✅ 正常 | 313 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/AV大平台<18+>.py` | ✅ 正常 | 355 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/优视频.py` | ✅ 正常 | 391 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/ytbzb.py` | ✅ 正常 | 402 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
-| Python | `py` | `py/芒果TV (1).py` | ✅ 正常 | 404 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
-| Python | `py` | `py/小苹果影视.py` | ✅ 正常 | 412 | 🎬 一般 | http://item.xpgcom.com (HTTP 200) |
-| Python | `py` | `py/ytb.py` | ✅ 正常 | 424 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
-| Python | `py` | `py/哔哩聚合.py` | ✅ 正常 | 438 | 🎬 一般 | https://api.bilibili.com/x/web-interface/index/top/feed/rcmd?y_num=1&fresh_type=3&feed_version=SEO_VIDEO&fresh_idx_1h=1&fetch_row=1&fresh_idx=1&brush=0&homepage_ver=1&ps=20 (HTTP 200) |
-| Python | `py` | `py/芒果视频.py` | ✅ 正常 | 481 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
-| Python | `py` | `py/腾讯视频.py` | ✅ 正常 | 503 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/火车影视.py` | ✅ 正常 | 543 | 🎬 一般 | 動態取得主站: https://bfm11as9f.fuqiyun.cn |
-| Python | `py` | `py/魔方影视.py` | ✅ 正常 | 550 | 🎬 一般 | 動態取得主站: https://www.ky4k14t.top/ |
-| Python | `py` | `py/枫叶音乐.py` | ✅ 正常 | 569 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/猎手影视.py` | ✅ 正常 | 583 | 🎬 一般 | 動態取得主站: https://ls2026.madp8.cn |
-| Python | `py` | `py/努努影院.py` | ✅ 正常 | 587 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/七味.py` | ✅ 正常 | 655 | 🎬 一般 | 動態取得主站: https://www.qnmp4.com |
-| Python | `py` | `py/歪比巴卜.py` | ✅ 正常 | 684 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/Xhm<18+>.py` | ✅ 正常 | 697 | 🔞 成人 | 動態取得主站: https://zn.xhamster.com |
-| Python | `py` | `py/优酷视频.py` | ✅ 正常 | 747 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/光速影视.py` | ✅ 正常 | 755 | 🎬 一般 | 動態取得主站: http://110.42.110.224:1133 |
-| Python | `py` | `py/偷乐短剧.py` | ✅ 正常 | 811 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/kkys.py` | ✅ 正常 | 815 | 🎬 一般 | 動態取得主站: https://www.kkys20.com |
-| Python | `py` | `py/mifun.py` | ✅ 正常 | 879 | 🎬 一般 | 動態取得主站: http://get.mymifun.com |
-| Python | `py` | `py/骚火影视.py` | ✅ 正常 | 895 | 🎬 一般 | https://shdy2.com (HTTP 200) |
-| Python | `py` | `py/4K影院.py` | ✅ 正常 | 906 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/py_电影猎手.py` | ✅ 正常 | 935 | 🎬 一般 | 動態取得主站: https://ls2026.madp8.cn |
-| Python | `py` | `py/MiFun动漫.py` | ✅ 正常 | 965 | 🎬 一般 | 動態取得主站: https://getcf.mymifun.com |
-| Python | `py` | `py/蓝莓短剧.py` | ✅ 正常 | 974 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/Pornhub<18+>.py` | ✅ 正常 | 993 | 🔞 成人 | 動態取得主站: https://cn.pornhub.com |
-| Python | `py` | `py/Teng.py` | ✅ 正常 | 1007 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/爱奇艺.py` | ✅ 正常 | 1108 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/河马短剧.py` | ✅ 正常 | 1174 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/actor.py` | ✅ 正常 | 1221 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/星芽短剧.py` | ✅ 正常 | 1237 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/若惜影视.py` | ✅ 正常 | 1312 | 🎬 一般 | 動態取得主站: <?xml version="1.0" encoding="UTF-8"?>
+| Python | `py` | `py/爱瓜影视.py` | ✅ 正常 | 163 | 🎬 一般 | https://tvapi211.magicetech.com (HTTP 200) |
+| Python | `py` | `py/每日大赛.py` | ✅ 正常 | 182 | 🎬 一般 | 動態取得主站: https://www.mrds66.com |
+| Python | `py` | `py/小红薯APP.py` | ✅ 正常 | 186 | 🎬 一般 | https://jhfkdnov21vfd.dyfcbkggxn.work (HTTP 200) |
+| Python | `py` | `py/qiyoudy.py` | ✅ 正常 | 189 | 🎬 一般 | http://www.qiyoudy2.com (HTTP 200) |
+| Python | `py` | `py/盘友圈.py` | ✅ 正常 | 197 | 🎬 一般 | https://panyq.com (HTTP 200) |
+| Python | `py` | `py/芒果TV (1).py` | ✅ 正常 | 218 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
+| Python | `py` | `py/国外剧.py` | ✅ 正常 | 232 | 🎬 一般 | 動態取得主站: https://guowaiju.com |
+| Python | `py` | `py/Mang.py` | ✅ 正常 | 237 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
+| Python | `py` | `py/优视频.py` | ✅ 正常 | 249 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/黑料不打烊<18+>.py` | ✅ 正常 | 252 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/小苹果APP.py` | ✅ 正常 | 256 | 🎬 一般 | http://item.xpgtv.com (HTTP 200) |
+| Python | `py` | `py/ytb.py` | ✅ 正常 | 258 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
+| Python | `py` | `py/ytbzb.py` | ✅ 正常 | 259 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
+| Python | `py` | `py/maple.py` | ✅ 正常 | 269 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/亚色影库.py` | ✅ 正常 | 329 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/小苹果影视.py` | ✅ 正常 | 363 | 🎬 一般 | http://item.xpgcom.com (HTTP 200) |
+| Python | `py` | `py/芒果视频.py` | ✅ 正常 | 391 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
+| Python | `py` | `py/哔哩聚合.py` | ✅ 正常 | 416 | 🎬 一般 | https://api.bilibili.com/x/web-interface/index/top/feed/rcmd?y_num=1&fresh_type=3&feed_version=SEO_VIDEO&fresh_idx_1h=1&fetch_row=1&fresh_idx=1&brush=0&homepage_ver=1&ps=20 (HTTP 200) |
+| Python | `py` | `py/火车影视.py` | ✅ 正常 | 421 | 🎬 一般 | 動態取得主站: https://bfm11as9f.fuqiyun.cn |
+| Python | `py` | `py/AV大平台<18+>.py` | ✅ 正常 | 452 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/聚合直播.py` | ✅ 正常 | 456 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/七味.py` | ✅ 正常 | 502 | 🎬 一般 | 動態取得主站: https://www.qnmp4.com |
+| Python | `py` | `py/猫咪TV.py` | ✅ 正常 | 508 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/腾讯视频.py` | ✅ 正常 | 557 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/kkys.py` | ✅ 正常 | 562 | 🎬 一般 | 動態取得主站: https://www.kkys20.com |
+| Python | `py` | `py/偷乐短剧.py` | ✅ 正常 | 608 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/猎手影视.py` | ✅ 正常 | 658 | 🎬 一般 | 動態取得主站: https://ls2026.madp8.cn |
+| Python | `py` | `py/Xhm<18+>.py` | ✅ 正常 | 674 | 🔞 成人 | 動態取得主站: https://zn.xhamster.com |
+| Python | `py` | `py/骚火影视.py` | ✅ 正常 | 704 | 🎬 一般 | https://shdy2.com (HTTP 200) |
+| Python | `py` | `py/蓝莓短剧.py` | ✅ 正常 | 709 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/枫叶音乐.py` | ✅ 正常 | 813 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/光速影视.py` | ✅ 正常 | 854 | 🎬 一般 | 動態取得主站: http://110.42.110.224:1133 |
+| Python | `py` | `py/魔方影视.py` | ✅ 正常 | 868 | 🎬 一般 | 動態取得主站: https://www.ky4k14t.top/ |
+| Python | `py` | `py/Teng.py` | ✅ 正常 | 924 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/优酷视频.py` | ✅ 正常 | 962 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/4K影院.py` | ✅ 正常 | 988 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/like.py` | ✅ 正常 | 1018 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/爱奇艺.py` | ✅ 正常 | 1052 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/py_电影猎手.py` | ✅ 正常 | 1071 | 🎬 一般 | 動態取得主站: https://ls2026.madp8.cn |
+| Python | `py` | `py/歪比巴卜.py` | ✅ 正常 | 1087 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/Pornhub<18+>.py` | ✅ 正常 | 1094 | 🔞 成人 | 動態取得主站: https://cn.pornhub.com |
+| Python | `py` | `py/py_jianpian.py` | ✅ 正常 | 1150 | 🎬 一般 | 動態取得主站: https://ev5356.970xw.com |
+| Python | `py` | `py/云速影视.py` | ✅ 正常 | 1164 | 🎬 一般 | 動態取得主站: http://110.42.110.224:1133 |
+| Python | `py` | `py/共青春影院.py` | ✅ 正常 | 1296 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/actor.py` | ✅ 正常 | 1438 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/麒麟影视.py` | ✅ 正常 | 1486 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/河马短剧.py` | ✅ 正常 | 1499 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/啪啪视频.py` | ✅ 正常 | 1518 | 🔞 成人 | https://4.pp795pp.cc:88 (HTTP 200) |
+| Python | `py` | `py/若惜影视.py` | ✅ 正常 | 1637 | 🎬 一般 | 動態取得主站: <?xml version="1.0" encoding="UTF-8"?>
 <Error>
   <Code>NoSuchKey</Code>
   <Message>The specified key does not exist.</Message>
-  <RequestId>6AE5A7A39898513738CC00CE</RequestId>
+  <RequestId>6AE5A7C4C0627D37309C3A75</RequestId>
   <HostId>rxysyyds.oss-cn-chengdu.aliyuncs.com</HostId>
   <Key>getapp.txt</Key>
   <EC>0026-00000001</EC>
   <RecommendDoc>https://api.aliyun.com/troubleshoot?q=0026-00000001</RecommendDoc>
 </Error> |
-| Python | `py` | `py/啪啪视频.py` | ✅ 正常 | 1378 | 🔞 成人 | https://4.pp795pp.cc:88 (HTTP 200) |
-| Python | `py` | `py/麒麟影视.py` | ✅ 正常 | 1389 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/py_jianpian.py` | ✅ 正常 | 1487 | 🎬 一般 | 動態取得主站: https://ev5356.970xw.com |
-| Python | `py` | `py/熊猫tv.py` | ✅ 正常 | 1583 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/熊猫直播.py` | ✅ 正常 | 1606 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/河马剧场.py` | ✅ 正常 | 1657 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/云速影视.py` | ✅ 正常 | 2054 | 🎬 一般 | 動態取得主站: http://110.42.110.224:1133 |
-| Python | `py` | `py/acfun.py` | ✅ 正常 | 2150 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/瓜子影视.py` | ✅ 正常 | 2204 | 🎬 一般 | 動態取得主站: https://apinew.uozvr.com |
-| Python | `py` | `py/Phb<18+>.py` | ✅ 正常 | 2723 | 🔞 成人 | 動態取得主站: https://www.pornhub.com |
-| Python | `py` | `py/黄豆短剧<18+>.py` | ✅ 正常 | 2746 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/熊猫视频.py` | ✅ 正常 | 2924 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/光速APP.py` | ✅ 正常 | 2926 | 🎬 一般 | 動態取得主站: http://110.42.110.224:1133 |
-| Python | `py` | `py/618.py` | ✅ 正常 | 2972 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/剧王短剧.py` | ✅ 正常 | 3798 | 🎬 一般 | https://fs-im-kefu.7moor-fs1.com/ly/4d2c3f00-7d4c-11e5-af15-41bf63ae4ea0/1732707176882/jiduo.txt (HTTP 200) |
-| Python | `py` | `py/采集聚合.py` | ✅ 正常 | 5507 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/shortfilm.py` | ✅ 正常 | 5707 | 🔞 成人 | homeContent 響應成功 |
-| Python | `py` | `py/wxty.py` | ✅ 正常 | 11016 | 🎬 一般 | homeContent 響應成功 |
-| Python | `py` | `py/山楂影视.py` | ✅ 正常 | 12252 | 🎬 一般 | 動態取得主站: http://qkys.qukanwh.com |
-| Python | `py` | `py/胖虎APP.py` | ✅ 正常 | 12776 | 🎬 一般 | https://www.yemu.xyz/?url={0} (HTTP 200) |
-| Python | `py` | `py/yymp3.py` | ✅ 正常 | 19697 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/努努影院.py` | ✅ 正常 | 1660 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/熊猫tv.py` | ✅ 正常 | 1822 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/熊猫直播.py` | ✅ 正常 | 1888 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/河马剧场.py` | ✅ 正常 | 2130 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/采集聚合.py` | ✅ 正常 | 2158 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/瓜子影视.py` | ✅ 正常 | 2162 | 🎬 一般 | 動態取得主站: https://apinew.uozvr.com |
+| Python | `py` | `py/MiFun动漫.py` | ✅ 正常 | 2211 | 🎬 一般 | 動態取得主站: http://get.mymifun.com |
+| Python | `py` | `py/mifun.py` | ✅ 正常 | 2214 | 🎬 一般 | 動態取得主站: http://get.mymifun.com |
+| Python | `py` | `py/Phb<18+>.py` | ✅ 正常 | 2783 | 🔞 成人 | 動態取得主站: https://www.pornhub.com |
+| Python | `py` | `py/黄豆短剧<18+>.py` | ✅ 正常 | 2868 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/618.py` | ✅ 正常 | 2909 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/acfun.py` | ✅ 正常 | 3191 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/熊猫视频.py` | ✅ 正常 | 3242 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/剧王短剧.py` | ✅ 正常 | 3360 | 🎬 一般 | https://fs-im-kefu.7moor-fs1.com/ly/4d2c3f00-7d4c-11e5-af15-41bf63ae4ea0/1732707176882/jiduo.txt (HTTP 200) |
+| Python | `py` | `py/光速APP.py` | ✅ 正常 | 3687 | 🎬 一般 | 動態取得主站: http://110.42.110.224:1133 |
+| Python | `py` | `py/shortfilm.py` | ✅ 正常 | 4680 | 🔞 成人 | homeContent 響應成功 |
+| Python | `py` | `py/山楂影视.py` | ✅ 正常 | 12248 | 🎬 一般 | 動態取得主站: http://qkys.qukanwh.com |
+| Python | `py` | `py/wxty.py` | ✅ 正常 | 12388 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/胖虎APP.py` | ✅ 正常 | 12926 | 🎬 一般 | https://www.yemu.xyz/?url={0} (HTTP 200) |
+| Python | `py` | `py/yymp3.py` | ✅ 正常 | 19485 | 🎬 一般 | homeContent 響應成功 |
+| Python | `py` | `py/4KAV.py` | ❌ 失效 | 12093 | 🎬 一般 | 連線失敗 (測試 1 個候選網址) ➔ 已移至 `py/NG/4KAV.py` |
