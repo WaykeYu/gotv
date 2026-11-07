@@ -1,0 +1,56 @@
+name: Daily Fun URL Checker
+
+on:
+  schedule:
+    # UTC 16:00 = 台灣時間 00:00
+    - cron: '0 16 * * *'
+  workflow_dispatch: # 支援手動隨時觸發測試
+
+permissions:
+  contents: write
+
+env:
+  # 抑制 Runner 強制以 Node 24 執行 Node 20 Actions 時輸出的警告訊息
+  ACTIONS_RUNNER_FORCE_NODE24_WARNING: false
+
+jobs:
+  check-and-filter-fun:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        # 升級至 v5（已適配 Node 24 執行環境）
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        # 升級至 v6（已適配 Node 24 執行環境）
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip' # 開啟 pip 快取以加速每次執行
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests urllib3 curl_cffi
+
+      - name: Run Fun1 URL Checker & Latency Sort
+        run: |
+          python scripts/check_fun.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 容錯 add：檔案存在才納入暫存區
+          [ -f fun1.json ] && git add fun1.json
+          [ -f fun_STATUS.md ] && git add fun_STATUS.md
+          [ -d collect/NG ] && git add collect/NG/
+
+          if git diff --staged --quiet; then
+            echo "沒有任何內容變動，跳過 Commit。"
+          else
+            git commit -m "chore: auto filter, latency sort and update fun_STATUS.md [$(date +'%Y-%m-%d')]"
+            git push
+          fi

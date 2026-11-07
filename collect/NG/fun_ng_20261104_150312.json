@@ -1,0 +1,16 @@
+[
+  {
+    "key": "星夜资源站",
+    "name": "星夜 | 采集",
+    "type": 1,
+    "api": "https://xyezy.com/api.php/provide/vod/",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "_error_reason": "重複網址 (首見於: 星夜 | 采集)",
+    "_tested_url": "https://xyezy.com/api.php/provide/vod/",
+    "_fail_latency": 0,
+    "_checked_at": "2026-11-04 15:03:09"
+  }
+]

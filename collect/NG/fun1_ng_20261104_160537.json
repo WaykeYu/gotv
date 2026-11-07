@@ -1,0 +1,31 @@
+[
+  {
+    "key": "新极品资源",
+    "name": "新极品 | 采集",
+    "type": 1,
+    "api": "https://jipinvip1.com/api.php/provide/vod/",
+    "playUrl": "https://jipinvip1.com/m3u8/?url=",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "_error_reason": "未包含 code:1 特徵 (摘要: <!DOCTYPE html><html><head><script>windo...)",
+    "_tested_url": "https://jipinvip1.com/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-04 16:05:35"
+  },
+  {
+    "key": "大地资源",
+    "name": "大地 | 采集",
+    "type": 1,
+    "api": "https://dadiapi.com/api.php",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "_error_reason": "未包含 code:1 特徵 (摘要: <?xml version=\"1.0\" encoding=\"UTF-8\"?> <...)",
+    "_tested_url": "https://dadiapi.com/api.php",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-04 16:05:35"
+  }
+]

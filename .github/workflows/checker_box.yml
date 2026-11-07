@@ -1,0 +1,56 @@
+name: Daily Box URL Checker
+
+on:
+  schedule:
+    # UTC 16:00 = 台灣時間 00:00
+    - cron: '0 16 * * *'
+  workflow_dispatch: # 支援手動立即觸發執行
+
+permissions:
+  contents: write
+
+env:
+  # 抑制 Runner 強制以 Node 24 執行 Node 20 依賴時輸出的警告訊息
+  ACTIONS_RUNNER_FORCE_NODE24_WARNING: false
+
+jobs:
+  check-and-filter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        # 升級至 v5，原生支援 Node 24 執行環境
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        # 升級至 v6，原生支援 Node 24 執行環境
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip' # 開啟快取以加速每日重複下載依賴
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests urllib3 curl_cffi
+
+      - name: Run URL Checker & Latency Sort
+        run: |
+          python scripts/check_box.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 容錯 add：檔案存在才納入暫存區
+          [ -f box1.json ] && git add box1.json
+          [ -f box_STATUS.md ] && git add box_STATUS.md
+          [ -d collect/NG ] && git add collect/NG/
+
+          if git diff --staged --quiet; then
+            echo "沒有任何內容變動，跳過 Commit。"
+          else
+            git commit -m "chore: auto filter, latency sort and update status [$(date +'%Y-%m-%d')]"
+            git push
+          fi

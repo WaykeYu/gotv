@@ -1,0 +1,14 @@
+[
+  {
+    "name": "豆瓣 | 采集",
+    "url": "https://caiji.dbzy5.com/api.php/provide/vod/",
+    "error": "連線中斷 (ConnectionError)",
+    "checked_at": "2026-10-30 11:02:48"
+  },
+  {
+    "name": "无尽 | 采集",
+    "url": "https://api.wujinapi.net/api.php/provide/vod/",
+    "error": "連線逾時 (Timeout)",
+    "checked_at": "2026-10-30 11:02:48"
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "key": "飄零资源",
+    "name": "飄零 | 采集",
+    "type": 1,
+    "api": "https://p2100.net/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "HTTP 403 (CF 防火牆阻擋，未得 code:1)",
+    "_tested_url": "https://p2100.net/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-04 16:28:50"
+  }
+]

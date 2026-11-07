@@ -1,0 +1,15 @@
+[
+  {
+    "key": "豆瓣资源站",
+    "name": "豆瓣 | 采集",
+    "type": 1,
+    "api": "https://dbzy.tv/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "例外: DNSError",
+    "_tested_url": "https://dbzy.tv/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-06 05:42:53"
+  }
+]

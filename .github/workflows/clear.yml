@@ -1,0 +1,44 @@
+name: Clean up the garbage
+
+on:
+  schedule:
+    - cron: '0 4 7 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 檢出當前自身倉庫（不再檢出 cluntop/tvbox）
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: main
+
+      # 2. 設定 Git 提交身份
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # 3. 重置歷史為單一 Commit 並推送到自身倉庫
+      - name: Reset History & Force Push
+        run: |
+          # 建立全新無歷史孤立分支
+          git checkout --orphan temp_branch
+          
+          # 暫存全部檔案並提交
+          git add -A
+          git commit -m "purge history"
+          
+          # 直接覆蓋推送到本倉庫的 main（使用內建權限，無需外部 Token）
+          git push -f origin temp_branch:main
