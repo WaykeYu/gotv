@@ -1,0 +1,41 @@
+[
+  {
+    "key": "茅台",
+    "name": "茅台 | 采集",
+    "type": 1,
+    "api": "https://mtzy.me/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "例外: DNSError",
+    "_tested_url": "https://mtzy.me/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-08 03:45:51"
+  },
+  {
+    "key": "360",
+    "name": "360 | 采集",
+    "type": 1,
+    "api": "https://360zy.com/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://360zy.com/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-08 03:45:51"
+  },
+  {
+    "key": "爱奇艺",
+    "name": "爱奇艺 | 采集",
+    "type": 1,
+    "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-08 03:45:51"
+  }
+]
