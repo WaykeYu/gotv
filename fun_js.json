@@ -1,0 +1,4 @@
+{
+  "spider": "./custom_spider.jar;md5;auto",
+  "sites": []
+}
