@@ -39,7 +39,7 @@ for p in [BASE_DIR, PY_DIR, PY_DIR / "base"]:
         sys.path.insert(0, p_str)
 
 # 白名單：即使雲端測活異常也強制視為可用
-WHITELIST_SPIDERS = {"韩小圈", "剧多短剧"}
+WHITELIST_SPIDERS = {"韩小圈", "剧多短剧", "花都"}
 
 BROWSER_HEADERS = {
     "User-Agent": (
