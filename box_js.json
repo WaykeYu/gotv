@@ -1,5 +1,5 @@
 {
-  "spider": "./drpy.min.js;md5;auto",
+  "spider": "./jar/xs.jar;md5;auto",
   "sites": [
     {
       "key": "json_面包影视",
