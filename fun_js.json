@@ -1,5 +1,5 @@
 {
-  "spider": "./drpy.min.js;md5;auto",
+  "spider": "./pg.jar;md5;auto",
   "sites": [
     {
       "key": "js_注视影视",
