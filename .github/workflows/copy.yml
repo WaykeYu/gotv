@@ -1,0 +1,61 @@
+name: Sync lib and jar from upstream
+
+on:
+  schedule:
+    # 每天 UTC 17:00 (台灣時間凌晨 01:00) 自動執行一次
+    - cron: '0 17 * * *'
+  workflow_dispatch: # 支援在 GitHub 介面手動點擊觸發執行
+
+permissions:
+  contents: write # 賦予 GITHUB_TOKEN 提交與推送權限
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target repository (gotv)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Checkout source repository (tvbox)
+        uses: actions/checkout@v4
+        with:
+          repository: cluntop/tvbox
+          ref: main
+          path: upstream_tvbox
+
+      - name: Sync lib and jar folders
+        run: |
+          # 覆蓋 lib 目錄
+          if [ -d "upstream_tvbox/lib" ]; then
+            rm -rf lib
+            cp -r upstream_tvbox/lib .
+            echo "Successfully updated lib/"
+          fi
+
+          # 覆蓋 jar 目錄
+          if [ -d "upstream_tvbox/jar" ]; then
+            rm -rf jar
+            cp -r upstream_tvbox/jar .
+            echo "Successfully updated jar/"
+          fi
+
+          # 清理來源臨時目錄，避免被加入 commit
+          rm -rf upstream_tvbox
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 檢查是否有檔案變更
+          if git status --porcelain | grep -q .; then
+            git add lib jar
+            git commit -m "chore: sync lib and jar from cluntop/tvbox [skip ci]"
+            git push origin main
+            echo "Changes pushed successfully."
+          else
+            echo "No changes detected. Skipping push."
+          fi
