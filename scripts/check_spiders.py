@@ -5,61 +5,56 @@ import json
 import shutil
 import importlib.util
 import inspect
-import requests
+from pathlib import Path
 from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PY_DIR = os.path.join(BASE_DIR, "py")
-JS_DIR = os.path.join(BASE_DIR, "js")
-REPORT_FILE = os.path.join(BASE_DIR, "SPIDER_STATUS.md")
+# --- 目錄與路徑設定 ---
+BASE_DIR = Path(__file__).resolve().parent
+PY_DIR = BASE_DIR / "py"
+JS_DIR = BASE_DIR / "js"
+REPORT_FILE = BASE_DIR / "SPIDER_STATUS.md"
 
-# 4 個輸出 JSON 檔案路徑配置
-BOX_PY_JSON_FILE = os.path.join(BASE_DIR, "box_py.json")
-FUN_PY_JSON_FILE = os.path.join(BASE_DIR, "fun_py.json")
-BOX_JS_JSON_FILE = os.path.join(BASE_DIR, "box_js.json")
-FUN_JS_JSON_FILE = os.path.join(BASE_DIR, "fun_js.json")
+# 4 個獨立輸出的設定檔路徑
+BOX_PY_FILE = BASE_DIR / "box_py.json"
+FUN_PY_FILE = BASE_DIR / "fun_py.json"
+BOX_JS_FILE = BASE_DIR / "box_js.json"
+FUN_JS_FILE = BASE_DIR / "fun_js.json"
 
-TIMEOUT = 12
-MAX_WORKERS = 10
+TIMEOUT = 8
+MAX_WORKERS = 16
 
-# 加入 Python 模組搜尋路徑
-for p in [BASE_DIR, PY_DIR, os.path.join(PY_DIR, "base")]:
-    if os.path.exists(p) and p not in sys.path:
-        sys.path.insert(0, p)
+for p in [BASE_DIR, PY_DIR, PY_DIR / "base"]:
+    p_str = str(p)
+    if p.exists() and p_str not in sys.path:
+        sys.path.insert(0, p_str)
 
-# 白名單：即使雲端機房 (GitHub Actions) 遭遇海外阻擋或超時，也強制視為可用且不移入 NG
-WHITELIST_SPIDERS = [
-    "韩小圈",
-    "剧多短剧"
-]
+WHITELIST_SPIDERS = {"韩小圈", "剧多短剧"}
 
-# 擬真現代瀏覽器標頭，降低 WAF / CDN 防爬屏障阻斷率
 BROWSER_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache",
     "Sec-Ch-Ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
     "Sec-Ch-Ua-Mobile": "?0",
     "Sec-Ch-Ua-Platform": '"Windows"',
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-    "Upgrade-Insecure-Requests": "1"
 }
 
-# 成人內容識別關鍵字庫
 ADULT_KEYWORDS = [
-    "adult", "18+", "18x", "porn", "sex", "jav", "av", "missav", "jable",
-    "netflav", "hanime", "madou", "麻豆", "91", "黄", "色", "情色", "福利",
-    "cosplay", "密室", "番號", "偷拍", "自拍", "亂倫", "女優"
+    r"18\+", r"18x", r"porn", r"jav", r"\bav\b", r"missav", r"jable",
+    r"netflav", r"hanime", r"madou", r"麻豆", r"情色", r"番號", r"女優",
+    r"18禁", r"無碼", r"有碼", r"成人"
 ]
+ADULT_REGEX = re.compile("|".join(ADULT_KEYWORDS), re.IGNORECASE)
 
-# 注入相容的 Mock Spider 基底類別
+# --- Mock Spider ---
 try:
     import base.spider
 except ImportError:
@@ -72,11 +67,9 @@ except ImportError:
             self.headers = dict(BROWSER_HEADERS)
             self.host = ""
         def fetch(self, url, headers=None, timeout=TIMEOUT, **kwargs):
-            h = headers or self.headers
-            return requests.get(url, headers=h, timeout=timeout, verify=False)
+            return requests.get(url, headers=headers or self.headers, timeout=timeout, verify=False)
         def post(self, url, headers=None, data=None, timeout=TIMEOUT, **kwargs):
-            h = headers or self.headers
-            return requests.post(url, headers=h, data=data, timeout=timeout, verify=False)
+            return requests.post(url, headers=headers or self.headers, data=data, timeout=timeout, verify=False)
         def log(self, *args):
             pass
 
@@ -85,48 +78,71 @@ except ImportError:
     sys.modules["base"] = base_module
     sys.modules["base.spider"] = spider_module
 
+
+def create_reusable_session() -> requests.Session:
+    session = requests.Session()
+    retries = Retry(total=1, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504])
+    adapter = HTTPAdapter(max_retries=retries, pool_connections=MAX_WORKERS, pool_maxsize=MAX_WORKERS * 2)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+GLOBAL_SESSION = create_reusable_session()
+
+
 def is_adult_content(file_name: str, code: str, target_url: str) -> bool:
-    """判定是否屬於成人內容分類"""
-    check_text = f"{file_name.lower()} {target_url.lower()}"
-    for kw in ADULT_KEYWORDS:
-        if kw in check_text:
-            return True
-    for kw in ["成人", "麻豆", "18禁", "無碼", "有碼"]:
-        if kw in code:
-            return True
-    return False
+    sample_text = f"{file_name} {target_url} {code[:2000]}"
+    return bool(ADULT_REGEX.search(sample_text))
+
 
 def normalize_url(url: str) -> str:
-    """統一正規化網址格式，消除大小寫、路徑與結尾斜線差異"""
     if not url or not isinstance(url, str):
         return ""
     url = url.strip().rstrip("/")
     try:
         parsed = urlparse(url)
-        if parsed.scheme and parsed.netloc:
+        if parsed.scheme in ("http", "https") and parsed.netloc:
             path = parsed.path.rstrip("/")
             return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{path}"
     except Exception:
         pass
-    return url
+    return ""
+
 
 def extract_urls(code: str) -> list[str]:
-    """提取程式碼中的候選網址並即時去除重複項（保留順序）"""
+    # 支援 JSON 屬性及 JS 宣告的提取格式
     patterns = [
-        r'''(?:host|site|siteUrl|baseUrl|url|WEB_SITE|header_url|HOST|SITE|URL)\s*[:=]\s*['"](https?://[^'"]+)['"]''',
-        r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?)['"]'''
+        r'''["']?(?:host|site|siteUrl|baseUrl|url|WEB_SITE|header_url|HOST|SITE|URL|homeUrl|apiUrl)["']?\s*[:=]\s*['"](https?://[^'"]+)['"]''',
+        r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?(?:/[^\s'"]*)?)['"]'''
     ]
-    skip_keywords = ["github", "googlevideo", "w3.org", "schema.org", "jsdelivr", "baidu", "qq.com", "unpkg", "api.turing"]
-    
+    skip_domains = {"github.com", "googlevideo.com", "w3.org", "schema.org", "jsdelivr.net", "baidu.com", "qq.com", "unpkg.com"}
+
     seen = set()
     unique_urls = []
+
+    # 若檔案本身為有效 JSON，先嘗試結構化解析常用欄位
+    try:
+        data = json.loads(code)
+        candidates = []
+        if isinstance(data, dict):
+            for k in ["url", "host", "site", "siteUrl", "baseUrl", "ext"]:
+                if k in data and isinstance(data[k], str) and data[k].startswith("http"):
+                    candidates.append(data[k])
+        for c in candidates:
+            norm = normalize_url(c)
+            if norm and norm not in seen:
+                seen.add(norm)
+                unique_urls.append(norm)
+    except Exception:
+        pass
 
     for pat in patterns:
         for u in re.findall(pat, code, re.IGNORECASE):
             norm_url = normalize_url(u)
             if not norm_url:
                 continue
-            if any(skip in norm_url for skip in skip_keywords):
+            parsed = urlparse(norm_url)
+            if any(domain in parsed.netloc for domain in skip_domains):
                 continue
             if norm_url not in seen:
                 seen.add(norm_url)
@@ -134,8 +150,8 @@ def extract_urls(code: str) -> list[str]:
 
     return unique_urls
 
+
 def test_url_alive(url: str) -> tuple[bool, str]:
-    """強化版連線檢測：加入 Host 補全與針對防爬 / WAF 阻斷的容錯"""
     try:
         parsed = urlparse(url)
         headers = dict(BROWSER_HEADERS)
@@ -143,41 +159,42 @@ def test_url_alive(url: str) -> tuple[bool, str]:
             headers["Host"] = parsed.netloc
             headers["Referer"] = f"{parsed.scheme}://{parsed.netloc}/"
 
-        session = requests.Session()
-        adapter = requests.adapters.HTTPAdapter(max_retries=1)
-        session.mount("https://", adapter)
-        session.mount("http://", adapter)
+        try:
+            resp = GLOBAL_SESSION.head(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
+            if resp.status_code == 405:
+                resp = GLOBAL_SESSION.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False, stream=True)
+        except requests.RequestException:
+            resp = GLOBAL_SESSION.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False, stream=True)
 
-        resp = session.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
-
-        if resp.status_code < 400 or resp.status_code in [401, 403, 405, 502, 503]:
+        if resp.status_code < 400 or resp.status_code in {401, 403, 405, 502, 503}:
             return True, f"HTTP {resp.status_code}"
         return False, f"HTTP {resp.status_code}"
 
     except requests.exceptions.SSLError:
-        return True, "SSL 握手異常(站點存活)"
+        return True, "SSL 握手異常 (站點存活)"
     except requests.exceptions.ConnectionError as e:
         err_msg = str(e).lower()
         if any(k in err_msg for k in ["reset", "disconnected", "abort", "handshake"]):
-            return True, "WAF 阻斷攔截(站點存活)"
+            return True, "WAF 阻斷 (站點存活)"
         return False, "連線拒絕/超時"
     except Exception as e:
-        return False, str(e)[:35]
+        return False, str(e)[:30]
+
 
 def check_spider_file(file_info: tuple) -> dict:
-    """檢測爬蟲檔案狀態，優先檢查白名單，支援全域 HOST 與類別屬性 host 提取"""
     file_type, rel_path, full_path = file_info
-    ext = os.path.splitext(full_path)[1].lower().replace(".", "")
-    filename = os.path.basename(full_path)
-    stem = os.path.splitext(filename)[0]
+    path_obj = Path(full_path)
+    ext = path_obj.suffix.lower().replace(".", "")
+    stem = path_obj.stem
+    filename = path_obj.name
 
     start_time = datetime.now()
     result = {
         "type": file_type,
         "ext": ext,
         "name": stem,
-        "file": rel_path,
-        "full_path": full_path,
+        "file": rel_path.replace("\\", "/"),
+        "full_path": str(full_path),
         "status": "❌ 失效",
         "detail": "未知錯誤",
         "latency_ms": 99999,
@@ -186,10 +203,9 @@ def check_spider_file(file_info: tuple) -> dict:
     }
 
     try:
-        with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
-            code = f.read()
+        code = path_obj.read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
-        result["detail"] = f"無法讀取: {str(e)[:30]}"
+        result["detail"] = f"無法讀取: {str(e)[:25]}"
         return result
 
     candidate_urls = []
@@ -201,59 +217,62 @@ def check_spider_file(file_info: tuple) -> dict:
             seen_candidates.add(norm)
             candidate_urls.append(norm)
 
-    # 1. 白名單優先判定
-    for wl in WHITELIST_SPIDERS:
-        if wl.lower() in stem.lower():
-            urls = extract_urls(code)
-            target = urls[0] if urls else "https://www.jennyhow.com"
-            result.update({
-                "status": "✅ 正常",
-                "detail": f"白名單強制保留 ({target})",
-                "latency_ms": 100,
-                "target_url": target,
-                "is_adult": is_adult_content(filename, code, target)
-            })
-            return result
+    # 1. 白名單檢測
+    if any(wl.lower() in stem.lower() for wl in WHITELIST_SPIDERS):
+        urls = extract_urls(code)
+        target = urls[0] if urls else "https://www.jennyhow.com"
+        result.update({
+            "status": "✅ 正常",
+            "detail": f"白名單強制保留 ({target})",
+            "latency_ms": 100,
+            "target_url": target,
+            "is_adult": is_adult_content(filename, code, target)
+        })
+        return result
 
     # 2. Python 腳本動態載入分析
     if file_type == "Python":
-        mod_name = f"mod_{stem}"
+        mod_name = f"dynamic_spider_{stem}_{abs(hash(str(full_path)))}"
         try:
             spec = importlib.util.spec_from_file_location(mod_name, full_path)
-            module = importlib.util.module_from_spec(spec)
-            sys.modules[mod_name] = module
-            spec.loader.exec_module(module)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[mod_name] = module
+                try:
+                    spec.loader.exec_module(module)
 
-            for var_name in ["HOST", "host", "SITE", "site", "URL", "url", "WEB_SITE"]:
-                if hasattr(module, var_name):
-                    val = getattr(module, var_name)
-                    if isinstance(val, str) and val.startswith("http"):
-                        add_candidate(val)
+                    for var_name in ["HOST", "host", "SITE", "site", "URL", "url", "WEB_SITE"]:
+                        val = getattr(module, var_name, None)
+                        if isinstance(val, str) and val.startswith("http"):
+                            add_candidate(val)
 
-            spider_cls = None
-            for attr in dir(module):
-                obj = getattr(module, attr)
-                if inspect.isclass(obj) and obj.__module__ == module.__name__:
-                    if hasattr(obj, "homeContent") or "Spider" in attr:
-                        spider_cls = obj
-                        break
+                    spider_cls = None
+                    for attr in dir(module):
+                        obj = getattr(module, attr)
+                        if inspect.isclass(obj) and obj.__module__ == module.__name__:
+                            if hasattr(obj, "homeContent") or "Spider" in attr:
+                                spider_cls = obj
+                                break
 
-            if spider_cls:
-                spider = spider_cls()
-                if hasattr(spider, "init"):
-                    try: spider.init()
-                    except Exception: pass
-
-                if hasattr(spider, "host") and spider.host:
-                    add_candidate(spider.host)
+                    if spider_cls:
+                        spider = spider_cls()
+                        if hasattr(spider, "init"):
+                            try:
+                                spider.init()
+                            except Exception:
+                                pass
+                        if getattr(spider, "host", None):
+                            add_candidate(spider.host)
+                finally:
+                    sys.modules.pop(mod_name, None)
         except Exception:
             pass
 
-    # 3. 靜態正則提取補充
+    # 3. 靜態正則/JSON 檢索補全
     for u in extract_urls(code):
         add_candidate(u)
 
-    # 4. 強制實體網路測活
+    # 4. 實體連線測活
     if candidate_urls:
         alive_info = None
         for target_url in candidate_urls:
@@ -287,18 +306,17 @@ def check_spider_file(file_info: tuple) -> dict:
 
     return result
 
+
 def move_to_ng(full_path: str) -> str:
-    """將失效檔案移入 NG 資料夾中進行隔離"""
-    parent_dir = os.path.dirname(full_path)
-    ng_dir = os.path.join(parent_dir, "NG")
-    os.makedirs(ng_dir, exist_ok=True)
-    file_name = os.path.basename(full_path)
-    target_dest = os.path.join(ng_dir, file_name)
-    shutil.move(full_path, target_dest)
-    return os.path.relpath(target_dest, BASE_DIR)
+    src = Path(full_path)
+    ng_dir = src.parent / "NG"
+    ng_dir.mkdir(parents=True, exist_ok=True)
+    target = ng_dir / src.name
+    shutil.move(str(src), str(target))
+    return str(target.relative_to(BASE_DIR)).replace("\\", "/")
+
 
 def deduplicate_sites(items: list[dict]) -> list[dict]:
-    """站點網址去重：同一輸出分類中若 target_url 重複，保留延遲較低的項目"""
     seen_urls = set()
     unique_items = []
     for item in items:
@@ -310,8 +328,10 @@ def deduplicate_sites(items: list[dict]) -> list[dict]:
         unique_items.append(item)
     return unique_items
 
-def generate_tvbox_json(items: list, output_filepath: str):
-    """產出 TVBox 相容格式的 JSON 配置檔案"""
+
+def generate_tvbox_json(items: list, output_filepath: Path, spider_type: str = "py"):
+    spider_jar = "./custom_spider.jar;md5;auto" if spider_type == "py" else "./drpy.min.js;md5;auto"
+
     sites = []
     for item in items:
         site_entry = {
@@ -327,52 +347,55 @@ def generate_tvbox_json(items: list, output_filepath: str):
         sites.append(site_entry)
 
     config_data = {
-        "spider": "./custom_spider.jar;md5;auto",
+        "spider": spider_jar,
         "sites": sites
     }
 
-    with open(output_filepath, "w", encoding="utf-8") as f:
-        json.dump(config_data, f, ensure_ascii=False, indent=2)
+    output_filepath.write_text(json.dumps(config_data, ensure_ascii=False, indent=2), encoding="utf-8")
+
 
 def main():
     requests.packages.urllib3.disable_warnings()
 
     target_files = []
 
-    # 1. 搜尋 py 檔案
-    if os.path.exists(PY_DIR):
+    # 1. 搜尋 PY 目錄
+    if PY_DIR.exists():
         for root, dirs, files in os.walk(PY_DIR):
             if "NG" in dirs:
                 dirs.remove("NG")
             for f in files:
                 if f.endswith(".py") and not f.startswith("__"):
-                    full = os.path.join(root, f)
-                    target_files.append(("Python", os.path.relpath(full, BASE_DIR), full))
+                    full = Path(root) / f
+                    target_files.append(("Python", str(full.relative_to(BASE_DIR)), str(full)))
 
-    # 2. 遞迴搜尋 js 目錄及其所有子目錄下的檔案
-    if os.path.exists(JS_DIR):
+    # 2. 搜尋 JS 目錄 (包含所有子目錄如 js/s, js/ss，並同時納入 .js 與 .json 檔)
+    if JS_DIR.exists():
         for root, dirs, files in os.walk(JS_DIR):
             if "NG" in dirs:
                 dirs.remove("NG")
             for f in files:
-                if f.endswith(".js"):
-                    full = os.path.join(root, f)
-                    target_files.append(("JS", os.path.relpath(full, BASE_DIR), full))
+                # 排除根目錄生成的配置檔名，納入 .js 與 .json
+                if f in ["box_js.json", "fun_js.json", "box_py.json", "fun_py.json"]:
+                    continue
+                if f.endswith(".js") or f.endswith(".json"):
+                    full = Path(root) / f
+                    target_files.append(("JS", str(full.relative_to(BASE_DIR)), str(full)))
 
     if not target_files:
-        print("未找到任何待測 py 或 js 檔案。")
-        sys.exit(0)
+        print("未找到任何待測腳本。")
+        return
 
-    print(f"共發現 {len(target_files)} 個待測腳本，開始並行檢測...")
+    print(f"共發現 {len(target_files)} 個待測檔案 (含 JS/JSON)，開始檢測...")
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_map = {executor.submit(check_spider_file, item): item for item in target_files}
         for future in as_completed(future_map):
             r = future.result()
             results.append(r)
-            print(f"[{r['type']}][{r['status']}] {r['file']} (耗時: {r['latency_ms']}ms) -> {r['detail']}")
+            print(f"[{r['type']}][{r['status']}] {r['file']} ({r['latency_ms']}ms) -> {r['detail']}")
 
-    # 3. 隔離失效檔案（狀態包含 ❌ 即移入 NG）
+    # 隔離失效檔案
     moved_count = 0
     valid_results = []
     for r in results:
@@ -386,49 +409,43 @@ def main():
         else:
             valid_results.append(r)
 
-    # 4. 排序規則：優先依響應延遲 (由小到大)
     valid_results.sort(key=lambda x: x["latency_ms"])
 
-    # 5. 分別拆分 PY 與 JS 的有效站點，並在各自類別內進行去重
-    py_valid = [item for item in valid_results if item["type"] == "Python"]
-    js_valid = [item for item in valid_results if item["type"] == "JS"]
+    # 匯出 Python
+    py_valid = [r for r in valid_results if r["type"] == "Python"]
+    box_py_items = deduplicate_sites([r for r in py_valid if not r["is_adult"]])
+    fun_py_items = deduplicate_sites([r for r in py_valid if r["is_adult"]])
+    generate_tvbox_json(box_py_items, BOX_PY_FILE, spider_type="py")
+    generate_tvbox_json(fun_py_items, FUN_PY_FILE, spider_type="py")
 
-    # (A) Python 分類
-    fun_py_items = deduplicate_sites([item for item in py_valid if item["is_adult"]])
-    box_py_items = deduplicate_sites([item for item in py_valid if not item["is_adult"]])
+    # 匯出 JS / JSON 站點
+    js_valid = [r for r in valid_results if r["type"] == "JS"]
+    box_js_items = deduplicate_sites([r for r in js_valid if not r["is_adult"]])
+    fun_js_items = deduplicate_sites([r for r in js_valid if r["is_adult"]])
+    generate_tvbox_json(box_js_items, BOX_JS_FILE, spider_type="js")
+    generate_tvbox_json(fun_js_items, FUN_JS_FILE, spider_type="js")
 
-    # (B) JS 分類（包含所有子目錄）
-    fun_js_items = deduplicate_sites([item for item in js_valid if item["is_adult"]])
-    box_js_items = deduplicate_sites([item for item in js_valid if not item["is_adult"]])
+    print("\n" + "=" * 45)
+    print(f"✅ Python 一般類：{BOX_PY_FILE.name} (可用: {len(box_py_items)})")
+    print(f"🔞 Python 成人類：{FUN_PY_FILE.name} (可用: {len(fun_py_items)})")
+    print(f"✅ JS/JSON 一般類：{BOX_JS_FILE.name} (可用: {len(box_js_items)})")
+    print(f"🔞 JS/JSON 成人類：{FUN_JS_FILE.name} (可用: {len(fun_js_items)})")
+    print("=" * 45 + "\n")
 
-    # 產出 4 個設定檔案
-    generate_tvbox_json(box_py_items, BOX_PY_JSON_FILE)
-    generate_tvbox_json(fun_py_items, FUN_PY_JSON_FILE)
-    generate_tvbox_json(box_js_items, BOX_JS_JSON_FILE)
-    generate_tvbox_json(fun_js_items, FUN_JS_JSON_FILE)
-
-    print("\n" + "="*50)
-    print(f"✅ Python 一般分類：{BOX_PY_JSON_FILE} (去重後共 {len(box_py_items)} 個可用站點)")
-    print(f"✅ Python 成人分類：{FUN_PY_JSON_FILE} (去重後共 {len(fun_py_items)} 個可用站點)")
-    print(f"✅ JS     一般分類：{BOX_JS_JSON_FILE} (去重後共 {len(box_js_items)} 個可用站點)")
-    print(f"✅ JS     成人分類：{FUN_JS_JSON_FILE} (去重後共 {len(fun_js_items)} 個可用站點)")
-    print("="*50)
-
-    # 6. 生成 Markdown 狀態檢測報告
+    # 生成 Markdown 報告
     results.sort(key=lambda x: (x["type"], x["status"], x["latency_ms"]))
-
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     md = [
         "# 🕷️ 影音網站爬蟲有效性檢測與配置生成報告\n",
         f"> **檢測時間**：`{now_str}`  \n",
-        f"> **總站點數**：{len(results)} ｜ ✅ 有效可用：**{len(valid_results)}** ｜ ❌ 已隔離至 NG：**{moved_count}**\n",
+        f"> **總檢測站點**：{len(results)} ｜ ✅ 有效可用：**{len(valid_results)}** ｜ ❌ 已隔離至 NG：**{moved_count}**\n",
         "### 📦 設定檔匯總\n",
         f"- 📺 **Python 一般類**：[`box_py.json`](./box_py.json) (共 **{len(box_py_items)}** 筆)",
         f"- 🔞 **Python 成人類**：[`fun_py.json`](./fun_py.json) (共 **{len(fun_py_items)}** 筆)",
-        f"- 📺 **JS 一般類**：[`box_js.json`](./box_js.json) (共 **{len(box_js_items)}** 筆)",
-        f"- 🔞 **JS 成人類**：[`fun_js.json`](./fun_js.json) (共 **{len(fun_js_items)}** 筆)\n",
+        f"- 📺 **JS/JSON 一般類**：[`box_js.json`](./box_js.json) (共 **{len(box_js_items)}** 筆)",
+        f"- 🔞 **JS/JSON 成人類**：[`fun_js.json`](./fun_js.json) (共 **{len(fun_js_items)}** 筆)\n",
         "### 📝 詳細檢測結果\n",
-        "| 類型 | 副檔 | 名稱 / 路徑 | 狀態 | 耗時 (ms) | 分類 | 檢測資訊 |",
+        "| 類型 | 副檔 | 名稱 / 相對路徑 | 狀態 | 耗時 (ms) | 分類 | 檢測資訊 |",
         "| :---: | :---: | :--- | :---: | :---: | :---: | :--- |"
     ]
 
@@ -436,10 +453,9 @@ def main():
         cat_badge = "🔞 成人" if r["is_adult"] else "🎬 一般"
         md.append(f"| {r['type']} | `{r['ext']}` | `{r['file']}` | {r['status']} | {r['latency_ms']} | {cat_badge} | {r['detail']} |")
 
-    with open(REPORT_FILE, "w", encoding="utf-8") as f:
-        f.write("\n".join(md))
-
+    REPORT_FILE.write_text("\n".join(md), encoding="utf-8")
     print(f"報告已更新至 {REPORT_FILE}")
+
 
 if __name__ == "__main__":
     main()
