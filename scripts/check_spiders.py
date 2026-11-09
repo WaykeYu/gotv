@@ -19,7 +19,6 @@ PY_DIR = BASE_DIR / "py"
 JS_DIR = BASE_DIR / "js"
 REPORT_FILE = BASE_DIR / "SPIDER_STATUS.md"
 
-# 4 個獨立輸出的設定檔路徑
 BOX_PY_FILE = BASE_DIR / "box_py.json"
 FUN_PY_FILE = BASE_DIR / "fun_py.json"
 BOX_JS_FILE = BASE_DIR / "box_js.json"
@@ -33,6 +32,7 @@ for p in [BASE_DIR, PY_DIR, PY_DIR / "base"]:
     if p.exists() and p_str not in sys.path:
         sys.path.insert(0, p_str)
 
+# 白名單：即使雲端測活異常也強制視為可用
 WHITELIST_SPIDERS = {"韩小圈", "剧多短剧"}
 
 BROWSER_HEADERS = {
@@ -54,7 +54,7 @@ ADULT_KEYWORDS = [
 ]
 ADULT_REGEX = re.compile("|".join(ADULT_KEYWORDS), re.IGNORECASE)
 
-# --- Mock Spider ---
+# --- Mock Spider 基底類別注入 ---
 try:
     import base.spider
 except ImportError:
@@ -109,44 +109,65 @@ def normalize_url(url: str) -> str:
     return ""
 
 
-def extract_urls(code: str) -> list[str]:
-    # 支援 JSON 屬性及 JS 宣告的提取格式
-    patterns = [
-        r'''["']?(?:host|site|siteUrl|baseUrl|url|WEB_SITE|header_url|HOST|SITE|URL|homeUrl|apiUrl)["']?\s*[:=]\s*['"](https?://[^'"]+)['"]''',
-        r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?(?:/[^\s'"]*)?)['"]'''
-    ]
-    skip_domains = {"github.com", "googlevideo.com", "w3.org", "schema.org", "jsdelivr.net", "baidu.com", "qq.com", "unpkg.com"}
+def clean_test_url(raw_url: str) -> str:
+    """清理帶有模板參數的網址（如 {wd}、{pg}），轉為主機根目錄進行存活測試"""
+    try:
+        cleaned = re.sub(r"\{.*?\}|\$.*?|@.*?", "", raw_url)
+        parsed = urlparse(cleaned)
+        if parsed.scheme in ("http", "https") and parsed.netloc:
+            return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}"
+    except Exception:
+        pass
+    return raw_url
 
+
+def extract_urls(code: str) -> list[str]:
+    """深度解析 JSON 字典/列表與各類規則正則"""
     seen = set()
     unique_urls = []
+    skip_domains = {"github.com", "googlevideo.com", "w3.org", "schema.org", "jsdelivr.net", "baidu.com", "qq.com", "unpkg.com"}
 
-    # 若檔案本身為有效 JSON，先嘗試結構化解析常用欄位
+    def add_url(u: str):
+        if not u or not isinstance(u, str):
+            return
+        match = re.search(r"https?://[^\s'\"<>\\]+", u)
+        if match:
+            raw = match.group(0).rstrip(";/")
+            norm = normalize_url(raw)
+            if norm:
+                parsed = urlparse(norm)
+                if not any(domain in parsed.netloc for domain in skip_domains):
+                    if norm not in seen:
+                        seen.add(norm)
+                        unique_urls.append(norm)
+
+    # 1. 深度遍歷結構化 JSON
     try:
         data = json.loads(code)
-        candidates = []
-        if isinstance(data, dict):
-            for k in ["url", "host", "site", "siteUrl", "baseUrl", "ext"]:
-                if k in data and isinstance(data[k], str) and data[k].startswith("http"):
-                    candidates.append(data[k])
-        for c in candidates:
-            norm = normalize_url(c)
-            if norm and norm not in seen:
-                seen.add(norm)
-                unique_urls.append(norm)
+        def recurse_json(node):
+            if isinstance(node, dict):
+                for v in node.values():
+                    if isinstance(v, (dict, list)):
+                        recurse_json(v)
+                    elif isinstance(v, str) and "http" in v:
+                        add_url(v)
+            elif isinstance(node, list):
+                for item in node:
+                    recurse_json(item)
+
+        recurse_json(data)
     except Exception:
         pass
 
+    # 2. 正則表達式抓取
+    patterns = [
+        r'''["']?(?:host|site|siteUrl|baseUrl|url|searchUrl|findRule|detailUrl|header_url|API|HOST|SITE|URL)["']?\s*[:=]\s*['"](https?://[^'"]+)['"]''',
+        r'''['"](https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?(?:/[^\s'"]*)?)['"]'''
+    ]
+
     for pat in patterns:
         for u in re.findall(pat, code, re.IGNORECASE):
-            norm_url = normalize_url(u)
-            if not norm_url:
-                continue
-            parsed = urlparse(norm_url)
-            if any(domain in parsed.netloc for domain in skip_domains):
-                continue
-            if norm_url not in seen:
-                seen.add(norm_url)
-                unique_urls.append(norm_url)
+            add_url(u)
 
     return unique_urls
 
@@ -208,19 +229,11 @@ def check_spider_file(file_info: tuple) -> dict:
         result["detail"] = f"無法讀取: {str(e)[:25]}"
         return result
 
-    candidate_urls = []
-    seen_candidates = set()
+    candidate_urls = extract_urls(code)
 
-    def add_candidate(raw_url: str):
-        norm = normalize_url(raw_url)
-        if norm and norm not in seen_candidates:
-            seen_candidates.add(norm)
-            candidate_urls.append(norm)
-
-    # 1. 白名單檢測
+    # 1. 白名單優先
     if any(wl.lower() in stem.lower() for wl in WHITELIST_SPIDERS):
-        urls = extract_urls(code)
-        target = urls[0] if urls else "https://www.jennyhow.com"
+        target = candidate_urls[0] if candidate_urls else "https://unknown.site"
         result.update({
             "status": "✅ 正常",
             "detail": f"白名單強制保留 ({target})",
@@ -230,7 +243,7 @@ def check_spider_file(file_info: tuple) -> dict:
         })
         return result
 
-    # 2. Python 腳本動態載入分析
+    # 2. Python 腳本動態反射分析
     if file_type == "Python":
         mod_name = f"dynamic_spider_{stem}_{abs(hash(str(full_path)))}"
         try:
@@ -240,11 +253,12 @@ def check_spider_file(file_info: tuple) -> dict:
                 sys.modules[mod_name] = module
                 try:
                     spec.loader.exec_module(module)
-
                     for var_name in ["HOST", "host", "SITE", "site", "URL", "url", "WEB_SITE"]:
                         val = getattr(module, var_name, None)
                         if isinstance(val, str) and val.startswith("http"):
-                            add_candidate(val)
+                            norm = normalize_url(val)
+                            if norm and norm not in candidate_urls:
+                                candidate_urls.insert(0, norm)
 
                     spider_cls = None
                     for attr in dir(module):
@@ -257,29 +271,26 @@ def check_spider_file(file_info: tuple) -> dict:
                     if spider_cls:
                         spider = spider_cls()
                         if hasattr(spider, "init"):
-                            try:
-                                spider.init()
-                            except Exception:
-                                pass
+                            try: spider.init()
+                            except Exception: pass
                         if getattr(spider, "host", None):
-                            add_candidate(spider.host)
+                            norm = normalize_url(spider.host)
+                            if norm and norm not in candidate_urls:
+                                candidate_urls.insert(0, norm)
                 finally:
                     sys.modules.pop(mod_name, None)
         except Exception:
             pass
 
-    # 3. 靜態正則/JSON 檢索補全
-    for u in extract_urls(code):
-        add_candidate(u)
-
-    # 4. 實體連線測活
+    # 3. 連線測活
     if candidate_urls:
         alive_info = None
-        for target_url in candidate_urls:
-            alive, msg = test_url_alive(target_url)
+        for raw_target in candidate_urls:
+            ping_url = clean_test_url(raw_target)
+            alive, msg = test_url_alive(ping_url)
             cost = int((datetime.now() - start_time).total_seconds() * 1000)
             if alive:
-                alive_info = (target_url, msg, cost)
+                alive_info = (raw_target, msg, cost)
                 break
 
         if alive_info:
@@ -308,6 +319,10 @@ def check_spider_file(file_info: tuple) -> dict:
 
 
 def move_to_ng(full_path: str) -> str:
+    """
+    精確移動至檔案所在資料夾底下的 NG 資料夾
+    例：js/s/996影视.json -> js/s/NG/996影视.json
+    """
     src = Path(full_path)
     ng_dir = src.parent / "NG"
     ng_dir.mkdir(parents=True, exist_ok=True)
@@ -332,9 +347,8 @@ def deduplicate_sites(items: list[dict]) -> list[dict]:
 def generate_tvbox_json(items: list, output_filepath: Path, spider_type: str = "py"):
     spider_jar = "./custom_spider.jar;md5;auto" if spider_type == "py" else "./drpy.min.js;md5;auto"
 
-    sites = []
-    for item in items:
-        site_entry = {
+    sites = [
+        {
             "key": f"{item['ext']}_{item['name']}",
             "name": f"[{item['ext'].upper()}] {item['name']} ({item['latency_ms']}ms)",
             "type": 3,
@@ -344,7 +358,8 @@ def generate_tvbox_json(items: list, output_filepath: Path, spider_type: str = "
             "filterable": 1,
             "ext": item["target_url"]
         }
-        sites.append(site_entry)
+        for item in items
+    ]
 
     config_data = {
         "spider": spider_jar,
@@ -359,7 +374,7 @@ def main():
 
     target_files = []
 
-    # 1. 搜尋 PY 目錄
+    # 1. 遞迴搜尋 PY 目錄（避開各層級的 NG 資料夾）
     if PY_DIR.exists():
         for root, dirs, files in os.walk(PY_DIR):
             if "NG" in dirs:
@@ -369,13 +384,12 @@ def main():
                     full = Path(root) / f
                     target_files.append(("Python", str(full.relative_to(BASE_DIR)), str(full)))
 
-    # 2. 搜尋 JS 目錄 (包含所有子目錄如 js/s, js/ss，並同時納入 .js 與 .json 檔)
+    # 2. 遞迴搜尋 JS 目錄（包含 js/s, js/ss 等所有子目錄，掃描 .js 與 .json，避開各層級 NG）
     if JS_DIR.exists():
         for root, dirs, files in os.walk(JS_DIR):
             if "NG" in dirs:
                 dirs.remove("NG")
             for f in files:
-                # 排除根目錄生成的配置檔名，納入 .js 與 .json
                 if f in ["box_js.json", "fun_js.json", "box_py.json", "fun_py.json"]:
                     continue
                 if f.endswith(".js") or f.endswith(".json"):
@@ -395,7 +409,7 @@ def main():
             results.append(r)
             print(f"[{r['type']}][{r['status']}] {r['file']} ({r['latency_ms']}ms) -> {r['detail']}")
 
-    # 隔離失效檔案
+    # 隔離失效檔案：移入該檔案所在同層目錄下的 NG 資料夾
     moved_count = 0
     valid_results = []
     for r in results:
@@ -411,34 +425,35 @@ def main():
 
     valid_results.sort(key=lambda x: x["latency_ms"])
 
-    # 匯出 Python
+    # 匯出 Python 配置
     py_valid = [r for r in valid_results if r["type"] == "Python"]
     box_py_items = deduplicate_sites([r for r in py_valid if not r["is_adult"]])
     fun_py_items = deduplicate_sites([r for r in py_valid if r["is_adult"]])
     generate_tvbox_json(box_py_items, BOX_PY_FILE, spider_type="py")
     generate_tvbox_json(fun_py_items, FUN_PY_FILE, spider_type="py")
 
-    # 匯出 JS / JSON 站點
+    # 匯出 JS/JSON 配置 (涵蓋 js/, js/s/, js/ss/)
     js_valid = [r for r in valid_results if r["type"] == "JS"]
     box_js_items = deduplicate_sites([r for r in js_valid if not r["is_adult"]])
     fun_js_items = deduplicate_sites([r for r in js_valid if r["is_adult"]])
     generate_tvbox_json(box_js_items, BOX_JS_FILE, spider_type="js")
     generate_tvbox_json(fun_js_items, FUN_JS_FILE, spider_type="js")
 
-    print("\n" + "=" * 45)
+    print("\n" + "=" * 50)
     print(f"✅ Python 一般類：{BOX_PY_FILE.name} (可用: {len(box_py_items)})")
     print(f"🔞 Python 成人類：{FUN_PY_FILE.name} (可用: {len(fun_py_items)})")
     print(f"✅ JS/JSON 一般類：{BOX_JS_FILE.name} (可用: {len(box_js_items)})")
     print(f"🔞 JS/JSON 成人類：{FUN_JS_FILE.name} (可用: {len(fun_js_items)})")
-    print("=" * 45 + "\n")
+    print(f"📁 總計失效已隔離檔案：{moved_count} 個")
+    print("=" * 50 + "\n")
 
-    # 生成 Markdown 報告
+    # 生成 Markdown 狀態報告
     results.sort(key=lambda x: (x["type"], x["status"], x["latency_ms"]))
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     md = [
         "# 🕷️ 影音網站爬蟲有效性檢測與配置生成報告\n",
         f"> **檢測時間**：`{now_str}`  \n",
-        f"> **總檢測站點**：{len(results)} ｜ ✅ 有效可用：**{len(valid_results)}** ｜ ❌ 已隔離至 NG：**{moved_count}**\n",
+        f"> **總檢測站點**：{len(results)} ｜ ✅ 有效可用：**{len(valid_results)}** ｜ ❌ 已隔離至各層 NG：**{moved_count}**\n",
         "### 📦 設定檔匯總\n",
         f"- 📺 **Python 一般類**：[`box_py.json`](./box_py.json) (共 **{len(box_py_items)}** 筆)",
         f"- 🔞 **Python 成人類**：[`fun_py.json`](./fun_py.json) (共 **{len(fun_py_items)}** 筆)",
