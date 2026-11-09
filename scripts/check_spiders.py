@@ -13,8 +13,14 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
-# --- 目錄與路徑設定 ---
-BASE_DIR = Path(__file__).resolve().parent
+# --- 目錄與路徑設定（智慧偵測專案根目錄）---
+CURRENT_DIR = Path(__file__).resolve().parent
+# 如果腳本位在 scripts/ 目錄下，往上一層找根目錄；否則使用當前目錄
+if CURRENT_DIR.name == "scripts":
+    BASE_DIR = CURRENT_DIR.parent
+else:
+    BASE_DIR = CURRENT_DIR
+
 PY_DIR = BASE_DIR / "py"
 JS_DIR = BASE_DIR / "js"
 REPORT_FILE = BASE_DIR / "SPIDER_STATUS.md"
