@@ -5,7 +5,7 @@ from base.spider import Spider
 class Spider(Spider):
     def getName(self): return "光鸭社区"
     def init(self,extend=""):
-        self.host="https://gy.lubao2.de5.net";self.sb="https://houhvngggkkcqcjmzafx.supabase.co";self.tmdb="https://api.tmdb.org";self.tmdb_img="https://images.tmdb.org/t/p";self.tmdb_key="2894d9a1baf7812b451de03c801b0281"
+        self.host="https://www.guangya.cc/ ";self.sb="https://houhvngggkkcqcjmzafx.supabase.co";self.tmdb="https://api.tmdb.org";self.tmdb_img="https://images.tmdb.org/t/p";self.tmdb_key="2894d9a1baf7812b451de03c801b0281"
         self.key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWh2bmdnZ2trY3Fjam16YWZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mjg2MjgsImV4cCI6MjA5MzIwNDYyOH0.FUUT9ETU-lP5iNqwK3i7nflwGLSBHM1b-qIs9CoVles"
         self.cookie="";self.page_size=40;self.default_pic="https://miaoda-edit-image.cdn.bcebos.com/b74i02x880e9/IMG-b7c60ycpg3r4.png";self.pic_cache={};self.pic_pending=set();self.pic_sem=threading.BoundedSemaphore(3);self.cache_file="/storage/emulated/0/Download/gy_tmdb_pic_cache.json";self.list_fields="id,title,cover_url,year,region,genres,category_id"
         self.headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122 Safari/537.36","Referer":self.host+"/","apikey":self.key,"Authorization":"Bearer "+self.key,"Accept":"application/json"}
