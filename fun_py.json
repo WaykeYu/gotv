@@ -23,7 +23,7 @@
     },
     {
       "key": "py_禁片天堂<18+>",
-      "name": "[PY] 禁片天堂<18+> (119ms)",
+      "name": "[PY] 禁片天堂<18+> (103ms)",
       "type": 3,
       "api": "./py/禁片天堂<18+>.py",
       "searchable": 1,
@@ -32,38 +32,18 @@
       "ext": "https://jptt.tv/tag_list"
     },
     {
-      "key": "py_stripchat<18+>",
-      "name": "[PY] stripchat<18+> (126ms)",
+      "key": "py_ddmf",
+      "name": "[PY] ddmf (104ms)",
       "type": 3,
-      "api": "./py/stripchat<18+>.py",
+      "api": "./py/ddmf.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://zh.stripchat.com"
-    },
-    {
-      "key": "py_韩国色情电影<18+>",
-      "name": "[PY] 韩国色情电影<18+> (131ms)",
-      "type": 3,
-      "api": "./py/韩国色情电影<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://koreanpornmovie.com"
-    },
-    {
-      "key": "py_AV大平台<18+>",
-      "name": "[PY] AV大平台<18+> (154ms)",
-      "type": 3,
-      "api": "./py/AV大平台<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://porndav.com"
+      "ext": "https://www.ddmf.net"
     },
     {
       "key": "py_亚色影库<18+>",
-      "name": "[PY] 亚色影库<18+> (171ms)",
+      "name": "[PY] 亚色影库<18+> (110ms)",
       "type": 3,
       "api": "./py/亚色影库<18+>.py",
       "searchable": 1,
@@ -72,18 +52,38 @@
       "ext": "https://www.yasetube.com"
     },
     {
-      "key": "py_久久視頻_18+_",
-      "name": "[PY] 久久視頻_18+_ (188ms)",
+      "key": "py_韩国色情电影<18+>",
+      "name": "[PY] 韩国色情电影<18+> (118ms)",
       "type": 3,
-      "api": "./py/久久視頻_18+_.py",
+      "api": "./py/韩国色情电影<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://ww.jiujiu.one"
+      "ext": "https://koreanpornmovie.com"
+    },
+    {
+      "key": "py_撸一天<18+>",
+      "name": "[PY] 撸一天<18+> (140ms)",
+      "type": 3,
+      "api": "./py/撸一天<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://luyitian.com"
+    },
+    {
+      "key": "py_stripchat<18+>",
+      "name": "[PY] stripchat<18+> (147ms)",
+      "type": 3,
+      "api": "./py/stripchat<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://zh.stripchat.com"
     },
     {
       "key": "py_VHUB<18+>",
-      "name": "[PY] VHUB<18+> (202ms)",
+      "name": "[PY] VHUB<18+> (222ms)",
       "type": 3,
       "api": "./py/VHUB<18+>.py",
       "searchable": 1,
@@ -92,18 +92,18 @@
       "ext": "https://newxvideos.pages.dev"
     },
     {
-      "key": "py_茄子<18+>",
-      "name": "[PY] 茄子<18+> (238ms)",
+      "key": "py_怦然心动<18+>",
+      "name": "[PY] 怦然心动<18+> (253ms)",
       "type": 3,
-      "api": "./py/茄子<18+>.py",
+      "api": "./py/怦然心动<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://xtu.qzjp6.ink/cn/home/web"
+      "ext": "https://prshinezenx.blog"
     },
     {
       "key": "py_4KAV",
-      "name": "[PY] 4KAV (350ms)",
+      "name": "[PY] 4KAV (265ms)",
       "type": 3,
       "api": "./py/4KAV.py",
       "searchable": 1,
@@ -112,14 +112,104 @@
       "ext": "https://4k-av.com"
     },
     {
-      "key": "py_怦然心动<18+>",
-      "name": "[PY] 怦然心动<18+> (424ms)",
+      "key": "py_久久視頻_18+_",
+      "name": "[PY] 久久視頻_18+_ (268ms)",
       "type": 3,
-      "api": "./py/怦然心动<18+>.py",
+      "api": "./py/久久視頻_18+_.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://prshinezenx.blog"
+      "ext": "https://ww.jiujiu.one"
+    },
+    {
+      "key": "py_ptt_red",
+      "name": "[PY] ptt_red (393ms)",
+      "type": 3,
+      "api": "./py/ptt_red.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://ptt.red"
+    },
+    {
+      "key": "py_黑料不打烊<18+>",
+      "name": "[PY] 黑料不打烊<18+> (404ms)",
+      "type": 3,
+      "api": "./py/黑料不打烊<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://heiliao.com"
+    },
+    {
+      "key": "py_茄子<18+>",
+      "name": "[PY] 茄子<18+> (497ms)",
+      "type": 3,
+      "api": "./py/茄子<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://xtu.qzjp6.ink/cn/home/web"
+    },
+    {
+      "key": "py_AV大平台<18+>",
+      "name": "[PY] AV大平台<18+> (509ms)",
+      "type": 3,
+      "api": "./py/AV大平台<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://porndav.com"
+    },
+    {
+      "key": "py_麻豆社<18+>",
+      "name": "[PY] 麻豆社<18+> (527ms)",
+      "type": 3,
+      "api": "./py/亚色影库<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.yasetube.com"
+    },
+    {
+      "key": "py_Hanime<18+>",
+      "name": "[PY] Hanime<18+> (566ms)",
+      "type": 3,
+      "api": "./py/Hanime<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://hanime1.best"
+    },
+    {
+      "key": "py_香肠派对<18+>",
+      "name": "[PY] 香肠派对<18+> (773ms)",
+      "type": 3,
+      "api": "./py/香肠派对<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://xiang512.xiang.party/xcpd"
+    },
+    {
+      "key": "py_Xvideos<18+>",
+      "name": "[PY] Xvideos<18+> (778ms)",
+      "type": 3,
+      "api": "./py/茄子<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://xtu.qzjp6.ink/cn/home/web"
+    },
+    {
+      "key": "py_黄豆短剧<18+>",
+      "name": "[PY] 黄豆短剧<18+> (1292ms)",
+      "type": 3,
+      "api": "./py/4KAV.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://vjs.zencdn.net/v/oceans.mp4"
     },
     {
       "key": "py_Hanime<18+>",
@@ -183,7 +273,7 @@
     },
     {
       "key": "py_TOPTV<18+>",
-      "name": "[PY] TOPTV<18+> (999ms)",
+      "name": "[PY] TOPTV<18+> (1384ms)",
       "type": 3,
       "api": "./py/TOPTV<18+>.py",
       "searchable": 1,
@@ -193,7 +283,7 @@
     },
     {
       "key": "py_guazi",
-      "name": "[PY] guazi (1335ms)",
+      "name": "[PY] guazi (1385ms)",
       "type": 3,
       "api": "./py/guazi.py",
       "searchable": 1,
@@ -202,28 +292,18 @@
       "ext": "https://apinew.uozvr.com"
     },
     {
-      "key": "py_黄豆短剧<18+>",
-      "name": "[PY] 黄豆短剧<18+> (1458ms)",
+      "key": "py_Xhm<18+>",
+      "name": "[PY] Xhm<18+> (1498ms)",
       "type": 3,
-      "api": "./py/黄豆短剧<18+>.py",
+      "api": "./py/Xhm<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://vjs.zencdn.net/v/oceans.mp4"
-    },
-    {
-      "key": "py_撸一天<18+>",
-      "name": "[PY] 撸一天<18+> (2176ms)",
-      "type": 3,
-      "api": "./py/撸一天<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://luyitian.com"
+      "ext": "https://xhamster.com"
     },
     {
       "key": "py_Pornhub<18+>",
-      "name": "[PY] Pornhub<18+> (2254ms)",
+      "name": "[PY] Pornhub<18+> (2368ms)",
       "type": 3,
       "api": "./py/Pornhub<18+>.py",
       "searchable": 1,
@@ -233,7 +313,7 @@
     },
     {
       "key": "py_Phb<18+>",
-      "name": "[PY] Phb<18+> (11672ms)",
+      "name": "[PY] Phb<18+> (12378ms)",
       "type": 3,
       "api": "./py/Phb<18+>.py",
       "searchable": 1,
