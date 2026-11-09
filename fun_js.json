@@ -1,9 +1,9 @@
 {
-  "spider": "./pg.jar;md5;auto",
+  "spider": "./drpy.min.js;md5;auto",
   "sites": [
     {
       "key": "js_注视影视",
-      "name": "[JS] 注视影视 (76ms)",
+      "name": "[JS] 注视影视 (39ms)",
       "type": 3,
       "api": "./js/注视影视.js",
       "searchable": 1,
@@ -13,7 +13,7 @@
     },
     {
       "key": "js_cilixiong",
-      "name": "[JS] cilixiong (81ms)",
+      "name": "[JS] cilixiong (65ms)",
       "type": 3,
       "api": "./js/cilixiong.js",
       "searchable": 1,
@@ -23,7 +23,7 @@
     },
     {
       "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (87ms)",
+      "name": "[JSON] pronlulu (82ms)",
       "type": 3,
       "api": "./js/ss/pronlulu.json",
       "searchable": 1,
@@ -33,7 +33,7 @@
     },
     {
       "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (111ms)",
+      "name": "[JS] 欧乐影院 (91ms)",
       "type": 3,
       "api": "./js/欧乐影院.js",
       "searchable": 1,
@@ -43,7 +43,7 @@
     },
     {
       "key": "js_子子影视",
-      "name": "[JS] 子子影视 (147ms)",
+      "name": "[JS] 子子影视 (124ms)",
       "type": 3,
       "api": "./js/子子影视.js",
       "searchable": 1,
@@ -53,7 +53,7 @@
     },
     {
       "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (322ms)",
+      "name": "[JS] 嘀嗒影视 (282ms)",
       "type": 3,
       "api": "./js/嘀嗒影视.js",
       "searchable": 1,
@@ -63,7 +63,7 @@
     },
     {
       "key": "js_厂长资源",
-      "name": "[JS] 厂长资源 (544ms)",
+      "name": "[JS] 厂长资源 (333ms)",
       "type": 3,
       "api": "./js/厂长资源.js",
       "searchable": 1,
@@ -73,7 +73,7 @@
     },
     {
       "key": "js_B站",
-      "name": "[JS] B站 (629ms)",
+      "name": "[JS] B站 (521ms)",
       "type": 3,
       "api": "./js/B站.js",
       "searchable": 1,
@@ -83,7 +83,7 @@
     },
     {
       "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (775ms)",
+      "name": "[JS] xp天堂 (562ms)",
       "type": 3,
       "api": "./js/ss/xp天堂.js",
       "searchable": 1,
@@ -93,7 +93,7 @@
     },
     {
       "key": "json_cj",
-      "name": "[JSON] cj (1027ms)",
+      "name": "[JSON] cj (758ms)",
       "type": 3,
       "api": "./js/cj.json",
       "searchable": 1,
@@ -103,7 +103,7 @@
     },
     {
       "key": "js_央视频",
-      "name": "[JS] 央视频 (1282ms)",
+      "name": "[JS] 央视频 (1497ms)",
       "type": 3,
       "api": "./js/央视频.js",
       "searchable": 1,
@@ -113,7 +113,7 @@
     },
     {
       "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (3142ms)",
+      "name": "[JSON] 农民影视 (2642ms)",
       "type": 3,
       "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
