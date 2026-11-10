@@ -1,0 +1,11 @@
+    {
+      "key": "jkun資源",
+      "name": "jkun | 采集",
+      "type": 1,
+      "api": "https://jkunzyapi.com/api.php/provide/vod",
+      "playUrl": "https://jkunjiexi.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
