@@ -1,0 +1,11 @@
+    {
+      "key": "115資源",
+      "name": "115 | 采集",
+      "type": 1,
+      "api": "https://155api.com/api.php/provide/vod/",
+      "playUrl": "https://www.155jx.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
