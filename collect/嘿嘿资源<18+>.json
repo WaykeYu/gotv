@@ -1,0 +1,10 @@
+    {
+      "key": "嘿嘿资源",
+      "name": "嘿嘿 | 采集",
+      "type": 1,
+      "api": "https://api.heiapi.cc/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
