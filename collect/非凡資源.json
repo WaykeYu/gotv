@@ -1,0 +1,9 @@
+    {
+      "key": "非凡",
+      "name": "非凡 | 采集",
+      "type": 1,
+      "api": "https://liuyan.ffzy3.tv/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
