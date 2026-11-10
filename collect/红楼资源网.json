@@ -1,0 +1,11 @@
+    {
+      "key": "红楼资源网",
+      "name": "红楼 | 采集",
+      "type": 1,
+      "api": "https://www.hlzy.my/api.php/provide/vod/",
+      "playUrl": "https://api.hlzy.my/url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
