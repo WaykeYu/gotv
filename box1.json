@@ -109,24 +109,22 @@
       "changeable": 1
     },
     {
-      "key": "芒果资源",
-      "name": "芒果 | 采集",
+      "key": "极速资源",
+      "name": "极速 | 采集",
       "type": 1,
-      "api": "https://caiji.mgzyapi.com/api.php/provide/vod/",
-      "quickSearch": 1,
+      "api": "https://jszyapi.com/api.php/provide/vod/",
       "searchable": 1,
+      "quickSearch": 1,
       "changeable": 1
     },
     {
-      "key": "魔都资源",
-      "name": "魔都 | 采集",
+      "key": "鸭鸭资源",
+      "name": "鸭鸭 | 采集",
       "type": 1,
-      "api": "https://www.mdzyapi.com/api.php/provide/vod/",
-      "playUrl": "https://www.modujiexi66.com/?url=",
-      "quickSearch": 1,
+      "api": "https://cj.yayazy.net/api.php/provide/vod/",
       "searchable": 1,
-      "changeable": 1,
-      "ext": "proxy"
+      "quickSearch": 1,
+      "changeable": 1
     },
     {
       "key": "红牛资源",
@@ -138,12 +136,12 @@
       "changeable": 1
     },
     {
-      "key": "百度云资源",
-      "name": "百度云 | 采集",
+      "key": "芒果资源",
+      "name": "芒果 | 采集",
       "type": 1,
-      "api": "https://api.apibdzy.com/api.php/provide/vod",
-      "searchable": 1,
+      "api": "https://caiji.mgzyapi.com/api.php/provide/vod/",
       "quickSearch": 1,
+      "searchable": 1,
       "changeable": 1
     },
     {
@@ -155,6 +153,24 @@
       "searchable": 1,
       "changeable": 1,
       "ext": "proxy"
+    },
+    {
+      "key": "无尽",
+      "name": "无尽 | 采集",
+      "type": 1,
+      "api": "https://api.wujinapi.net/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "百度云资源",
+      "name": "百度云 | 采集",
+      "type": 1,
+      "api": "https://api.apibdzy.com/api.php/provide/vod",
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
     },
     {
       "key": "索尼",
@@ -186,37 +202,19 @@
       "changeable": 1
     },
     {
+      "key": "豪华资源",
+      "name": "豪华 | 采集",
+      "type": 1,
+      "api": "https://hhzyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
       "key": "快车资源",
       "name": "快车 | 采集",
       "type": 1,
       "api": "https://caiji.kuaichezy.org/api.php/provide/vod/",
-      "quickSearch": 1,
-      "searchable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "无尽",
-      "name": "无尽 | 采集",
-      "type": 1,
-      "api": "https://api.wujinapi.net/api.php/provide/vod/",
-      "quickSearch": 0,
-      "searchable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "鸭鸭资源",
-      "name": "鸭鸭 | 采集",
-      "type": 1,
-      "api": "https://cj.yayazy.net/api.php/provide/vod/",
-      "searchable": 1,
-      "quickSearch": 1,
-      "changeable": 1
-    },
-    {
-      "key": "优质",
-      "name": "优质 | 采集",
-      "type": 1,
-      "api": "https://api.yyzy-tv.vip/inc/apijson.php",
       "quickSearch": 1,
       "searchable": 1,
       "changeable": 1
@@ -232,21 +230,12 @@
       "changeable": 1
     },
     {
-      "key": "豪华资源",
-      "name": "豪华 | 采集",
+      "key": "暴風",
+      "name": "暴風 | 采集",
       "type": 1,
-      "api": "https://hhzyapi.com/api.php/provide/vod/",
+      "api": "https://bfzyapi.com/api.php/provide/vod/",
       "quickSearch": 1,
       "searchable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "极速资源",
-      "name": "极速 | 采集",
-      "type": 1,
-      "api": "https://jszyapi.com/api.php/provide/vod/",
-      "searchable": 1,
-      "quickSearch": 1,
       "changeable": 1
     },
     {
@@ -268,11 +257,58 @@
       "changeable": 1
     },
     {
+      "key": "厂长資源",
+      "name": "厂长 | 采集",
+      "type": 1,
+      "api": "https://api.changzhang.tv/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "速播",
+      "name": "速播 | 采集",
+      "type": 1,
+      "api": "https://subocaiji.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "新浪",
+      "name": "新浪 | 采集",
+      "type": 1,
+      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "魔都资源",
+      "name": "魔都 | 采集",
+      "type": 1,
+      "api": "https://www.mdzyapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.modujiexi66.com/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    },
+    {
       "key": "虎牙资源",
       "name": "虎牙 | 采集",
       "type": 1,
       "api": "https://www.huyaapi.com/api.php/provide/vod/",
       "playUrl": "https://huyajx.com/play/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "优质",
+      "name": "优质 | 采集",
+      "type": 1,
+      "api": "https://api.yyzy-tv.vip/inc/apijson.php",
       "quickSearch": 1,
       "searchable": 1,
       "changeable": 1
@@ -288,35 +324,6 @@
       "changeable": 1
     },
     {
-      "key": "最大资源",
-      "name": "最大 | 采集",
-      "type": 1,
-      "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
-      "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
-      "quickSearch": 1,
-      "searchable": 1,
-      "changeable": 1,
-      "ext": "proxy"
-    },
-    {
-      "key": "暴風",
-      "name": "暴風 | 采集",
-      "type": 1,
-      "api": "https://bfzyapi.com/api.php/provide/vod/",
-      "quickSearch": 1,
-      "searchable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "新浪",
-      "name": "新浪 | 采集",
-      "type": 1,
-      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
-      "quickSearch": 0,
-      "searchable": 1,
-      "changeable": 1
-    },
-    {
       "key": "猫眼资源",
       "name": "猫眼 | 采集",
       "type": 1,
@@ -328,13 +335,15 @@
       "ext": "proxy"
     },
     {
-      "key": "速播",
-      "name": "速播 | 采集",
+      "key": "最大资源",
+      "name": "最大 | 采集",
       "type": 1,
-      "api": "https://subocaiji.com/api.php/provide/vod/",
+      "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+      "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
       "quickSearch": 1,
       "searchable": 1,
-      "changeable": 1
+      "changeable": 1,
+      "ext": "proxy"
     },
     {
       "key": "艾旦",
@@ -347,11 +356,11 @@
       "ext": "proxy"
     },
     {
-      "key": "量子",
-      "name": "量子 | 采集",
+      "key": "非凡",
+      "name": "非凡 | 采集",
       "type": 1,
-      "api": "https://cj.lziapi.com/api.php/provide/vod/",
-      "quickSearch": 0,
+      "api": "https://liuyan.ffzy3.tv/api.php/provide/vod/",
+      "quickSearch": 1,
       "searchable": 1,
       "changeable": 1
     },
@@ -365,19 +374,19 @@
       "changeable": 1
     },
     {
-      "key": "母鸡资源",
-      "name": "母鸡 | 采集",
+      "key": "量子",
+      "name": "量子 | 采集",
       "type": 1,
-      "api": "https://mujiziyuan00.com/api.php/provide/vod/",
-      "quickSearch": 1,
+      "api": "https://cj.lziapi.com/api.php/provide/vod/",
+      "quickSearch": 0,
       "searchable": 1,
       "changeable": 1
     },
     {
-      "key": "非凡",
-      "name": "非凡 | 采集",
+      "key": "母鸡资源",
+      "name": "母鸡 | 采集",
       "type": 1,
-      "api": "https://liuyan.ffzy3.tv/api.php/provide/vod/",
+      "api": "https://mujiziyuan00.com/api.php/provide/vod/",
       "quickSearch": 1,
       "searchable": 1,
       "changeable": 1
@@ -405,15 +414,6 @@
       "name": "创享 | 采集",
       "type": 1,
       "api": "https://ys.cxkjg.cn/api/provide/vod/",
-      "quickSearch": 1,
-      "searchable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "厂长資源",
-      "name": "厂长 | 采集",
-      "type": 1,
-      "api": "https://api.changzhang.tv/api.php/provide/vod/",
       "quickSearch": 1,
       "searchable": 1,
       "changeable": 1
