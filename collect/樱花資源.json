@@ -1,0 +1,9 @@
+    {
+      "key": "樱花資源",
+      "name": "樱花 | 采集",
+      "type": 1,
+      "api": "https://m3u8.apiyhzy.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
