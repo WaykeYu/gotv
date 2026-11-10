@@ -1,0 +1,10 @@
+    {
+      "key": "光速资源",
+      "name": "光速 | 采集",
+      "type": 1,
+      "api": "https://api.guangsuapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.gszyv.com/m3u8/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
