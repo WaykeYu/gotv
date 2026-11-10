@@ -1,0 +1,9 @@
+    {
+      "key": "豪华资源",
+      "name": "豪华 | 采集",
+      "type": 1,
+      "api": "https://hhzyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
