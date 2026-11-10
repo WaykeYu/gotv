@@ -1,0 +1,9 @@
+    {
+      "key": "芒果资源",
+      "name": "芒果 | 采集",
+      "type": 1,
+      "api": "https://caiji.mgzyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
