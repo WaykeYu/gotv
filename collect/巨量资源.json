@@ -1,0 +1,9 @@
+    {
+      "key": "巨量资源",
+      "name": "巨量 | 采集",
+      "type": 1,
+      "api": "https://api.juliang.live/api/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
