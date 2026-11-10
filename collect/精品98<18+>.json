@@ -1,0 +1,11 @@
+    {
+      "key": "精品98",
+      "name": "精品98 | 采集",
+      "type": 1,
+      "api": "https://jp98.vip/api.php/provide/vod/",
+      "playUrl": "https://jp998.vip/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
