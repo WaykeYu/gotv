@@ -1,0 +1,9 @@
+    {
+      "key": "厂长資源",
+      "name": "厂长 | 采集",
+      "type": 1,
+      "api": "https://api.changzhang.tv/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
