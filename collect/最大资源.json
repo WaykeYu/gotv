@@ -1,0 +1,11 @@
+    {
+      "key": "最大资源",
+      "name": "最大 | 采集",
+      "type": 1,
+      "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+      "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    }
