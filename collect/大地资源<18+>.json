@@ -1,0 +1,11 @@
+    {
+      "key": "大地资源",
+      "name": "大地 | 采集",
+      "type": 1,
+      "api": "https://dadiapi.com/api.php/provide/vod/",
+      "playUrl": "https://play.dadiapi.com/watch?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
