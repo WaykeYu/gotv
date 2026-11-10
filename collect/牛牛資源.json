@@ -1,0 +1,10 @@
+    {
+      "key": "牛牛資源",
+      "name": "牛牛 | 采集",
+      "type": 1,
+      "api": "https://api.niuniuzy.me/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    }
