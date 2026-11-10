@@ -1,0 +1,11 @@
+    {
+      "key": "黑料资源站",
+      "name": "黑料 | 采集",
+      "type": 1,
+      "api": "https://www.heiliaozyapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.heiliaozyjx.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
