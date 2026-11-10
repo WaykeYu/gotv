@@ -1,0 +1,9 @@
+    {
+      "key": "快车资源",
+      "name": "快车 | 采集",
+      "type": 1,
+      "api": "https://caiji.kuaichezy.org/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
