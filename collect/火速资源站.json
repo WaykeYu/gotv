@@ -1,0 +1,10 @@
+    {
+      "key": "火速资源站",
+      "name": "火速 | 采集",
+      "type": 1,
+      "api": "https://api.huosuapi.cc/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
