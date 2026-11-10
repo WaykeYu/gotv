@@ -1,0 +1,9 @@
+    {
+      "key": "创享",
+      "name": "创享 | 采集",
+      "type": 1,
+      "api": "https://ys.cxkjg.cn/api/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
