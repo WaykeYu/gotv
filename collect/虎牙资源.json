@@ -1,0 +1,10 @@
+    {
+      "key": "虎牙资源",
+      "name": "虎牙 | 采集",
+      "type": 1,
+      "api": "https://www.huyaapi.com/api.php/provide/vod/",
+      "playUrl": "https://huyajx.com/play/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
