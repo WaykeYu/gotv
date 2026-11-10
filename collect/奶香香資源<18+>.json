@@ -1,0 +1,11 @@
+    {
+      "key": "奶香香資源",
+      "name": "奶香香 | 采集",
+      "type": 1,
+      "api": "https://naixxzy.com/api.php/provide/vod/",
+      "playUrl": "https://nxbfvod.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
