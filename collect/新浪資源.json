@@ -1,0 +1,9 @@
+    {
+      "key": "新浪",
+      "name": "新浪 | 采集",
+      "type": 1,
+      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    }
