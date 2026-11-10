@@ -1,0 +1,11 @@
+    {
+      "key": "猫眼资源",
+      "name": "猫眼 | 采集",
+      "type": 1,
+      "api": "https://api.maoyanapi.top/api.php/provide/vod/",
+      "playUrl": "https://jx.maoyanjx.top/player/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    }
