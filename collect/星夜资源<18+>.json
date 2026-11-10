@@ -1,0 +1,10 @@
+    {
+      "key": "星夜资源",
+      "name": "星夜 | 采集",
+      "type": 1,
+      "api": "https://xyezy.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    }
