@@ -126,21 +126,10 @@
   ],
   "sites": [
     {
-      "key": "红楼资源网",
-      "name": "红楼 | 采集",
+      "key": "越南资源",
+      "name": "越南 | 采集",
       "type": 1,
-      "api": "https://www.hlzy.my/api.php/provide/vod/",
-      "playUrl": "https://api.hlzy.my/url=",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "豆豆资源站",
-      "name": "豆豆 | 采集",
-      "type": 1,
-      "api": "https://api.douapi.cc/api.php/provide/vod/",
+      "api": "https://api.vnzyz.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -157,10 +146,11 @@
       "changeable": 1
     },
     {
-      "key": "越南资源",
-      "name": "越南 | 采集",
+      "key": "红楼资源网",
+      "name": "红楼 | 采集",
       "type": 1,
-      "api": "https://api.vnzyz.com/api.php/provide/vod/",
+      "api": "https://www.hlzy.my/api.php/provide/vod/",
+      "playUrl": "https://api.hlzy.my/url=",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -188,36 +178,6 @@
       "changeable": 1
     },
     {
-      "key": "濕乐园资源",
-      "name": "濕乐园 | 采集",
-      "type": 1,
-      "api": "https://xxavs.com/api.php/provide/vod/",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "淫水機资源",
-      "name": "淫水機 | 采集",
-      "type": 1,
-      "api": "https://www.xrbsp.com/api/json.php",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "香x兒资源",
-      "name": "香x兒 | 采集",
-      "type": 1,
-      "api": "https://www.gdlsp.com/api/json.php",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
       "key": "色猫资源",
       "name": "色猫 | 采集",
       "type": 1,
@@ -239,21 +199,20 @@
       "changeable": 1
     },
     {
-      "key": "森林資源",
-      "name": "森林 | 采集",
+      "key": "豆豆资源站",
+      "name": "豆豆 | 采集",
       "type": 1,
-      "api": "https://slapibf.com/api.php/provide/vod/",
-      "playUrl": "https://slslplay.com/?url=",
+      "api": "https://api.douapi.cc/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "changeable": 1
     },
     {
-      "key": "美少女资源",
-      "name": "美少女 | 采集",
+      "key": "淫水機资源",
+      "name": "淫水機 | 采集",
       "type": 1,
-      "api": "https://www.msnii.com/api/json.php",
+      "api": "https://www.xrbsp.com/api/json.php",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -270,31 +229,30 @@
       "changeable": 1
     },
     {
-      "key": "大奶子資源",
-      "name": "大奶子 | 采集",
+      "key": "香x兒资源",
+      "name": "香x兒 | 采集",
       "type": 1,
-      "api": "https://apidanaizi.com/api.php/provide/vod/",
+      "api": "https://www.gdlsp.com/api/json.php",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "changeable": 1
     },
     {
-      "key": "嘿嘿资源",
-      "name": "嘿嘿 | 采集",
+      "key": "濕乐园资源",
+      "name": "濕乐园 | 采集",
       "type": 1,
-      "api": "https://api.heiapi.cc/api.php/provide/vod/",
+      "api": "https://xxavs.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "changeable": 1
     },
     {
-      "key": "老色P資源",
-      "name": "老色P | 采集",
+      "key": "美少女资源",
+      "name": "美少女 | 采集",
       "type": 1,
-      "api": "https://apilsbzy1.com/api.php/provide/vod/",
-      "playUrl": "https://playlaosebi.com/?url=",
+      "api": "https://www.msnii.com/api/json.php",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -312,10 +270,31 @@
       "changeable": 1
     },
     {
-      "key": "星夜资源",
-      "name": "星夜 | 采集",
+      "key": "嘿嘿资源",
+      "name": "嘿嘿 | 采集",
       "type": 1,
-      "api": "https://xyezy.com/api.php/provide/vod/",
+      "api": "https://api.heiapi.cc/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "jkun資源",
+      "name": "jkun | 采集",
+      "type": 1,
+      "api": "https://jkunzyapi.com/api.php/provide/vod",
+      "playUrl": "https://jkunjiexi.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "大奶子資源",
+      "name": "大奶子 | 采集",
+      "type": 1,
+      "api": "https://apidanaizi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -333,11 +312,44 @@
       "changeable": 1
     },
     {
+      "key": "新极品资源",
+      "name": "新极品 | 采集",
+      "type": 1,
+      "api": "https://jipinvip1.com/api.php/provide/vod/",
+      "playUrl": "https://jipinvip1.com/m3u8/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
       "key": "奶香香資源",
       "name": "奶香香 | 采集",
       "type": 1,
       "api": "https://naixxzy.com/api.php/provide/vod/",
       "playUrl": "https://nxbfvod.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "老色P資源",
+      "name": "老色P | 采集",
+      "type": 1,
+      "api": "https://apilsbzy1.com/api.php/provide/vod/",
+      "playUrl": "https://playlaosebi.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "森林資源",
+      "name": "森林 | 采集",
+      "type": 1,
+      "api": "https://slapibf.com/api.php/provide/vod/",
+      "playUrl": "https://slslplay.com/?url=",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -355,26 +367,6 @@
       "changeable": 1
     },
     {
-      "key": "辣椒資源",
-      "name": "辣椒 | 采集",
-      "type": 1,
-      "api": "https://apilj.com/api.php/provide/vod/",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "精品资源站",
-      "name": "精品 | 采集",
-      "type": 1,
-      "api": "https://www.jingpinx.com/api.php/provide/vod/",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
       "key": "番号",
       "name": "番号 | 采集",
       "type": 1,
@@ -385,15 +377,14 @@
       "changeable": 1
     },
     {
-      "key": "新极品资源",
-      "name": "新极品 | 采集",
+      "key": "辣椒資源",
+      "name": "辣椒 | 采集",
       "type": 1,
-      "api": "https://jipinvip1.com/api.php/provide/vod/",
-      "playUrl": "https://jipinvip1.com/m3u8/?url=",
+      "api": "https://apilj.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "changeable": 1,
+      "changeable": 1
     },
     {
       "key": "大地资源",
@@ -401,28 +392,6 @@
       "type": 1,
       "api": "https://dadiapi.com/api.php/provide/vod/",
       "playUrl": "https://play.dadiapi.com/watch?url=",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "souav",
-      "name": "souav | 采集",
-      "type": 1,
-      "api": "https://api.souavzy.vip/api.php/provide/vod/",
-      "playUrl": "https://jiexi.souavzyw.top/m3u8/?url=",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "番茄資源",
-      "name": "番茄 | 采集",
-      "type": 1,
-      "api": "https://fqzy.me/api.php/provide/vod/",
-      "playUrl": "https://xxb-player.com/player.php?url=",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -439,10 +408,41 @@
       "changeable": 1
     },
     {
+      "key": "精品资源站",
+      "name": "精品 | 采集",
+      "type": 1,
+      "api": "https://www.jingpinx.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
       "key": "桃花資源",
       "name": "桃花 | 采集",
       "type": 1,
       "api": "https://thzy1.me/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "星夜资源",
+      "name": "星夜 | 采集",
+      "type": 1,
+      "api": "https://xyezy.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "番茄資源",
+      "name": "番茄 | 采集",
+      "type": 1,
+      "api": "https://fqzy.me/api.php/provide/vod/",
+      "playUrl": "https://xxb-player.com/player.php?url=",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -469,41 +469,20 @@
       "changeable": 1
     },
     {
+      "key": "小雞資源",
+      "name": "小雞 | 采集",
+      "type": 1,
+      "api": "https://api.xjzyapi.com/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
       "key": "黃色倉庫",
       "name": "黃色 | 采集",
       "type": 1,
       "api": "https://hsckzy888.com/api.php/provide/vod/",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "jkun資源",
-      "name": "jkun | 采集",
-      "type": 1,
-      "api": "https://jkunzyapi.com/api.php/provide/vod",
-      "playUrl": "https://jkunjiexi.com/?url=",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "百花资源",
-      "name": "百花 | 采集",
-      "type": 1,
-      "api": "https://bhziyuan.com/api.php/provide/vod",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1
-    },
-    {
-      "key": "看看资源",
-      "name": "看看 | 采集",
-      "type": 1,
-      "api": "https://f-1.cc/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -520,10 +499,10 @@
       "changeable": 1
     },
     {
-      "key": "小雞資源",
-      "name": "小雞 | 采集",
+      "key": "看看资源",
+      "name": "看看 | 采集",
       "type": 1,
-      "api": "https://api.xjzyapi.com/provide/vod/",
+      "api": "https://f-1.cc/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -535,6 +514,16 @@
       "type": 1,
       "api": "https://www.heiliaozyapi.com/api.php/provide/vod/",
       "playUrl": "https://www.heiliaozyjx.com/?url=",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "百花资源",
+      "name": "百花 | 采集",
+      "type": 1,
+      "api": "https://bhziyuan.com/api.php/provide/vod",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
