@@ -1,0 +1,9 @@
+    {
+      "key": "红牛资源",
+      "name": "红牛 | 采集",
+      "type": 1,
+      "api": "http://hongniuzy2.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
+    }
