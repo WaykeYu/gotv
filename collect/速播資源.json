@@ -1,0 +1,9 @@
+    {
+      "key": "速播",
+      "name": "速播 | 采集",
+      "type": 1,
+      "api": "https://subocaiji.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
