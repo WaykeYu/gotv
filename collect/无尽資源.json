@@ -1,0 +1,9 @@
+    {
+      "key": "无尽",
+      "name": "无尽 | 采集",
+      "type": 1,
+      "api": "https://api.wujinapi.net/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    }
