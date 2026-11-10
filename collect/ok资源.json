@@ -1,0 +1,11 @@
+    {
+      "key": "ok资源",
+      "name": "ok | 采集",
+      "type": 1,
+      "api": "https://api.okzyw.net/api.php/provide/vod/",
+      "playUrl": "https://jiexi.okzyw.org/m3u8/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    }
