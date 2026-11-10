@@ -1,0 +1,9 @@
+    {
+      "key": "飄零资源",
+      "name": "飄零 | 采集",
+      "type": 1,
+      "api": "https://p2100.net/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
