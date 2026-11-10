@@ -1,0 +1,9 @@
+    {
+      "key": "爱奇艺",
+      "name": "爱奇艺 | 采集",
+      "type": 1,
+      "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
