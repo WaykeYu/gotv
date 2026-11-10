@@ -1,0 +1,9 @@
+    {
+      "key": "金鹰",
+      "name": "金鹰 | 采集",
+      "type": 1,
+      "api": "https://jyzyapi.com/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    }
