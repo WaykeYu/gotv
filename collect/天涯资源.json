@@ -1,0 +1,9 @@
+    {
+      "key": "天涯资源",
+      "name": "天涯 | 采集",
+      "type": 1,
+      "api": "https://tyyszyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
