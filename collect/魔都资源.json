@@ -1,0 +1,11 @@
+    {
+      "key": "魔都资源",
+      "name": "魔都 | 采集",
+      "type": 1,
+      "api": "https://www.mdzyapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.modujiexi66.com/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    }
