@@ -1,0 +1,10 @@
+    {
+      "key": "ikun",
+      "name": "ikun | 采集",
+      "type": 1,
+      "api": "https://ikunzyapi.com/api.php/provide/vod/",
+      "playerType": 1,
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    }
