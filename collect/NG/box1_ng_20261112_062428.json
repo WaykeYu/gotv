@@ -1,0 +1,30 @@
+[
+  {
+    "key": "爱奇艺",
+    "name": "爱奇艺 | 采集",
+    "type": 1,
+    "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "HTTP 504",
+    "_tested_url": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-12 06:24:02"
+  },
+  {
+    "key": "魔都资源",
+    "name": "魔都 | 采集",
+    "type": 1,
+    "api": "https://www.mdzyapi.com/api.php/provide/vod/",
+    "playUrl": "https://www.modujiexi66.com/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ext": "proxy",
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://www.mdzyapi.com/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-12 06:24:02"
+  }
+]
