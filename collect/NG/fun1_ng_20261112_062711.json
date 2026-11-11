@@ -1,0 +1,16 @@
+[
+  {
+    "key": "看看资源",
+    "name": "看看 | 采集",
+    "type": 1,
+    "api": "https://f-1.cc/api.php/provide/vod/",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://f-1.cc/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-12 06:26:44"
+  }
+]
