@@ -3,7 +3,7 @@
   "sites": [
     {
       "key": "js_cilixiong",
-      "name": "[JS] cilixiong (42ms)",
+      "name": "[JS] cilixiong (13ms)",
       "type": 3,
       "api": "./js/cilixiong.js",
       "searchable": 1,
@@ -12,38 +12,8 @@
       "ext": "https://www.cilixiong.com"
     },
     {
-      "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (127ms)",
-      "type": 3,
-      "api": "./js/ss/pronlulu.json",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.pornlulu.com"
-    },
-    {
-      "key": "js_注视影视",
-      "name": "[JS] 注视影视 (130ms)",
-      "type": 3,
-      "api": "./js/注视影视.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://gaze.run"
-    },
-    {
-      "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (136ms)",
-      "type": 3,
-      "api": "./js/欧乐影院.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.oleol.com"
-    },
-    {
       "key": "js_子子影视",
-      "name": "[JS] 子子影视 (213ms)",
+      "name": "[JS] 子子影视 (82ms)",
       "type": 3,
       "api": "./js/子子影视.js",
       "searchable": 1,
@@ -52,18 +22,38 @@
       "ext": "https://www.rebozj.pro"
     },
     {
-      "key": "js_厂长资源",
-      "name": "[JS] 厂长资源 (440ms)",
+      "key": "json_pronlulu",
+      "name": "[JSON] pronlulu (82ms)",
       "type": 3,
-      "api": "./js/厂长资源.js",
+      "api": "./js/ss/pronlulu.json",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.czzymovie.com"
+      "ext": "https://www.pornlulu.com"
+    },
+    {
+      "key": "js_欧乐影院",
+      "name": "[JS] 欧乐影院 (112ms)",
+      "type": 3,
+      "api": "./js/欧乐影院.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.oleol.com"
+    },
+    {
+      "key": "js_注视影视",
+      "name": "[JS] 注视影视 (122ms)",
+      "type": 3,
+      "api": "./js/注视影视.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://gaze.run"
     },
     {
       "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (774ms)",
+      "name": "[JS] 嘀嗒影视 (427ms)",
       "type": 3,
       "api": "./js/嘀嗒影视.js",
       "searchable": 1,
@@ -72,18 +62,18 @@
       "ext": "https://www.didahd.pro"
     },
     {
-      "key": "js_B站",
-      "name": "[JS] B站 (807ms)",
+      "key": "js_厂长资源",
+      "name": "[JS] 厂长资源 (542ms)",
       "type": 3,
-      "api": "./js/B站.js",
+      "api": "./js/厂长资源.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.bilibili.com"
+      "ext": "https://www.czzymovie.com"
     },
     {
       "key": "json_cj",
-      "name": "[JSON] cj (883ms)",
+      "name": "[JSON] cj (773ms)",
       "type": 3,
       "api": "./js/cj.json",
       "searchable": 1,
@@ -93,7 +83,7 @@
     },
     {
       "key": "js_央视频",
-      "name": "[JS] 央视频 (1222ms)",
+      "name": "[JS] 央视频 (961ms)",
       "type": 3,
       "api": "./js/央视频.js",
       "searchable": 1,
@@ -102,8 +92,18 @@
       "ext": "https://m.yangshipin.cn"
     },
     {
+      "key": "js_B站",
+      "name": "[JS] B站 (967ms)",
+      "type": 3,
+      "api": "./js/B站.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.bilibili.com"
+    },
+    {
       "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (1245ms)",
+      "name": "[JSON] 农民影视 (1112ms)",
       "type": 3,
       "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
@@ -113,7 +113,7 @@
     },
     {
       "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (1398ms)",
+      "name": "[JS] xp天堂 (1230ms)",
       "type": 3,
       "api": "./js/ss/xp天堂.js",
       "searchable": 1,
