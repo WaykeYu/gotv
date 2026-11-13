@@ -389,6 +389,27 @@
       "searchable": 1,
       "changeable": 1
     },
+      {
+    "key": "爱奇艺",
+    "name": "爱奇艺 | 采集",
+    "type": 1,
+    "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+    "playUrl": "https://www.iqiyizyjx.com/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1
+  },
+  {
+    "key": "魔都资源",
+    "name": "魔都 | 采集",
+    "type": 1,
+    "api": "https://www.mdzyapi.com/api.php/provide/vod/",
+    "playUrl": "https://www.modujiexi66.com/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ext": "proxy"
+  },
     {
       "key": "创享",
       "name": "创享 | 采集",
