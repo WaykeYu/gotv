@@ -1,0 +1,30 @@
+[
+  {
+    "key": "快车资源",
+    "name": "快车 | 采集",
+    "type": 1,
+    "api": "https://caiji.kuaichezy.org/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://caiji.kuaichezy.org/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-14 05:45:38"
+  },
+  {
+    "key": "最大资源",
+    "name": "最大 | 采集",
+    "type": 1,
+    "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+    "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ext": "proxy",
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-14 05:45:38"
+  }
+]
