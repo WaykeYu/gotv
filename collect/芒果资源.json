@@ -3,6 +3,7 @@
       "name": "芒果 | 采集",
       "type": 1,
       "api": "https://caiji.mgzyapi.com/api.php/provide/vod/",
+      "playUrl": "https://svip.mgzym3u8.com/?url=",
       "quickSearch": 1,
       "searchable": 1,
       "changeable": 1
