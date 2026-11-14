@@ -1002,6 +1002,15 @@
       "ext": "https://vres.zyxpedu.com"
     },
     {
+      "key": "py_imaple",
+      "name": "🍁 楓林網 (iMaple)",
+      "type": 3,
+      "api": "./py_imaple.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
       "key": "py_爱看短剧",
       "name": "[PY] 爱看短剧 (34331ms)",
       "type": 3,
