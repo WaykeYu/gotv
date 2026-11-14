@@ -1,0 +1,17 @@
+[
+  {
+    "key": "ok资源",
+    "name": "ok | 采集",
+    "type": 1,
+    "api": "https://api.okzyw.net/api.php/provide/vod/",
+    "playUrl": "https://jiexi.okzyw.org/m3u8/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ext": "proxy",
+    "_error_reason": "連線逾時 (Timeout)",
+    "_tested_url": "https://api.okzyw.net/api.php/provide/vod/",
+    "_fail_latency": 99999,
+    "_checked_at": "2026-11-15 04:16:09"
+  }
+]
