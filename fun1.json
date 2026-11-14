@@ -509,6 +509,24 @@
       "filterable": 0,
       "changeable": 1
     },
+      {
+      "key": "csp_XBPQ_huangguo",
+      "name": "🎬 黃果短劇(XBPQ)",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": {
+        "主頁url": "https://huangguodrama.ai/zh-hant/library/",
+        "分類": "全部作品$/zh-hant/library/?page={catePg}#國產$/zh-hant/library/?tag=國產&page={catePg}#歐美$/zh-hant/library/?tag=歐美&page={catePg}#日本$/zh-hant/library/?tag=日本&page={catePg}#少婦熟女$/zh-hant/library/?tag=少婦熟女&page={catePg}#人妻$/zh-hant/library/?tag=人妻&page={catePg}#媽媽$/zh-hant/library/?tag=媽媽&page={catePg}#繼母$/zh-hant/library/?tag=繼母&page={catePg}#繼妹$/zh-hant/library/?tag=繼妹&page={catePg}#綠帽$/zh-hant/library/?tag=綠帽&page={catePg}#後宮$/zh-hant/library/?tag=後宮&page={catePg}#女同$/zh-hant/library/?tag=女同&page={catePg}#戶外露出$/zh-hant/library/?tag=戶外露出&page={catePg}#調教$/zh-hant/library/?tag=調教&page={catePg}#豪門$/zh-hant/library/?tag=豪門&page={catePg}#都市故事$/zh-hant/library/?tag=都市故事&page={catePg}#現代$/zh-hant/library/?tag=現代&page={catePg}#古風$/zh-hant/library/?tag=古風&page={catePg}#逆襲$/zh-hant/library/?tag=逆襲&page={catePg}#大男主$/zh-hant/library/?tag=大男主&page={catePg}#系統$/zh-hant/library/?tag=系統&page={catePg}#仙俠$/zh-hant/library/?tag=仙俠&page={catePg}#玄幻$/zh-hant/library/?tag=玄幻&page={catePg}#奇幻$/zh-hant/library/?tag=奇幻&page={catePg}#科幻$/zh-hant/library/?tag=科幻&page={catePg}#懸疑$/zh-hant/library/?tag=懸疑&page={catePg}#超能力$/zh-hant/library/?tag=超能力&page={catePg}#腦洞$/zh-hant/library/?tag=腦洞&page={catePg}#多角戀情$/zh-hant/library/?tag=多角戀情&page={catePg}#情感糾葛$/zh-hant/library/?tag=情感糾葛&page={catePg}#伴侶背叛$/zh-hant/library/?tag=伴侶背叛&page={catePg}#性轉$/zh-hant/library/?tag=性轉&page={catePg}"
+        "圖片": "src=\"&&\"",
+        "副標題": "集可觀看",
+        "連結": "href=\"&&\"",
+        "搜尋url": "https://huangguodrama.ai/zh-hant/library/?q={wd}&page={pg}",
+        "嗅探詞": ".m3u8#.mp4#video",
+        "免嗅": "0"
+    },
     {
       "key": "乐播",
       "name": "乐播 | 采集",
