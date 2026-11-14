@@ -3,7 +3,7 @@
   "sites": [
     {
       "key": "js_cilixiong",
-      "name": "[JS] cilixiong (24ms)",
+      "name": "[JS] cilixiong (10ms)",
       "type": 3,
       "api": "./js/cilixiong.js",
       "searchable": 1,
@@ -12,18 +12,8 @@
       "ext": "https://www.cilixiong.com"
     },
     {
-      "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (67ms)",
-      "type": 3,
-      "api": "./js/ss/pronlulu.json",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.pornlulu.com"
-    },
-    {
       "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (71ms)",
+      "name": "[JS] 欧乐影院 (66ms)",
       "type": 3,
       "api": "./js/欧乐影院.js",
       "searchable": 1,
@@ -32,8 +22,18 @@
       "ext": "https://www.oleol.com"
     },
     {
+      "key": "json_pronlulu",
+      "name": "[JSON] pronlulu (85ms)",
+      "type": 3,
+      "api": "./js/ss/pronlulu.json",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.pornlulu.com"
+    },
+    {
       "key": "js_注视影视",
-      "name": "[JS] 注视影视 (319ms)",
+      "name": "[JS] 注视影视 (339ms)",
       "type": 3,
       "api": "./js/注视影视.js",
       "searchable": 1,
@@ -43,7 +43,7 @@
     },
     {
       "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (519ms)",
+      "name": "[JS] 嘀嗒影视 (584ms)",
       "type": 3,
       "api": "./js/嘀嗒影视.js",
       "searchable": 1,
@@ -52,28 +52,8 @@
       "ext": "https://www.didahd.pro"
     },
     {
-      "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (666ms)",
-      "type": 3,
-      "api": "./js/厂长资源.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.czzymovie.com"
-    },
-    {
-      "key": "js_央视频",
-      "name": "[JS] 央视频 (806ms)",
-      "type": 3,
-      "api": "./js/央视频.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://m.yangshipin.cn"
-    },
-    {
       "key": "js_厂长资源",
-      "name": "[JS] 厂长资源 (774ms)",
+      "name": "[JS] 厂长资源 (787ms)",
       "type": 3,
       "api": "./js/厂长资源.js",
       "searchable": 1,
@@ -82,18 +62,18 @@
       "ext": "https://www.czzymovie.com"
     },
     {
-      "key": "js_央视频",
-      "name": "[JS] 央视频 (782ms)",
+      "key": "json_cj",
+      "name": "[JSON] cj (901ms)",
       "type": 3,
-      "api": "./js/央视频.js",
+      "api": "./js/cj.json",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://m.yangshipin.cn"
+      "ext": "http://caiji.dyttzyapi.com/api.php/provide/vod"
     },
     {
       "key": "js_B站",
-      "name": "[JS] B站 (1004ms)",
+      "name": "[JS] B站 (959ms)",
       "type": 3,
       "api": "./js/B站.js",
       "searchable": 1,
@@ -103,7 +83,7 @@
     },
     {
       "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (991ms)",
+      "name": "[JS] xp天堂 (1241ms)",
       "type": 3,
       "api": "./js/ss/xp天堂.js",
       "searchable": 1,
@@ -112,18 +92,18 @@
       "ext": "https://attack.bjidvlyog.com"
     },
     {
-      "key": "json_cj",
-      "name": "[JSON] cj (1042ms)",
+      "key": "js_央视频",
+      "name": "[JS] 央视频 (1359ms)",
       "type": 3,
-      "api": "./js/cj.json",
+      "api": "./js/央视频.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "http://caiji.dyttzyapi.com/api.php/provide/vod"
+      "ext": "https://m.yangshipin.cn"
     },
     {
       "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (4563ms)",
+      "name": "[JSON] 农民影视 (3514ms)",
       "type": 3,
       "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
