@@ -232,6 +232,15 @@
       "ext": "https://luyitian.com"
     },
     {
+      "key": "py_huangguo",
+      "name": "🎬 黃果短劇",
+      "type": 3,
+      "api": "./py_huangguo.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
       "key": "py_Phb<18+>",
       "name": "[PY] Phb<18+> (11545ms)",
       "type": 3,
