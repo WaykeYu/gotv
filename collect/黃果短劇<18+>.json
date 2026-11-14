@@ -1,0 +1,21 @@
+    {
+      "key": "csp_XBPQ_huangguo",
+      "name": "🎬 黃果短劇(XBPQ)",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": {
+        "主頁url": "https://huangguodrama.ai/zh-hant/library/",
+        "分類": "全部$/zh-hant/library/?page={catePg}#國產$/zh-hant/library/?tag=國產&page={catePg}#歐美$/zh-hant/library/?tag=歐美&page={catePg}#豪門$/zh-hant/library/?tag=豪門&page={catePg}#逆襲$/zh-hant/library/?tag=逆襲&page={catePg}#古風$/zh-hant/library/?tag=古風&page={catePg}",
+        "陣列": "<a&&</a>",
+        "標題": "<h3>&&</h3>",
+        "圖片": "src=\"&&\"",
+        "副標題": "集可觀看",
+        "連結": "href=\"&&\"",
+        "搜尋url": "https://huangguodrama.ai/zh-hant/library/?q={wd}&page={pg}",
+        "嗅探詞": ".m3u8#.mp4#video",
+        "免嗅": "0"
+      }
+}
