@@ -223,7 +223,7 @@ class Spider(Spider):
 
     def gethost(self):
         try:
-            response = self.fetch('https://www.pornhub.com',headers=self.headers,allow_redirects=False)
+            response = self.fetch('https://cn.pornhub.com/',headers=self.headers,allow_redirects=False)
             return response.headers['Location'][:-1]
         except Exception as e:
             print(f"获取主页失败: {str(e)}")
