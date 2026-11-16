@@ -17,6 +17,7 @@ JS_DIR = BASE_DIR / "js"
 COLLECT_DIR = BASE_DIR / "collect"
 REPORT_FILE = BASE_DIR / "SPIDER_STATUS.md"
 
+# 六大分類輸出檔
 BOX_PY_FILE = BASE_DIR / "box_py.json"
 FUN_PY_FILE = BASE_DIR / "fun_py.json"
 BOX_JS_FILE = BASE_DIR / "box_js.json"
@@ -24,59 +25,64 @@ FUN_JS_FILE = BASE_DIR / "fun_js.json"
 BOX_CT_FILE = BASE_DIR / "box_ct.json"
 FUN_CT_FILE = BASE_DIR / "fun_ct.json"
 
-# 成人類特徵關鍵字
+# 統合廣告攔截共用檔
+ADBLOCK_FILE = BASE_DIR / "adblock.json"
+
+# 成人類特徵關鍵字（涵蓋繁簡中文、英文與常見影視源暗語）
 ADULT_KEYWORDS = [
-    "成人", "福利", "18+", "18禁", "伦理", "倫理", 
-    "情色", "av", "sex", "adult", "色情", "午夜", "限制", "私密"
+    "成人", "福利", "18+", "18禁", "伦理", "倫理", "情色", "色情",
+    "av", "sex", "adult", "porn", "xxx", "午夜", "限制", "私密",
+    "里番", "無碼", "无码", "有碼", "有码", "女優", "女优", "蜜桃", "麻豆"
 ]
 
-# ================= 標準廣告攔截規則庫 =================
-DEFAULT_ADS_DOMAINS = [
-    "mimg.0c1q0l.cn", "www.googletagmanager.com", "www.google-analytics.com",
-    "mc.usihnbcq.cn", "mg.g1mm3d.cn", "mscs.svaeuzh.cn", "cnzz.hhttm.top",
-    "tp.vinuxhome.com", "cnzz.mmstat.com", "www.baihuillq.com", "s23.cnzz.com",
-    "z3.cnzz.com", "c.cnzz.com", "stj.v1vo.top", "z12.cnzz.com", "img.mosflower.cn",
-    "tips.gamevvip.com", "ehwe.yhdtns.com", "xdn.cqqc3.com", "www.jixunkyy.cn",
-    "sp.chemacid.cn", "hm.baidu.com", "s9.cnzz.com", "z6.cnzz.com", "um.cavuc.com",
-    "mav.mavuz.com", "wofwk.aoidf3.com", "z5.cnzz.com", "xc.hubeijieshikj.cn",
-    "tj.tianwenhu.com", "xg.gars57.cn", "k.jinxiuzhilv.com", "cdn.bootcss.com",
-    "ppl.xunzhuo123.com", "xomk.jiangjunmh.top", "img.xunzhuo123.com", "z1.cnzz.com",
-    "s13.cnzz.com", "xg.huataisangao.cn", "z7.cnzz.com", "xg.huataisangao.cn",
-    "z2.cnzz.com", "s96.cnzz.com", "q11.cnzz.com", "thy.dacedsfa.cn", "xg.whsbpw.cn",
-    "s19.cnzz.com", "z8.cnzz.com", "s4.cnzz.com", "f5w.as12df.top", "ae01.alicdn.com",
-    "www.92424.cn", "k.wudejia.com", "vivovip.mmszxc.top", "qiu.xixiqiu.com",
-    "cdnjs.hnfenxun.com", "cms.qdwght.com", "api.htpan.net",
-    "googlesyndication.com", "doubleclick.net", "adservice.google.com",
-    "pagead2.googlesyndication.com", "umeng.com", "log.aliyuncs.com"
-]
-
-DEFAULT_AD_RULES = [
-    {
-        "name": "量子廣告攔截",
-        "hosts": ["vip.lz", "hd.lz", "v.cdnlz", "cdnlz"],
-        "regex": ["18.5333", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-    },
-    {
-        "name": "非凡廣告攔截",
-        "hosts": ["vip.ffzy", "hd.ffzy", "ffzy"],
-        "regex": ["25.0666", "25.08", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-    },
-    {
-        "name": "暴風廣告攔截",
-        "hosts": ["bfzy", "s5.bfzycdn"],
-        "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-    },
-    {
-        "name": "索尼廣告攔截",
-        "hosts": ["suonizy", "snzy"],
-        "regex": ["15.1666", "15.2666", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-    },
-    {
-        "name": "通用切片廣告過濾",
-        "hosts": ["m3u8"],
-        "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-    }
-]
+# ================= 統合廣告攔截設定中心 =================
+UNIFIED_ADBLOCK = {
+    "ads": [
+        "mimg.0c1q0l.cn", "www.googletagmanager.com", "www.google-analytics.com",
+        "mc.usihnbcq.cn", "mg.g1mm3d.cn", "mscs.svaeuzh.cn", "cnzz.hhttm.top",
+        "tp.vinuxhome.com", "cnzz.mmstat.com", "www.baihuillq.com", "s23.cnzz.com",
+        "z3.cnzz.com", "c.cnzz.com", "stj.v1vo.top", "z12.cnzz.com", "img.mosflower.cn",
+        "tips.gamevvip.com", "ehwe.yhdtns.com", "xdn.cqqc3.com", "www.jixunkyy.cn",
+        "sp.chemacid.cn", "hm.baidu.com", "s9.cnzz.com", "z6.cnzz.com", "um.cavuc.com",
+        "mav.mavuz.com", "wofwk.aoidf3.com", "z5.cnzz.com", "xc.hubeijieshikj.cn",
+        "tj.tianwenhu.com", "xg.gars57.cn", "k.jinxiuzhilv.com", "cdn.bootcss.com",
+        "ppl.xunzhuo123.com", "xomk.jiangjunmh.top", "img.xunzhuo123.com", "z1.cnzz.com",
+        "s13.cnzz.com", "xg.huataisangao.cn", "z7.cnzz.com", "z2.cnzz.com",
+        "s96.cnzz.com", "q11.cnzz.com", "thy.dacedsfa.cn", "xg.whsbpw.cn",
+        "s19.cnzz.com", "z8.cnzz.com", "s4.cnzz.com", "f5w.as12df.top", "ae01.alicdn.com",
+        "www.92424.cn", "k.wudejia.com", "vivovip.mmszxc.top", "qiu.xixiqiu.com",
+        "cdnjs.hnfenxun.com", "cms.qdwght.com", "api.htpan.net",
+        "googlesyndication.com", "doubleclick.net", "adservice.google.com",
+        "pagead2.googlesyndication.com", "umeng.com", "log.aliyuncs.com"
+    ],
+    "rules": [
+        {
+            "name": "量子廣告攔截",
+            "hosts": ["vip.lz", "hd.lz", "v.cdnlz", "cdnlz"],
+            "regex": ["18.5333", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+        },
+        {
+            "name": "非凡廣告攔截",
+            "hosts": ["vip.ffzy", "hd.ffzy", "ffzy"],
+            "regex": ["25.0666", "25.08", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+        },
+        {
+            "name": "暴風廣告攔截",
+            "hosts": ["bfzy", "s5.bfzycdn"],
+            "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+        },
+        {
+            "name": "索尼廣告攔截",
+            "hosts": ["suonizy", "snzy"],
+            "regex": ["15.1666", "15.2666", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+        },
+        {
+            "name": "通用切片廣告過濾",
+            "hosts": ["m3u8"],
+            "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+        }
+    ]
+}
 
 TIMEOUT_SECONDS = 8
 MAX_CONCURRENT_TASKS = 20
@@ -86,28 +92,22 @@ SSL_CONTEXT.check_hostname = False
 SSL_CONTEXT.verify_mode = ssl.CERT_NONE
 
 
-def inject_adblock_rules(config_data):
-    """為匯出的配置資料注入廣告攔截網域 (ads) 與切片過濾規則 (rules)"""
+def apply_unified_adblock(config_data):
+    """統合廣告攔截：將 UNIFIED_ADBLOCK 合併進設定檔，避免重複與遺漏"""
     if not isinstance(config_data, dict):
         return config_data
 
-    # 1. 合併並去重 ads 網域清單
-    existing_ads = config_data.get("ads", [])
-    if not isinstance(existing_ads, list):
-        existing_ads = []
-    merged_ads = list(dict.fromkeys(existing_ads + DEFAULT_ADS_DOMAINS))
-    config_data["ads"] = merged_ads
+    # 合併 ads 網域黑名單
+    old_ads = config_data.get("ads") if isinstance(config_data.get("ads"), list) else []
+    config_data["ads"] = list(dict.fromkeys(old_ads + UNIFIED_ADBLOCK["ads"]))
 
-    # 2. 合併並去重 rules 切片規則（依規則名稱比對避免重複注入）
-    existing_rules = config_data.get("rules", [])
-    if not isinstance(existing_rules, list):
-        existing_rules = []
-    existing_rule_names = {r.get("name") for r in existing_rules if isinstance(r, dict)}
-    
-    for rule in DEFAULT_AD_RULES:
-        if rule["name"] not in existing_rule_names:
-            existing_rules.append(rule)
-    config_data["rules"] = existing_rules
+    # 合併 rules 切片過濾規則
+    old_rules = config_data.get("rules") if isinstance(config_data.get("rules"), list) else []
+    existing_names = {r.get("name") for r in old_rules if isinstance(r, dict)}
+    for rule in UNIFIED_ADBLOCK["rules"]:
+        if rule["name"] not in existing_names:
+            old_rules.append(rule)
+    config_data["rules"] = old_rules
 
     return config_data
 
@@ -195,16 +195,20 @@ def extract_primary_url(content) -> str:
     return ""
 
 
-def is_adult_content(content, file_name: str) -> bool:
-    """判斷是否屬於成人類別"""
-    text_to_check = f"{file_name} {json.dumps(content, ensure_ascii=False)}".lower()
-    return any(keyword in text_to_check for keyword in ADULT_KEYWORDS)
+def check_is_adult(content, file_name: str, remote_snippet: str = "") -> bool:
+    """綜合比對：檔名 + 本地內容 + 遠端抓取內容，精準區分成人類與一般類"""
+    local_str = json.dumps(content, ensure_ascii=False) if not isinstance(content, str) else content
+    combined_text = f"{file_name} {local_str} {remote_snippet}".lower()
+    return any(keyword in combined_text for keyword in ADULT_KEYWORDS)
 
 
-def _sync_check_url(url: str) -> tuple[float | None, str]:
-    """測試 URL 連線速度，回傳 (毫秒延遲, 狀態說明)"""
+def _sync_check_url(url: str) -> tuple[float | None, str, str]:
+    """
+    測試 URL 連線速度並抓取部分回應內容供分類判定
+    回傳：(毫秒延遲, 狀態說明, 遠端內容片段)
+    """
     if not url.startswith(("http://", "https://")):
-        return None, "無效網址格式"
+        return None, "無效網址格式", ""
 
     req = urllib.request.Request(
         url,
@@ -219,17 +223,20 @@ def _sync_check_url(url: str) -> tuple[float | None, str]:
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
             elapsed_ms = (time.time() - start_time) * 1000
             if response.status < 400:
-                return round(elapsed_ms, 2), f"HTTP {response.status}"
-            return None, f"HTTP {response.status}"
+                # 讀取前 16KB 文本內容供成人/一般分類辨識
+                raw_bytes = response.read(16384)
+                snippet = raw_bytes.decode("utf-8", errors="ignore")
+                return round(elapsed_ms, 2), f"HTTP {response.status}", snippet
+            return None, f"HTTP {response.status}", ""
     except urllib.error.HTTPError as e:
         if e.code in [403, 405]:
-            return 999.0, f"HTTP {e.code} (主機在線)"
-        return None, f"HTTP Error {e.code}"
+            return 999.0, f"HTTP {e.code} (主機在線)", ""
+        return None, f"HTTP Error {e.code}", ""
     except Exception as e:
-        return None, f"連線異常: {type(e).__name__}"
+        return None, f"連線異常: {type(e).__name__}", ""
 
 
-async def test_spider_speed(url: str) -> tuple[float | None, str]:
+async def test_spider_speed(url: str) -> tuple[float | None, str, str]:
     return await asyncio.to_thread(_sync_check_url, url)
 
 
@@ -295,28 +302,31 @@ async def process_file(
 
         seen_urls.add(primary_url)
 
-        speed, msg = await test_spider_speed(primary_url)
+        speed, msg, remote_snippet = await test_spider_speed(primary_url)
         if speed is None:
             status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"{msg} ({primary_url})", immediate=False)
             return {"_status": status, "file_name": file_path.name}
 
         fail_history.pop(file_path.name, None)
 
-        # 注入廣告攔截規則
-        enriched_content = inject_adblock_rules(content)
+        # 結合遠端回傳內容進行成人/一般分類判定
+        is_adult = check_is_adult(content, file_path.name, remote_snippet)
+
+        # 統合注入廣告攔截規則
+        enriched_content = apply_unified_adblock(content)
 
         return {
             "_status": "valid",
             "file_name": file_path.name,
             "response_time_ms": speed,
-            "is_adult": is_adult_content(enriched_content, file_path.name),
+            "is_adult": is_adult,
             "url": primary_url,
             "data": enriched_content
         }
 
 
 def save_and_split(entries: list, box_path: Path, fun_path: Path):
-    """依一般類與成人類拆分，按延遲由低到高排序，並確保包含廣告攔截規則"""
+    """分拆一般類 (box) 與成人類 (fun)，各自按響應速度由快到慢排序匯出"""
     box_list = [e for e in entries if not e["is_adult"]]
     fun_list = [e for e in entries if e["is_adult"]]
 
@@ -385,33 +395,47 @@ async def main():
     seen_urls = set()
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_TASKS)
 
+    # 1. 獨立匯出一份全專案統合廣告攔截檔 adblock.json
+    with open(ADBLOCK_FILE, "w", encoding="utf-8") as f:
+        json.dump(UNIFIED_ADBLOCK, f, ensure_ascii=False, indent=2)
+
+    # 2. 分別檢測並產出 PY / JS / COLLECT 的一般類與成人類配置
     py_stat = await process_directory(PY_DIR, BOX_PY_FILE, FUN_PY_FILE, semaphore, seen_urls, today_str)
     js_stat = await process_directory(JS_DIR, BOX_JS_FILE, FUN_JS_FILE, semaphore, seen_urls, today_str)
     ct_stat = await process_directory(COLLECT_DIR, BOX_CT_FILE, FUN_CT_FILE, semaphore, seen_urls, today_str)
 
+    # 3. 更新狀態報告
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     report_lines = [
         "# Spider Status Report",
-        f"> 更新時間：{now_str}（已自動注入廣告攔截 `ads` 與 `rules` 規則）\n",
+        f"> 更新時間：{now_str}（已統合廣告攔截規則至 `adblock.json` 及各配置檔）\n",
         "### 統計摘要",
         f"- **PY 目錄**：一般類 `{len(py_stat['box'])}` 筆 / 成人類 `{len(py_stat['fun'])}` 筆（觀察中 `{py_stat['pending_count']}` 筆 / 移入 NG `{py_stat['moved_count']}` 筆）",
         f"- **JS 目錄**：一般類 `{len(js_stat['box'])}` 筆 / 成人類 `{len(js_stat['fun'])}` 筆（觀察中 `{js_stat['pending_count']}` 筆 / 移入 NG `{js_stat['moved_count']}` 筆）",
         f"- **COLLECT 目錄**：一般類 `{len(ct_stat['box'])}` 筆 / 成人類 `{len(ct_stat['fun'])}` 筆（觀察中 `{ct_stat['pending_count']}` 筆 / 移入 NG `{ct_stat['moved_count']}` 筆）\n",
-        "### 響應速度前 5 名 (COLLECT)",
-        "| 檔案名稱 | 響應時間 (ms) | 類別 |",
-        "| :--- | :--- | :--- |"
+        "### 響應速度前 5 名 (COLLECT - 一般類)",
+        "| 檔案名稱 | 響應時間 (ms) |",
+        "| :--- | :--- |"
     ]
 
-    all_ct = sorted(ct_stat["valid"], key=lambda x: x["response_time_ms"])
-    for item in all_ct[:5]:
-        cat_name = "成人類" if item["is_adult"] else "一般類"
-        report_lines.append(f"| {item['file_name']} | {item['response_time_ms']} ms | {cat_name} |")
+    for item in ct_stat["box"][:5]:
+        report_lines.append(f"| {item['file_name']} | {item['response_time_ms']} ms |")
+
+    report_lines.extend([
+        "\n### 響應速度前 5 名 (COLLECT - 成人類)",
+        "| 檔案名稱 | 響應時間 (ms) |",
+        "| :--- | :--- |"
+    ])
+
+    for item in ct_stat["fun"][:5]:
+        report_lines.append(f"| {item['file_name']} | {item['response_time_ms']} ms |")
 
     with open(REPORT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(report_lines) + "\n")
 
     print("\n==========================================")
-    print("所有目錄檢測、分類與廣告攔截規則注入完成！")
+    print(f"一般類 box_ct.json：{len(ct_stat['box'])} 筆 | 成人類 fun_ct.json：{len(ct_stat['fun'])} 筆")
+    print(f"統合廣告攔截規則已匯出至：{ADBLOCK_FILE.name}")
 
 
 if __name__ == "__main__":
