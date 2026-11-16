@@ -11,19 +11,19 @@
       "filterable": 1
     },
     {
-      "key": "js_index.config",
-      "name": "默认(JS)",
+      "key": "js_欧乐影院",
+      "name": "电影(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/index.config.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/欧乐影院.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
     },
     {
-      "key": "js_欧乐影院",
-      "name": "电影(JS)",
+      "key": "js_index.config",
+      "name": "默认(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/欧乐影院.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/index.config.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -38,19 +38,28 @@
       "filterable": 1
     },
     {
-      "key": "js_meow",
-      "name": "meow.tg[搜](JS)",
+      "key": "js_B站",
+      "name": "排序(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/meow.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/B站.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
     },
     {
-      "key": "js_B站",
-      "name": "排序(JS)",
+      "key": "js_huya",
+      "name": "虎牙直播(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/B站.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/huya.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_meow",
+      "name": "meow.tg[搜](JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/meow.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -65,15 +74,6 @@
       "filterable": 1
     },
     {
-      "key": "js_ddys",
-      "name": "ddys(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/ddys.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
       "key": "js_meijumi",
       "name": "美剧迷[磁](JS)",
       "type": 3,
@@ -83,10 +83,19 @@
       "filterable": 1
     },
     {
-      "key": "js_低端影视",
-      "name": "电影(JS)",
+      "key": "js_ddys",
+      "name": "ddys(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/低端影视.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/ddys.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_xzys",
+      "name": "校长影视[云盘](JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/xzys.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -110,19 +119,19 @@
       "filterable": 1
     },
     {
-      "key": "js_kkpans",
-      "name": "KK網盤[磁](JS)",
+      "key": "js_低端影视",
+      "name": "电影(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/kkpans.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/低端影视.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
     },
     {
-      "key": "js_xzys",
-      "name": "校长影视[云盘](JS)",
+      "key": "js_kkpans",
+      "name": "KK網盤[磁](JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/xzys.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/kkpans.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -137,15 +146,6 @@
       "filterable": 1
     },
     {
-      "key": "js_huya",
-      "name": "虎牙直播(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/huya.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
       "key": "js_xb6v",
       "name": "新版6V[磁](JS)",
       "type": 3,
@@ -155,19 +155,19 @@
       "filterable": 1
     },
     {
-      "key": "js_央视频",
-      "name": "央视(JS)",
+      "key": "js_新韩剧网",
+      "name": "韩剧(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/央视频.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/新韩剧网.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
     },
     {
-      "key": "js_新韩剧网",
-      "name": "韩剧(JS)",
+      "key": "js_央视频",
+      "name": "央视(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/新韩剧网.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/央视频.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1

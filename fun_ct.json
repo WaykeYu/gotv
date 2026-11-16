@@ -1,268 +1,264 @@
 {
   "urls": [
     {
-      "url": "https://api.huosuapi.cc/api.php/provide/vod/",
-      "name": "火速 | 采集 [134ms]"
-    },
-    {
-      "url": "https://jyzyapi.com/api.php/provide/vod/",
-      "name": "金鹰 | 采集 [185ms]"
-    },
-    {
-      "url": "https://jkunzyapi.com/api.php/provide/vod",
-      "name": "jkun | 采集 [191ms]"
-    },
-    {
-      "url": "https://jszyapi.com/api.php/provide/vod/",
-      "name": "极速 | 采集 [202ms]"
-    },
-    {
-      "url": "https://api.douapi.cc/api.php/provide/vod/",
-      "name": "豆豆 | 采集 [228ms]"
-    },
-    {
-      "url": "https://caiji.semaozy.net/inc/apijson_vod.php",
-      "name": "色猫 | 采集 [231ms]"
-    },
-    {
-      "url": "https://api.guangsuapi.com/api.php/provide/vod/",
-      "name": "光速 | 采集 [257ms]"
-    },
-    {
-      "url": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
-      "name": "新浪 | 采集 [262ms]"
-    },
-    {
-      "url": "http://hongniuzy2.com/api.php/provide/vod/",
-      "name": "红牛 | 采集 [268ms]"
-    },
-    {
-      "url": "https://apiyutu.com/api.php/providedao/vod/",
-      "name": "玉兔 | 采集 [269ms]"
-    },
-    {
-      "url": "https://www.huyaapi.com/api.php/provide/vod/",
-      "name": "虎牙 | 采集 [272ms]"
-    },
-    {
-      "url": "https://www.hlzy.my/api.php/provide/vod/",
-      "name": "红楼 | 采集 [275ms]"
-    },
-    {
-      "url": "https://hsckzy888.com/api.php/provide/vod/",
-      "name": "黃色 | 采集 [279ms]"
-    },
-    {
-      "url": "https://yuanlib.com/api.php/provide/vod/",
-      "name": "免费 | 采集 [297ms]"
-    },
-    {
-      "url": "https://caiji.kuaichezy.org/api.php/provide/vod/",
-      "name": "快车 | 采集 [297ms]"
-    },
-    {
-      "url": "https://api.vnzyz.com/api.php/provide/vod/",
-      "name": "越南 | 采集 [310ms]"
-    },
-    {
-      "url": "https://apilsbzy1.com/api.php/provide/vod/",
-      "name": "老色P | 采集 [313ms]"
-    },
-    {
-      "url": "https://api.apibdzy.com/api.php/provide/vod",
-      "name": "百度云 | 采集 [314ms]"
-    },
-    {
-      "url": "https://hhzyapi.com/api.php/provide/vod/",
-      "name": "豪华 | 采集 [316ms]"
-    },
-    {
-      "url": "https://ikunzyapi.com/api.php/provide/vod/",
-      "name": "ikun | 采集 [318ms]"
-    },
-    {
-      "url": "https://tyyszyapi.com/api.php/provide/vod/",
-      "name": "天涯 | 采集 [329ms]"
-    },
-    {
-      "url": "https://cj.yayazy.net/api.php/provide/vod/",
-      "name": "鸭鸭 | 采集 [331ms]"
-    },
-    {
-      "url": "https://caiji.mgzyapi.com/api.php/provide/vod/",
-      "name": "芒果 | 采集 [336ms]"
-    },
-    {
-      "url": "https://slapibf.com/api.php/provide/vod/",
-      "name": "森林 | 采集 [339ms]"
-    },
-    {
-      "url": "https://api.okzyw.net/api.php/provide/vod/",
-      "name": "ok | 采集 [365ms]"
-    },
-    {
-      "url": "https://xxavs.com/api.php/provide/vod/",
-      "name": "濕乐园 | 采集 [368ms]"
-    },
-    {
-      "url": "https://www.pgxdy.com/api/json.php",
-      "name": "黃色AV | 采集 [373ms]"
-    },
-    {
-      "url": "https://api.wujinapi.net/api.php/provide/vod/",
-      "name": "无尽 | 采集 [374ms]"
-    },
-    {
-      "url": "https://api.xjzyapi.com/provide/vod/",
-      "name": "小雞 | 采集 [417ms]"
-    },
-    {
-      "url": "https://lbapi9.com/api.php/provide/vod/",
-      "name": "乐播 | 采集 [419ms]"
-    },
-    {
-      "url": "https://api.xiaojizy.live/provide/vod/",
-      "name": "小鸡Live | 采集 [419ms]"
-    },
-    {
-      "url": "https://jipinvip1.com/api.php/provide/vod/",
-      "name": "新极品 | 采集 [433ms]"
-    },
-    {
-      "url": "https://f-1.cc/api.php/provide/vod/",
-      "name": "看看 | 采集 [439ms]"
-    },
-    {
-      "url": "https://apidanaizi.com/api.php/provide/vod/",
-      "name": "大奶子 | 采集 [441ms]"
-    },
-    {
-      "url": "https://suoniapi.com/api.php/provide/vod/",
-      "name": "索尼 | 采集 [444ms]"
-    },
-    {
-      "url": "https://www.xrbsp.com/api/json.php",
-      "name": "淫水機 | 采集 [464ms]"
-    },
-    {
-      "url": "https://www.msnii.com/api/json.php",
-      "name": "美少女 | 采集 [467ms]"
+      "url": "https://bfzyapi.com/api.php/provide/vod/",
+      "name": "暴風 | 采集 [64ms]"
     },
     {
       "url": "https://155api.com/api.php/provide/vod/",
-      "name": "115 | 采集 [474ms]"
+      "name": "115 | 采集 [80ms]"
+    },
+    {
+      "url": "https://hsckzy888.com/api.php/provide/vod/",
+      "name": "黃色 | 采集 [100ms]"
+    },
+    {
+      "url": "https://www.huyaapi.com/api.php/provide/vod/",
+      "name": "虎牙 | 采集 [111ms]"
+    },
+    {
+      "url": "https://jyzyapi.com/api.php/provide/vod/",
+      "name": "金鹰 | 采集 [123ms]"
+    },
+    {
+      "url": "https://jkunzyapi.com/api.php/provide/vod",
+      "name": "jkun | 采集 [134ms]"
+    },
+    {
+      "url": "https://jszyapi.com/api.php/provide/vod/",
+      "name": "极速 | 采集 [135ms]"
+    },
+    {
+      "url": "https://api.guangsuapi.com/api.php/provide/vod/",
+      "name": "光速 | 采集 [141ms]"
+    },
+    {
+      "url": "https://caiji.mgzyapi.com/api.php/provide/vod/",
+      "name": "芒果 | 采集 [146ms]"
+    },
+    {
+      "url": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
+      "name": "新浪 | 采集 [156ms]"
+    },
+    {
+      "url": "https://yuanlib.com/api.php/provide/vod/",
+      "name": "免费 | 采集 [175ms]"
+    },
+    {
+      "url": "https://api.huosuapi.cc/api.php/provide/vod/",
+      "name": "火速 | 采集 [183ms]"
+    },
+    {
+      "url": "https://api.apibdzy.com/api.php/provide/vod",
+      "name": "百度云 | 采集 [187ms]"
+    },
+    {
+      "url": "https://api.vnzyz.com/api.php/provide/vod/",
+      "name": "越南 | 采集 [197ms]"
+    },
+    {
+      "url": "https://www.hlzy.my/api.php/provide/vod/",
+      "name": "红楼 | 采集 [201ms]"
+    },
+    {
+      "url": "https://cj.yayazy.net/api.php/provide/vod/",
+      "name": "鸭鸭 | 采集 [205ms]"
+    },
+    {
+      "url": "http://hongniuzy2.com/api.php/provide/vod/",
+      "name": "红牛 | 采集 [208ms]"
+    },
+    {
+      "url": "https://api.douapi.cc/api.php/provide/vod/",
+      "name": "豆豆 | 采集 [208ms]"
+    },
+    {
+      "url": "https://suoniapi.com/api.php/provide/vod/",
+      "name": "索尼 | 采集 [225ms]"
+    },
+    {
+      "url": "https://api.okzyw.net/api.php/provide/vod/",
+      "name": "ok | 采集 [227ms]"
     },
     {
       "url": "https://ckzy.me/api.php/provide/vod/",
-      "name": "ck | 采集 [475ms]"
+      "name": "ck | 采集 [229ms]"
     },
     {
-      "url": "https://api.heiapi.cc/api.php/provide/vod/",
-      "name": "嘿嘿 | 采集 [477ms]"
+      "url": "https://ikunzyapi.com/api.php/provide/vod/",
+      "name": "ikun | 采集 [230ms]"
     },
     {
-      "url": "https://subocaiji.com/api.php/provide/vod/",
-      "name": "速播 | 采集 [511ms]"
-    },
-    {
-      "url": "https://jp98.vip/api.php/provide/vod/",
-      "name": "精品98 | 采集 [588ms]"
+      "url": "https://caiji.semaozy.net/inc/apijson_vod.php",
+      "name": "色猫 | 采集 [240ms]"
     },
     {
       "url": "https://api.niuniuzy.me/api.php/provide/vod/",
-      "name": "牛牛 | 采集 [598ms]"
+      "name": "牛牛 | 采集 [264ms]"
     },
     {
-      "url": "https://api.changzhang.tv/api.php/provide/vod/",
-      "name": "厂长 | 采集 [606ms]"
+      "url": "https://tyyszyapi.com/api.php/provide/vod/",
+      "name": "天涯 | 采集 [269ms]"
+    },
+    {
+      "url": "https://xxavs.com/api.php/provide/vod/",
+      "name": "濕乐园 | 采集 [285ms]"
+    },
+    {
+      "url": "https://slapibf.com/api.php/provide/vod/",
+      "name": "森林 | 采集 [299ms]"
+    },
+    {
+      "url": "https://www.msnii.com/api/json.php",
+      "name": "美少女 | 采集 [299ms]"
+    },
+    {
+      "url": "https://apilsbzy1.com/api.php/provide/vod/",
+      "name": "老色P | 采集 [300ms]"
+    },
+    {
+      "url": "https://hhzyapi.com/api.php/provide/vod/",
+      "name": "豪华 | 采集 [307ms]"
+    },
+    {
+      "url": "https://www.pgxdy.com/api/json.php",
+      "name": "黃色AV | 采集 [313ms]"
+    },
+    {
+      "url": "https://caiji.kuaichezy.org/api.php/provide/vod/",
+      "name": "快车 | 采集 [351ms]"
+    },
+    {
+      "url": "https://api.wujinapi.net/api.php/provide/vod/",
+      "name": "无尽 | 采集 [354ms]"
+    },
+    {
+      "url": "https://f-1.cc/api.php/provide/vod/",
+      "name": "看看 | 采集 [355ms]"
+    },
+    {
+      "url": "https://www.xrbsp.com/api/json.php",
+      "name": "淫水機 | 采集 [357ms]"
     },
     {
       "url": "https://sex8zy.com/api.php/provide/vod/",
-      "name": "杏吧 | 采集 [637ms]"
+      "name": "杏吧 | 采集 [385ms]"
     },
     {
-      "url": "https://www.mdzyapi.com/api.php/provide/vod/",
-      "name": "魔都 | 采集 [667ms]"
+      "url": "https://apidanaizi.com/api.php/provide/vod/",
+      "name": "大奶子 | 采集 [398ms]"
     },
     {
-      "url": "https://naixxzy.com/api.php/provide/vod/",
-      "name": "奶香香 | 采集 [691ms]"
-    },
-    {
-      "url": "https://bfzyapi.com/api.php/provide/vod/",
-      "name": "暴風 | 采集 [746ms]"
-    },
-    {
-      "url": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
-      "name": "最大 | 采集 [759ms]"
-    },
-    {
-      "url": "https://www.jingpinx.com/api.php/provide/vod/",
-      "name": "souav | 采集 [786ms]"
-    },
-    {
-      "url": "https://fqzy.me/api.php/provide/vod/",
-      "name": "番茄 | 采集 [831ms]"
-    },
-    {
-      "url": "https://api.maoyanapi.top/api.php/provide/vod/",
-      "name": "猫眼 | 采集 [866ms]"
-    },
-    {
-      "url": "https://thzy1.me/api.php/provide/vod/",
-      "name": "桃花 | 采集 [896ms]"
-    },
-    {
-      "url": "https://www.gdlsp.com/api/json.php",
-      "name": "香x兒 | 采集 [898ms]"
-    },
-    {
-      "url": "https://fhapi9.com/api.php/provide/vod/",
-      "name": "番号 | 采集 [916ms]"
-    },
-    {
-      "url": "https://apilj.com/api.php/provide/vod/",
-      "name": "辣椒 | 采集 [999ms]"
+      "url": "https://api.heiapi.cc/api.php/provide/vod/",
+      "name": "嘿嘿 | 采集 [432ms]"
     },
     {
       "url": "https://xyezy.com/api.php/provide/vod/",
-      "name": "星夜 | 采集 [1055ms]"
+      "name": "星夜 | 采集 [473ms]"
     },
     {
-      "url": "https://www.heiliaozyapi.com/api.php/provide/vod/",
-      "name": "黑料 | 采集 [1137ms]"
+      "url": "https://apiyutu.com/api.php/providedao/vod/",
+      "name": "玉兔 | 采集 [482ms]"
     },
     {
-      "url": "https://dadiapi.com/api.php/provide/vod/",
-      "name": "大地 | 采集 [1140ms]"
+      "url": "https://www.mdzyapi.com/api.php/provide/vod/",
+      "name": "魔都 | 采集 [500ms]"
     },
     {
-      "url": "https://shayuapi.com/api.php/provide/vod/",
-      "name": "鲨鱼 | 采集 [1159ms]"
+      "url": "https://api.changzhang.tv/api.php/provide/vod/",
+      "name": "厂长 | 采集 [501ms]"
     },
     {
-      "url": "https://api.juliang.live/api/provide/vod/",
-      "name": "巨量 | 采集 [1212ms]"
+      "url": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+      "name": "最大 | 采集 [510ms]"
     },
     {
-      "url": "https://cj.lziapi.com/api.php/provide/vod/",
-      "name": "量子 | 采集 [1274ms]"
+      "url": "https://api.xjzyapi.com/provide/vod/",
+      "name": "小雞 | 采集 [531ms]"
     },
     {
-      "url": "https://aosikazy1.com/api.php/provide/vod/",
-      "name": "奥斯卡 | 采集 [1464ms]"
+      "url": "https://naixxzy.com/api.php/provide/vod/",
+      "name": "奶香香 | 采集 [537ms]"
+    },
+    {
+      "url": "https://api.xiaojizy.live/provide/vod/",
+      "name": "小鸡Live | 采集 [641ms]"
+    },
+    {
+      "url": "https://jp98.vip/api.php/provide/vod/",
+      "name": "精品98 | 采集 [646ms]"
+    },
+    {
+      "url": "https://subocaiji.com/api.php/provide/vod/",
+      "name": "速播 | 采集 [726ms]"
+    },
+    {
+      "url": "https://api.maoyanapi.top/api.php/provide/vod/",
+      "name": "猫眼 | 采集 [779ms]"
+    },
+    {
+      "url": "https://www.gdlsp.com/api/json.php",
+      "name": "香x兒 | 采集 [805ms]"
+    },
+    {
+      "url": "https://fqzy.me/api.php/provide/vod/",
+      "name": "番茄 | 采集 [806ms]"
+    },
+    {
+      "url": "https://www.jingpinx.com/api.php/provide/vod/",
+      "name": "souav | 采集 [821ms]"
+    },
+    {
+      "url": "https://fhapi9.com/api.php/provide/vod/",
+      "name": "番号 | 采集 [836ms]"
+    },
+    {
+      "url": "https://thzy1.me/api.php/provide/vod/",
+      "name": "桃花 | 采集 [859ms]"
+    },
+    {
+      "url": "https://apilj.com/api.php/provide/vod/",
+      "name": "辣椒 | 采集 [903ms]"
     },
     {
       "url": "https://www.lovedan.net/api.php/provide/vod/",
-      "name": "艾旦 | 采集 [1596ms]"
+      "name": "艾旦 | 采集 [912ms]"
+    },
+    {
+      "url": "https://lbapi9.com/api.php/provide/vod/",
+      "name": "乐播 | 采集 [936ms]"
+    },
+    {
+      "url": "https://www.heiliaozyapi.com/api.php/provide/vod/",
+      "name": "黑料 | 采集 [997ms]"
+    },
+    {
+      "url": "https://dadiapi.com/api.php/provide/vod/",
+      "name": "大地 | 采集 [1009ms]"
+    },
+    {
+      "url": "https://aosikazy1.com/api.php/provide/vod/",
+      "name": "奥斯卡 | 采集 [1018ms]"
+    },
+    {
+      "url": "https://shayuapi.com/api.php/provide/vod/",
+      "name": "鲨鱼 | 采集 [1021ms]"
+    },
+    {
+      "url": "https://api.juliang.live/api/provide/vod/",
+      "name": "巨量 | 采集 [1132ms]"
     },
     {
       "url": "https://360zy.com/api.php/provide/vod/",
-      "name": "360 | 采集 [1601ms]"
+      "name": "360 | 采集 [1335ms]"
+    },
+    {
+      "url": "https://cj.lziapi.com/api.php/provide/vod/",
+      "name": "量子 | 采集 [1541ms]"
     },
     {
       "url": "https://www.iqiyizyapi.com/api.php/provide/vod/",
-      "name": "爱奇艺 | 采集 [2131ms]"
+      "name": "爱奇艺 | 采集 [1553ms]"
     }
   ],
   "ads": [

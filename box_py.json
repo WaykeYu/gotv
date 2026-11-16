@@ -20,10 +20,10 @@
       "filterable": 1
     },
     {
-      "key": "py_盘链",
-      "name": "盘链(PY)",
+      "key": "py_魔方影视",
+      "name": "魔方影视(PY)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/盘链.py",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/魔方影视.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -38,10 +38,10 @@
       "filterable": 1
     },
     {
-      "key": "py_魔方影视",
-      "name": "魔方影视(PY)",
+      "key": "py_盘链",
+      "name": "盘链(PY)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/魔方影视.py",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/盘链.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -56,10 +56,28 @@
       "filterable": 1
     },
     {
+      "key": "py_央视影视",
+      "name": "央视影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/央视影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
       "key": "py_红果网页",
       "name": "红果网页(PY)",
       "type": 3,
       "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/红果网页.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_dsystv",
+      "name": "([^(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/dsystv.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -141,15 +159,6 @@
       "name": "MiFun动漫(PY)",
       "type": 3,
       "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/MiFun动漫.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_央视影视",
-      "name": "央视影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/央视影视.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1

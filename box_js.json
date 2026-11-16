@@ -20,24 +20,6 @@
       "filterable": 1
     },
     {
-      "key": "js_lx-music",
-      "name": "lx-music(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/lx-music.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_funletu",
-      "name": "趣盘搜[夸](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/funletu.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
       "key": "js_金牌影视-DS",
       "name": "金牌影视(JS)",
       "type": 3,
@@ -47,10 +29,10 @@
       "filterable": 1
     },
     {
-      "key": "js_楓林追劇",
-      "name": "楓林網(JS)",
+      "key": "js_funletu",
+      "name": "趣盘搜[夸](JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/楓林追劇.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/funletu.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -69,6 +51,24 @@
       "name": "爱盘搜[夸](JS)",
       "type": 3,
       "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/aipanso.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_lx-music",
+      "name": "lx-music(JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/lx-music.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_funletu",
+      "name": "趣盘搜[夸](JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/funletu.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1

@@ -2,7 +2,11 @@
   "urls": [
     {
       "url": "https://api.yyzy-tv.vip/inc/apijson.php",
-      "name": "优质 | 采集 [800ms]"
+      "name": "优质 | 采集 [610ms]"
+    },
+    {
+      "url": "https://mujiziyuan00.com/api.php/provide/vod/",
+      "name": "母鸡 | 采集 [961ms]"
     },
     {
       "url": "https://liuyan.ffzy3.tv/api.php/provide/vod/",
@@ -15,10 +19,6 @@
     {
       "url": "https://m3u8.apiyhzy.com/api.php/provide/vod/",
       "name": "樱花 | 采集 [999ms]"
-    },
-    {
-      "url": "https://mujiziyuan00.com/api.php/provide/vod/",
-      "name": "母鸡 | 采集 [1149ms]"
     }
   ],
   "ads": [
