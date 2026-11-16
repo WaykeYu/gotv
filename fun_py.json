@@ -1,993 +1,245 @@
 {
-  "spider": "",
+  "spider": "./custom_spider.jar;md5;auto",
   "sites": [
     {
-      "key": "py_韩国色情电影<18+>",
-      "name": "韩国色情电影<18+>(PY)",
+      "key": "py_禁片天堂<18+>",
+      "name": "[PY] 禁片天堂<18+> (95ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/韩国色情电影<18+>.py",
+      "api": "./py/禁片天堂<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_麻豆社<18+>",
-      "name": "麻豆社(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/麻豆社<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_广东荔枝",
-      "name": "%s(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/广东荔枝.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_小鸭子看看",
-      "name": "小鸭子看看(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/小鸭子看看.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_youtubelive",
-      "name": "youtubelive(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/youtubelive.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_ytbzb",
-      "name": "{ch.get((PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ytbzb.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_撸一天<18+>",
-      "name": "未知标题(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/撸一天<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_ytb",
-      "name": "ytb(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ytb.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_优视频",
-      "name": "优视频(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/优视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_youtube",
-      "name": "youtube(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/youtube.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_VHUB<18+>",
-      "name": "VHUB<18+>(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/VHUB<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_qiyoudy",
-      "name": "qiyoudy(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/qiyoudy.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_ppnix",
-      "name": "ppnix(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ppnix.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_Mang",
-      "name": "Mang(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Mang.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_oule",
-      "name": "([^(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/oule.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_亚色影库<18+>",
-      "name": "亚色影库<18+>(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/亚色影库<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_小红薯APP",
-      "name": "小红薯APP(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/小红薯APP.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_huangguo<18+>",
-      "name": "huangguo<18+>(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/huangguo<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_芒果TV (1)",
-      "name": "芒果TV (1)(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/芒果TV (1).py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_duoduo",
-      "name": "duoduo(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/duoduo.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_bubuzhuiju",
-      "name": "bubuzhuiju(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/bubuzhuiju.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_低端影视",
-      "name": "低端影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/低端影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_奇优影院",
-      "name": "奇优影院(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/奇优影院.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_猫咪TV",
-      "name": "视频%s(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/猫咪TV.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_爱奇艺",
-      "name": "爱奇艺(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/爱奇艺.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_mifun",
-      "name": "mifun(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/mifun.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_Pandalive直播",
-      "name": "Pandalive直播(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Pandalive直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_茶杯狐",
-      "name": "茶杯狐(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/茶杯狐.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_哔哩直播",
-      "name": "哔哩直播(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/哔哩直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_茶杯狐影视",
-      "name": "茶杯狐影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/茶杯狐影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_小苹果影视",
-      "name": "小苹果影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/小苹果影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_huavod",
-      "name": "线路%d(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/huavod.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_fqdm",
-      "name": "description(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/fqdm.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_6v",
-      "name": "夸克网盘(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/6v.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_yangshipin",
-      "name": "%s(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/yangshipin.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_嘀嗒影视",
-      "name": "嘀嗒影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/嘀嗒影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_网络直播",
-      "name": "超清(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/网络直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_Xhm<18+>",
-      "name": "[a=cr:(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Xhm<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_哔哩聚合",
-      "name": "哔哩聚合(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/哔哩聚合.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_泥视频",
-      "name": "泥视频(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/泥视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_pansou",
-      "name": "pansou(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/pansou.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_黑料不打烊<18+>",
-      "name": "description(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/黑料不打烊<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_芒果视频",
-      "name": "芒果视频(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/芒果视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_怦然心动<18+>",
-      "name": "怦然心动<18+>(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/怦然心动<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_Xvideos<18+>",
-      "name": "[a=cr:(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Xvideos<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_香肠派对<18+>",
-      "name": "香肠派对<18+>(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/香肠派对<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_ddmf",
-      "name": "([^(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ddmf.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_4K影院",
-      "name": "description(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/4K影院.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_两个BT",
-      "name": "两个BT(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/两个BT.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_pianku4k",
-      "name": "([^(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/pianku4k.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_麒麟影视",
-      "name": "(\\d{4})(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/麒麟影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_咖啡直播",
-      "name": "{} vs {} ({})(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/咖啡直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_jieyingshi",
-      "name": "jieyingshi(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/jieyingshi.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_茄子<18+>",
-      "name": "茄子<18+>(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/茄子<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_咖啡体育",
-      "name": "{} vs {} ({})(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/咖啡体育.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_yinhuaone",
-      "name": "([^(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/yinhuaone.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_Xvd<18+>",
-      "name": "[a=cr:(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Xvd<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_Pornhub<18+>",
-      "name": "[a=cr:(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Pornhub<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_麦田影院",
-      "name": "超清YZ源(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/麦田影院.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_心跳不跳",
-      "name": "心跳不跳(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/心跳不跳.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_ptt_red",
-      "name": "ptt_red(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ptt_red.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_每日大赛",
-      "name": "每日大赛(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/每日大赛.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://jptt.tv/tag_list"
     },
     {
       "key": "py_stripchat<18+>",
-      "name": "stripchat<18+>(PY)",
+      "name": "[PY] stripchat<18+> (114ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/stripchat<18+>.py",
+      "api": "./py/stripchat<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://zh.stripchat.com"
     },
     {
-      "key": "py_边缘影视",
-      "name": "边缘影视(PY)",
+      "key": "py_亚色影库<18+>",
+      "name": "[PY] 亚色影库<18+> (118ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/边缘影视.py",
+      "api": "./py/亚色影库<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.yasetube.com"
     },
     {
-      "key": "py_心跳盘搜",
-      "name": "心跳盘搜(PY)",
+      "key": "py_ddmf",
+      "name": "[PY] ddmf (122ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/心跳盘搜.py",
+      "api": "./py/ddmf.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.ddmf.net"
+    },
+    {
+      "key": "py_麻豆社<18+>",
+      "name": "[PY] 麻豆社<18+> (124ms)",
+      "type": 3,
+      "api": "./py/麻豆社<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://madou.club"
+    },
+    {
+      "key": "py_韩国色情电影<18+>",
+      "name": "[PY] 韩国色情电影<18+> (124ms)",
+      "type": 3,
+      "api": "./py/韩国色情电影<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://koreanpornmovie.com"
+    },
+    {
+      "key": "py_撸一天<18+>",
+      "name": "[PY] 撸一天<18+> (130ms)",
+      "type": 3,
+      "api": "./py/撸一天<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://luyitian.com"
+    },
+    {
+      "key": "py_ptt_red",
+      "name": "[PY] ptt_red (132ms)",
+      "type": 3,
+      "api": "./py/ptt_red.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://ptt.red"
+    },
+    {
+      "key": "py_Hanime<18+>",
+      "name": "[PY] Hanime<18+> (201ms)",
+      "type": 3,
+      "api": "./py/Hanime<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://hanime1.best"
     },
     {
       "key": "py_4KAV",
-      "name": "分辨率(PY)",
+      "name": "[PY] 4KAV (243ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/4KAV.py",
+      "api": "./py/4KAV.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://4k-av.com"
     },
     {
-      "key": "py_心跳",
-      "name": "心跳(PY)",
+      "key": "py_huangguo<18+>",
+      "name": "[PY] huangguo<18+> (252ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/心跳.py",
+      "api": "./py/huangguo<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://huangguodrama.ai"
     },
     {
-      "key": "py_七七影視",
-      "name": "七七影視(PY)",
+      "key": "py_VHUB<18+>",
+      "name": "[PY] VHUB<18+> (266ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/七七影視.py",
+      "api": "./py/VHUB<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://newxvideos.pages.dev"
     },
     {
-      "key": "py_wbbb",
-      "name": "([^(PY)",
+      "key": "py_久久視頻_18+_",
+      "name": "[PY] 久久視頻_18+_ (301ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/wbbb.py",
+      "api": "./py/久久視頻_18+_.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://ww.jiujiu.one"
     },
     {
-      "key": "py_瓜子",
-      "name": "瓜子(PY)",
+      "key": "py_香肠派对<18+>",
+      "name": "[PY] 香肠派对<18+> (501ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/瓜子.py",
+      "api": "./py/香肠派对<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://xiang512.xiang.party/xcpd"
+    },
+    {
+      "key": "py_AV大平台<18+>",
+      "name": "[PY] AV大平台<18+> (555ms)",
+      "type": 3,
+      "api": "./py/AV大平台<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://porndav.com"
+    },
+    {
+      "key": "py_怦然心动<18+>",
+      "name": "[PY] 怦然心动<18+> (566ms)",
+      "type": 3,
+      "api": "./py/怦然心动<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://prshinezenx.blog"
+    },
+    {
+      "key": "py_茄子<18+>",
+      "name": "[PY] 茄子<18+> (590ms)",
+      "type": 3,
+      "api": "./py/茄子<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://xtu.qzjp6.ink/cn/home/web"
+    },
+    {
+      "key": "py_黑料不打烊<18+>",
+      "name": "[PY] 黑料不打烊<18+> (709ms)",
+      "type": 3,
+      "api": "./py/黑料不打烊<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://heiliao.com"
+    },
+    {
+      "key": "py_Xvideos<18+>",
+      "name": "[PY] Xvideos<18+> (748ms)",
+      "type": 3,
+      "api": "./py/Xvideos<18+>.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.xvideos.com"
     },
     {
       "key": "py_TOPTV<18+>",
-      "name": "TOPTV<18+>(PY)",
+      "name": "[PY] TOPTV<18+> (904ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/TOPTV<18+>.py",
+      "api": "./py/TOPTV<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://toptv15.cyou"
     },
     {
-      "key": "py_Phb<18+>",
-      "name": "[a=cr:(PY)",
+      "key": "py_Xhm<18+>",
+      "name": "[PY] Xhm<18+> (1203ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/Phb<18+>.py",
+      "api": "./py/Xhm<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_七味",
-      "name": "七味(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/七味.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_聚合直播",
-      "name": "超清(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/聚合直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_粤漫",
-      "name": "粤漫(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/粤漫.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_神秘电影",
-      "name": "神秘电影(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/神秘电影.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_hongguo",
-      "name": "红果短剧(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/hongguo.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_kkys",
-      "name": "t(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/kkys.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://xhamster.com"
     },
     {
       "key": "py_guazi",
-      "name": "瓜子(PY)",
+      "name": "[PY] guazi (1399ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/guazi.py",
+      "api": "./py/guazi.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://apinew.uozvr.com"
     },
     {
-      "key": "py_河马短剧",
-      "name": "河马短剧(PY)",
+      "key": "py_Pornhub<18+>",
+      "name": "[PY] Pornhub<18+> (2184ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/河马短剧.py",
+      "api": "./py/Pornhub<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_acfun",
-      "name": "未知标题(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/acfun.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_界影视",
-      "name": "界影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/界影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://cn.pornhub.com"
     },
     {
       "key": "py_黄豆短剧<18+>",
-      "name": "黄豆短剧(PY)",
+      "name": "[PY] 黄豆短剧<18+> (2592ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/黄豆短剧<18+>.py",
+      "api": "./py/黄豆短剧<18+>.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_275听书",
-      "name": "275听书(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/275听书.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_努努影院",
-      "name": "努努影院(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/努努影院.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_hongguo_fixed",
-      "name": "([^(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/hongguo_fixed.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_like",
-      "name": "like(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/like.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_aigua",
-      "name": "aigua(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/aigua.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_河马剧场",
-      "name": "河马剧场(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/河马剧场.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_优酷视频",
-      "name": "优酷视频(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/优酷视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_ruyishipin",
-      "name": "ruyishipin(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ruyishipin.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_goldmedal",
-      "name": "goldmedal(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/ruyishipin.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_actor",
-      "name": "actor(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/actor.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_LIVES",
-      "name": "LIVES(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/LIVES.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_maple",
-      "name": "maple(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/maple.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_瓜子影视",
-      "name": "瓜子(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/瓜子影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    }
-  ],
-  "ads": [
-    "mimg.0c1q0l.cn",
-    "www.googletagmanager.com",
-    "www.google-analytics.com",
-    "mc.usihnbcq.cn",
-    "mg.g1mm3d.cn",
-    "mscs.svaeuzh.cn",
-    "cnzz.hhttm.top",
-    "tp.vinuxhome.com",
-    "cnzz.mmstat.com",
-    "www.baihuillq.com",
-    "s23.cnzz.com",
-    "z3.cnzz.com",
-    "c.cnzz.com",
-    "stj.v1vo.top",
-    "z12.cnzz.com",
-    "img.mosflower.cn",
-    "tips.gamevvip.com",
-    "ehwe.yhdtns.com",
-    "xdn.cqqc3.com",
-    "www.jixunkyy.cn",
-    "sp.chemacid.cn",
-    "hm.baidu.com",
-    "s9.cnzz.com",
-    "z6.cnzz.com",
-    "um.cavuc.com",
-    "mav.mavuz.com",
-    "wofwk.aoidf3.com",
-    "z5.cnzz.com",
-    "xc.hubeijieshikj.cn",
-    "tj.tianwenhu.com",
-    "xg.gars57.cn",
-    "k.jinxiuzhilv.com",
-    "cdn.bootcss.com",
-    "ppl.xunzhuo123.com",
-    "xomk.jiangjunmh.top",
-    "img.xunzhuo123.com",
-    "z1.cnzz.com",
-    "s13.cnzz.com",
-    "xg.huataisangao.cn",
-    "z7.cnzz.com",
-    "z2.cnzz.com",
-    "s96.cnzz.com",
-    "q11.cnzz.com",
-    "thy.dacedsfa.cn",
-    "xg.whsbpw.cn",
-    "s19.cnzz.com",
-    "z8.cnzz.com",
-    "s4.cnzz.com",
-    "f5w.as12df.top",
-    "ae01.alicdn.com",
-    "www.92424.cn",
-    "k.wudejia.com",
-    "vivovip.mmszxc.top",
-    "qiu.xixiqiu.com",
-    "cdnjs.hnfenxun.com",
-    "cms.qdwght.com",
-    "api.htpan.net",
-    "googlesyndication.com",
-    "doubleclick.net",
-    "adservice.google.com",
-    "pagead2.googlesyndication.com",
-    "umeng.com",
-    "log.aliyuncs.com"
-  ],
-  "rules": [
-    {
-      "name": "量子廣告攔截",
-      "hosts": [
-        "vip.lz",
-        "hd.lz",
-        "v.cdnlz",
-        "cdnlz"
-      ],
-      "regex": [
-        "18.5333",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "非凡廣告攔截",
-      "hosts": [
-        "vip.ffzy",
-        "hd.ffzy",
-        "ffzy"
-      ],
-      "regex": [
-        "25.0666",
-        "25.08",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "暴風廣告攔截",
-      "hosts": [
-        "bfzy",
-        "s5.bfzycdn"
-      ],
-      "regex": [
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "索尼廣告攔截",
-      "hosts": [
-        "suonizy",
-        "snzy"
-      ],
-      "regex": [
-        "15.1666",
-        "15.2666",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "通用切片廣告過濾",
-      "hosts": [
-        "m3u8"
-      ],
-      "regex": [
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
+      "filterable": 1,
+      "ext": "https://vjs.zencdn.net/v/oceans.mp4"
     }
   ]
 }

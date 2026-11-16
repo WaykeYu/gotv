@@ -1,309 +1,95 @@
 {
-  "spider": "",
+  "spider": "./drpy.min.js;md5;auto",
   "sites": [
     {
-      "key": "js_555影视",
-      "name": "电影(JS)",
+      "key": "js_cilixiong",
+      "name": "[JS] cilixiong (58ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/555影视.js",
+      "api": "./js/cilixiong.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_欧乐影院",
-      "name": "电影(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/欧乐影院.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_index.config",
-      "name": "默认(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/index.config.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_dygang",
-      "name": "电影港[磁](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/dygang.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_B站",
-      "name": "排序(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/B站.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_huya",
-      "name": "虎牙直播(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/huya.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_meow",
-      "name": "meow.tg[搜](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/meow.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_tzfile",
-      "name": "团长资源(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/tzfile.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_meijumi",
-      "name": "美剧迷[磁](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/meijumi.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_ddys",
-      "name": "ddys(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/ddys.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_xzys",
-      "name": "校长影视[云盘](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/xzys.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.cilixiong.com"
     },
     {
       "key": "js_注视影视",
-      "name": "电影(JS)",
+      "name": "[JS] 注视影视 (119ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/注视影视.js",
+      "api": "./js/注视影视.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://gaze.run"
     },
     {
-      "key": "js_imaple",
-      "name": "楓林網(JS)",
+      "key": "json_pronlulu",
+      "name": "[JSON] pronlulu (143ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/imaple.js",
+      "api": "./js/ss/pronlulu.json",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.pornlulu.com"
     },
     {
-      "key": "js_低端影视",
-      "name": "电影(JS)",
+      "key": "js_欧乐影院",
+      "name": "[JS] 欧乐影院 (174ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/低端影视.js",
+      "api": "./js/欧乐影院.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.oleol.com"
     },
     {
-      "key": "js_kkpans",
-      "name": "KK網盤[磁](JS)",
+      "key": "js_嘀嗒影视",
+      "name": "[JS] 嘀嗒影视 (584ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/kkpans.js",
+      "api": "./js/嘀嗒影视.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.didahd.pro"
     },
     {
-      "key": "js_tuxiaobei",
-      "name": "兔小贝(JS)",
+      "key": "js_xp天堂",
+      "name": "[JS] xp天堂 (687ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/tuxiaobei.js",
+      "api": "./js/ss/xp天堂.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://attack.bjidvlyog.com"
     },
     {
-      "key": "js_xb6v",
-      "name": "新版6V[磁](JS)",
+      "key": "js_B站",
+      "name": "[JS] B站 (789ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/xb6v.js",
+      "api": "./js/B站.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://www.bilibili.com"
     },
     {
-      "key": "js_新韩剧网",
-      "name": "韩剧(JS)",
+      "key": "json_农民影视",
+      "name": "[JSON] 农民影视 (1085ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/新韩剧网.js",
+      "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "https://vip.wwgz.cn:5200/vod-list-id-{cateId}-pg-{catePg}-order--by-time-class-0-year-{year}-letter--area-{area}-lang-.html"
     },
     {
       "key": "js_央视频",
-      "name": "央视(JS)",
+      "name": "[JS] 央视频 (1187ms)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/央视频.js",
+      "api": "./js/央视频.js",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_88ball",
-      "name": "88看球(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/88ball.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    }
-  ],
-  "ads": [
-    "mimg.0c1q0l.cn",
-    "www.googletagmanager.com",
-    "www.google-analytics.com",
-    "mc.usihnbcq.cn",
-    "mg.g1mm3d.cn",
-    "mscs.svaeuzh.cn",
-    "cnzz.hhttm.top",
-    "tp.vinuxhome.com",
-    "cnzz.mmstat.com",
-    "www.baihuillq.com",
-    "s23.cnzz.com",
-    "z3.cnzz.com",
-    "c.cnzz.com",
-    "stj.v1vo.top",
-    "z12.cnzz.com",
-    "img.mosflower.cn",
-    "tips.gamevvip.com",
-    "ehwe.yhdtns.com",
-    "xdn.cqqc3.com",
-    "www.jixunkyy.cn",
-    "sp.chemacid.cn",
-    "hm.baidu.com",
-    "s9.cnzz.com",
-    "z6.cnzz.com",
-    "um.cavuc.com",
-    "mav.mavuz.com",
-    "wofwk.aoidf3.com",
-    "z5.cnzz.com",
-    "xc.hubeijieshikj.cn",
-    "tj.tianwenhu.com",
-    "xg.gars57.cn",
-    "k.jinxiuzhilv.com",
-    "cdn.bootcss.com",
-    "ppl.xunzhuo123.com",
-    "xomk.jiangjunmh.top",
-    "img.xunzhuo123.com",
-    "z1.cnzz.com",
-    "s13.cnzz.com",
-    "xg.huataisangao.cn",
-    "z7.cnzz.com",
-    "z2.cnzz.com",
-    "s96.cnzz.com",
-    "q11.cnzz.com",
-    "thy.dacedsfa.cn",
-    "xg.whsbpw.cn",
-    "s19.cnzz.com",
-    "z8.cnzz.com",
-    "s4.cnzz.com",
-    "f5w.as12df.top",
-    "ae01.alicdn.com",
-    "www.92424.cn",
-    "k.wudejia.com",
-    "vivovip.mmszxc.top",
-    "qiu.xixiqiu.com",
-    "cdnjs.hnfenxun.com",
-    "cms.qdwght.com",
-    "api.htpan.net",
-    "googlesyndication.com",
-    "doubleclick.net",
-    "adservice.google.com",
-    "pagead2.googlesyndication.com",
-    "umeng.com",
-    "log.aliyuncs.com"
-  ],
-  "rules": [
-    {
-      "name": "量子廣告攔截",
-      "hosts": [
-        "vip.lz",
-        "hd.lz",
-        "v.cdnlz",
-        "cdnlz"
-      ],
-      "regex": [
-        "18.5333",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "非凡廣告攔截",
-      "hosts": [
-        "vip.ffzy",
-        "hd.ffzy",
-        "ffzy"
-      ],
-      "regex": [
-        "25.0666",
-        "25.08",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "暴風廣告攔截",
-      "hosts": [
-        "bfzy",
-        "s5.bfzycdn"
-      ],
-      "regex": [
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "索尼廣告攔截",
-      "hosts": [
-        "suonizy",
-        "snzy"
-      ],
-      "regex": [
-        "15.1666",
-        "15.2666",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
-    },
-    {
-      "name": "通用切片廣告過濾",
-      "hosts": [
-        "m3u8"
-      ],
-      "regex": [
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
+      "filterable": 1,
+      "ext": "https://m.yangshipin.cn"
     }
   ]
 }
