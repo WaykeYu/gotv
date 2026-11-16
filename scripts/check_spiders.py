@@ -1,10 +1,12 @@
 import os
+import re
 import ssl
 import shutil
 import json
 import time
 import asyncio
 import urllib.request
+import urllib.error
 from pathlib import Path
 from datetime import datetime, date
 
@@ -25,20 +27,18 @@ FUN_CT_FILE = BASE_DIR / "fun_ct.json"
 # 成人類特徵關鍵字
 ADULT_KEYWORDS = [
     "成人", "福利", "18+", "18禁", "伦理", "倫理", 
-    "情色", "av", "sex", "adult", "色情", "午夜", "限制"
+    "情色", "av", "sex", "adult", "色情", "午夜", "限制", "私密"
 ]
 
-TIMEOUT_SECONDS = 6
-MAX_CONCURRENT_TASKS = 25
+TIMEOUT_SECONDS = 8
+MAX_CONCURRENT_TASKS = 20
 
-# 建立忽略 SSL 憑證驗證的 Context
 SSL_CONTEXT = ssl.create_default_context()
 SSL_CONTEXT.check_hostname = False
 SSL_CONTEXT.verify_mode = ssl.CERT_NONE
 
 
 def load_fail_history(history_file: Path) -> dict:
-    """讀取指定目錄的歷史失效日期紀錄"""
     if history_file.exists():
         try:
             with open(history_file, "r", encoding="utf-8") as f:
@@ -49,107 +49,163 @@ def load_fail_history(history_file: Path) -> dict:
 
 
 def save_fail_history(history_file: Path, history: dict):
-    """儲存更新後的歷史失效紀錄"""
     with open(history_file, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
 
 
-def is_adult_content(data: dict, file_name: str) -> bool:
-    """判斷配置內容、站點名稱或檔名是否屬於成人類別"""
-    text_to_check = file_name.lower()
-    
-    sites = data.get("sites", [])
-    for site in sites:
-        name = str(site.get("name", "")).lower()
-        site_type = str(site.get("type", "")).lower()
-        api = str(site.get("api", "")).lower()
-        text_to_check += f" {name} {site_type} {api}"
+def parse_flexible_content(file_path: Path):
+    """
+    彈性解析檔案：
+    支援標準 JSON、含 // 註解的 JSONC，以及純文字網址清單
+    """
+    raw_text = file_path.read_text(encoding="utf-8", errors="ignore").strip()
+    if not raw_text:
+        return None
 
-    return any(keyword in text_to_check for keyword in ADULT_KEYWORDS)
+    # 1. 嘗試直接解析 JSON
+    try:
+        return json.loads(raw_text)
+    except Exception:
+        pass
+
+    # 2. 移除 // 單行註解後再嘗試解析 JSONC
+    cleaned_lines = []
+    for line in raw_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("//") or stripped.startswith("#"):
+            continue
+        # 移除行尾註解（避開 http:// 與 https://）
+        line_no_comment = re.sub(r'(?<!:)\/\/.*$', '', line)
+        cleaned_lines.append(line_no_comment)
+    cleaned_text = "\n".join(cleaned_lines)
+
+    try:
+        return json.loads(cleaned_text)
+    except Exception:
+        pass
+
+    # 3. 若為純文字清單（每行一個網址），轉換為標準格式字典
+    urls = re.findall(r'https?://[^\s"\'<>]+', raw_text)
+    if urls:
+        return {"url": urls[0], "name": file_path.stem, "_raw_urls": urls}
+
+    return None
 
 
-def extract_primary_url(content: dict) -> str:
-    """提取配置中的主要連線 URL（spider/jar/api/wallpaper）"""
-    spider = content.get("spider", "") or content.get("jar", "")
-    if isinstance(spider, str) and spider.startswith(("http://", "https://")):
-        return spider.strip()
+def extract_primary_url(content) -> str:
+    """從各種可能的欄位結構中提取主要檢測 URL"""
+    if isinstance(content, list) and len(content) > 0:
+        first = content[0]
+        if isinstance(first, dict):
+            return extract_primary_url(first)
+        elif isinstance(first, str) and first.startswith(("http://", "https://")):
+            return first.strip()
 
+    if not isinstance(content, dict):
+        return ""
+
+    # 依序檢查常見的頂層鍵值
+    for key in ["url", "spider", "jar", "api", "wallpaper", "live"]:
+        val = content.get(key, "")
+        if isinstance(val, str) and val.startswith(("http://", "https://")):
+            # 處理 spider 常見的 "http://xxx.jar;md5;xxxx" 格式，僅取網址本體測速
+            return val.split(";")[0].strip()
+
+    # 檢查多倉 urls 陣列
+    urls_list = content.get("urls", [])
+    if isinstance(urls_list, list):
+        for item in urls_list:
+            if isinstance(item, dict) and str(item.get("url", "")).startswith(("http://", "https://")):
+                return item["url"].split(";")[0].strip()
+            elif isinstance(item, str) and item.startswith(("http://", "https://")):
+                return item.split(";")[0].strip()
+
+    # 檢查 sites 站點陣列
     sites = content.get("sites", [])
-    for site in sites:
-        api = site.get("api", "")
-        if isinstance(api, str) and api.startswith(("http://", "https://")):
-            return api.strip()
-
-    wallpaper = content.get("wallpaper", "")
-    if isinstance(wallpaper, str) and wallpaper.startswith(("http://", "https://")):
-        return wallpaper.strip()
+    if isinstance(sites, list):
+        for site in sites:
+            if isinstance(site, dict):
+                api = str(site.get("api", ""))
+                if api.startswith(("http://", "https://")):
+                    return api.split(";")[0].strip()
 
     return ""
 
 
-def _sync_check_url(url: str) -> float | None:
-    """使用內建 urllib 同步測試連線速度（供非同步執行緒池呼叫）"""
+def is_adult_content(content, file_name: str) -> bool:
+    """判斷是否屬於成人類別"""
+    text_to_check = f"{file_name} {json.dumps(content, ensure_ascii=False)}".lower()
+    return any(keyword in text_to_check for keyword in ADULT_KEYWORDS)
+
+
+def _sync_check_url(url: str) -> tuple[float | None, str]:
+    """測試 URL 連線速度，回傳 (毫秒延遲, 狀態說明)"""
     if not url.startswith(("http://", "https://")):
-        return None
+        return None, "無效網址格式"
+
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            "User-Agent": "okhttp/4.12.0",  # TVBox 常用 UA，避免被專擋瀏覽器的來源封鎖
+            "Accept": "*/*",
+            "Connection": "keep-alive"
         }
     )
     try:
         start_time = time.time()
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
-            if response.status in [200, 206, 301, 302]:
-                elapsed_ms = (time.time() - start_time) * 1000
-                return round(elapsed_ms, 2)
-    except Exception:
-        pass
-    return None
+            elapsed_ms = (time.time() - start_time) * 1000
+            if response.status < 400:
+                return round(elapsed_ms, 2), f"HTTP {response.status}"
+            return None, f"HTTP {response.status}"
+    except urllib.error.HTTPError as e:
+        # 部分伺服器不支援直接 GET 根目錄但回傳 403/405，代表主機仍在線
+        if e.code in [403, 405]:
+            return 999.0, f"HTTP {e.code} (主機在線)"
+        return None, f"HTTP Error {e.code}"
+    except Exception as e:
+        return None, f"連線異常: {type(e).__name__}"
 
 
-async def test_spider_speed(url: str) -> float | None:
-    """非同步包裝測速函式"""
+async def test_spider_speed(url: str) -> tuple[float | None, str]:
     return await asyncio.to_thread(_sync_check_url, url)
 
 
-def handle_failure(
-    file_path: Path, 
-    ng_dir: Path, 
-    fail_history: dict, 
-    today_str: str, 
-    immediate: bool = False
+def record_or_move_failure(
+    file_path: Path,
+    ng_dir: Path,
+    fail_history: dict,
+    today_str: str,
+    reason: str,
+    immediate: bool = False,
+    dry_run_move: bool = False
 ) -> str:
-    """
-    處理檔案失效：
-    - immediate=True（重覆或 JSON 格式毀損）：立即移入對應的 NG/
-    - immediate=False（連線超時/失效）：檢查是否已跨日連續兩天失效，達標才移入對應的 NG/
-    """
-    ng_dir.mkdir(parents=True, exist_ok=True)
-    target_ng_path = ng_dir / file_path.name
+    """記錄首次失效日期；僅在跨日連續兩天失效（或明確重覆）時移入 NG"""
     file_key = file_path.name
+    target_ng_path = ng_dir / file_key
 
     if immediate:
         fail_history.pop(file_key, None)
-        if file_path.resolve() != target_ng_path.resolve():
+        if not dry_run_move and file_path.resolve() != target_ng_path.resolve():
             shutil.move(str(file_path), str(target_ng_path))
+        print(f"  [立即移入NG] {file_key} -> 原因: {reason}")
         return "moved_ng"
 
     first_fail_str = fail_history.get(file_key)
     if not first_fail_str:
         fail_history[file_key] = today_str
+        print(f"  [第1天失效觀察] {file_key} -> 原因: {reason}")
         return "pending_day1"
 
-    first_fail_date = date.fromisoformat(first_fail_str)
-    today_date = date.fromisoformat(today_str)
-    days_elapsed = (today_date - first_fail_date).days
-
+    days_elapsed = (date.fromisoformat(today_str) - date.fromisoformat(first_fail_str)).days
     if days_elapsed >= 1:
         fail_history.pop(file_key, None)
-        if file_path.resolve() != target_ng_path.resolve():
+        if not dry_run_move and file_path.resolve() != target_ng_path.resolve():
             shutil.move(str(file_path), str(target_ng_path))
+        print(f"  [連續{days_elapsed + 1}天失效移入NG] {file_key} -> 原因: {reason}")
         return "moved_ng"
     else:
+        print(f"  [當日複檢仍失效] {file_key} -> 原因: {reason}")
         return "pending_day1"
 
 
@@ -161,43 +217,42 @@ async def process_file(
     fail_history: dict,
     today_str: str
 ):
-    """檢驗單一設定檔並執行去重、測速與跨日失效處置"""
     async with semaphore:
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = json.load(f)
-        except Exception:
-            status = handle_failure(file_path, ng_dir, fail_history, today_str, immediate=True)
+        content = parse_flexible_content(file_path)
+        if content is None:
+            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "無法解析內容或空檔", immediate=True)
             return {"_status": status, "file_name": file_path.name}
 
         primary_url = extract_primary_url(content)
-        if not primary_url or primary_url in seen_urls:
-            status = handle_failure(file_path, ng_dir, fail_history, today_str, immediate=True)
+        if not primary_url:
+            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "檔案內找不到有效網址", immediate=True)
+            return {"_status": status, "file_name": file_path.name}
+
+        if primary_url in seen_urls:
+            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"網址重覆 ({primary_url})", immediate=True)
             return {"_status": status, "file_name": file_path.name}
 
         seen_urls.add(primary_url)
 
-        speed = await test_spider_speed(primary_url)
+        speed, msg = await test_spider_speed(primary_url)
         if speed is None:
-            status = handle_failure(file_path, ng_dir, fail_history, today_str, immediate=False)
+            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"{msg} ({primary_url})", immediate=False)
             return {"_status": status, "file_name": file_path.name}
 
+        # 連線成功，清除歷史失效紀錄
         fail_history.pop(file_path.name, None)
 
-        is_adult = is_adult_content(content, file_path.name)
         return {
             "_status": "valid",
             "file_name": file_path.name,
-            "origin_path": str(file_path),
             "response_time_ms": speed,
-            "is_adult": is_adult,
+            "is_adult": is_adult_content(content, file_path.name),
             "url": primary_url,
             "data": content
         }
 
 
 def save_and_split(entries: list, box_path: Path, fun_path: Path):
-    """依一般類與成人類拆分，並按延遲由低到高排序寫入"""
     box_list = [e for e in entries if not e["is_adult"]]
     fun_list = [e for e in entries if e["is_adult"]]
 
@@ -221,7 +276,7 @@ async def process_directory(
     seen_urls: set,
     today_str: str
 ) -> dict:
-    """統一處理單一來源資料夾（PY / JS / COLLECT）的過濾、觀察與匯出"""
+    print(f"\n>>> 開始掃描目錄：{target_dir.name}/")
     ng_dir = target_dir / "NG"
     history_file = target_dir / ".fail_history.json"
     ng_dir.mkdir(parents=True, exist_ok=True)
@@ -230,9 +285,11 @@ async def process_directory(
 
     files = []
     if target_dir.exists():
-        for f in target_dir.glob("*.json"):
-            if f.parent != ng_dir and not f.name.startswith("."):
-                files.append(f)
+        # 同時支援 .json 與 .txt
+        for ext in ("*.json", "*.txt"):
+            for f in target_dir.glob(ext):
+                if f.parent != ng_dir and not f.name.startswith("."):
+                    files.append(f)
 
     tasks = [
         process_file(f, ng_dir, semaphore, seen_urls, fail_history, today_str)
@@ -290,10 +347,8 @@ async def main():
     with open(REPORT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(report_lines) + "\n")
 
-    print("\n所有目錄檢測與分類完成：")
-    print(f"- [PY] -> {BOX_PY_FILE.name} ({len(py_stat['box'])}), {FUN_PY_FILE.name} ({len(py_stat['fun'])}) | 觀察中: {py_stat['pending_count']} | 移入 NG: {py_stat['moved_count']}")
-    print(f"- [JS] -> {BOX_JS_FILE.name} ({len(js_stat['box'])}), {FUN_JS_FILE.name} ({len(js_stat['fun'])}) | 觀察中: {js_stat['pending_count']} | 移入 NG: {js_stat['moved_count']}")
-    print(f"- [CT] -> {BOX_CT_FILE.name} ({len(ct_stat['box'])}), {FUN_CT_FILE.name} ({len(ct_stat['fun'])}) | 觀察中: {ct_stat['pending_count']} | 移入 NG: {ct_stat['moved_count']}")
+    print("\n==========================================")
+    print("所有目錄檢測與分類完成！")
 
 
 if __name__ == "__main__":
