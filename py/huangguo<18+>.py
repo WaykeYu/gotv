@@ -20,7 +20,6 @@ class Spider(Spider):
     def homeContent(self, filter):
         classes = [
             {"type_id": "all", "type_name": "全部作品"},
-            # 地區與特色分類 (13項)
             {"type_id": "國產", "type_name": "國產"},
             {"type_id": "歐美", "type_name": "歐美"},
             {"type_id": "日本", "type_name": "日本"},
@@ -34,7 +33,6 @@ class Spider(Spider):
             {"type_id": "女同", "type_name": "女同"},
             {"type_id": "戶外露出", "type_name": "戶外露出"},
             {"type_id": "調教", "type_name": "調教"},
-            # 題材與標籤 (18項)
             {"type_id": "豪門", "type_name": "豪門"},
             {"type_id": "都市故事", "type_name": "都市故事"},
             {"type_id": "現代", "type_name": "現代"},
@@ -59,6 +57,78 @@ class Spider(Spider):
     def homeVideoContent(self):
         return self.categoryContent("all", "1", False, {})
 
+    def _extract_cards(self, soup):
+        videos = []
+        seen_urls = set()
+
+        # 尋找所有包含「集可觀看」或「開始觀看」的連結或父容器
+        for a in soup.find_all("a", href=True):
+            href = a.get("href", "").strip()
+            # 排除導覽列、分頁、登入、標籤篩選連結
+            if not href or href in ["/", "/zh-hant/", "/zh-hant/library/"]:
+                continue
+            if any(skip in href for skip in ["?page=", "?tag=", "/login", "/register", "/terms", "/privacy", "javascript:", "mailto:"]):
+                continue
+            if href.startswith("http") and not href.startswith(self.host):
+                continue
+
+            # 往上找最多 2 層父元素，涵蓋完整卡片文字與圖片
+            card = a
+            for _ in range(2):
+                if card.parent and ("集可觀看" not in card.get_text() and card.parent.name in ["div", "article", "li"]):
+                    card = card.parent
+
+            card_text = card.get_text(" ", strip=True)
+            if "集可觀看" not in card_text and "開始觀看" not in card_text:
+                continue
+
+            full_url = href if href.startswith("http") else self.host + href
+            if full_url in seen_urls:
+                continue
+
+            # 提取劇名（優先找標題標籤或圖片 alt，避免抓到「開始觀看→」）
+            title = ""
+            for tag in card.find_all(["h2", "h3", "h4", "strong"]):
+                t = tag.get_text(strip=True)
+                if t and "集可觀看" not in t and "開始觀看" not in t and len(t) >= 2:
+                    title = t
+                    break
+            if not title:
+                img = card.find("img")
+                if img and img.get("alt"):
+                    title = img.get("alt").strip()
+            if not title:
+                raw_a = a.get_text(strip=True)
+                if raw_a and "開始觀看" not in raw_a and "集可觀看" not in raw_a:
+                    title = raw_a
+
+            if not title or len(title) < 2:
+                continue
+
+            # 提取封面圖
+            pic = ""
+            img_el = card.find("img")
+            if img_el:
+                pic = img_el.get("src") or img_el.get("data-src") or ""
+                if pic and not pic.startswith("http"):
+                    pic = self.host + pic
+
+            # 提取集數備註
+            remarks = ""
+            ep_match = re.search(r"(\d+\s*集可觀看)", card_text)
+            if ep_match:
+                remarks = ep_match.group(1)
+
+            seen_urls.add(full_url)
+            videos.append({
+                "vod_id": full_url,
+                "vod_name": title,
+                "vod_pic": pic,
+                "vod_remarks": remarks
+            })
+
+        return videos
+
     def categoryContent(self, tid, pg, filter, extend):
         url = f"{self.host}/zh-hant/library/?page={pg}"
         if tid != "all":
@@ -66,44 +136,14 @@ class Spider(Spider):
         
         res = requests.get(url, headers=self.headers, timeout=10)
         soup = BeautifulSoup(res.text, "html.parser")
-        videos = []
-
-        # 解析片庫卡片列表
-        for a in soup.find_all("a", href=re.compile(r"/zh-hant/(drama|watch|series)/")):
-            href = a.get("href", "")
-            if not href:
-                continue
-            full_url = href if href.startswith("http") else self.host + href
-            
-            title_el = a.find(["h2", "h3", "h4"])
-            title = title_el.get_text(strip=True) if title_el else a.get_text(strip=True)
-            if not title or len(title) < 2:
-                continue
-
-            img_el = a.find("img")
-            pic = img_el.get("src", "") if img_el else ""
-            if pic and not pic.startswith("http"):
-                pic = self.host + pic
-
-            remarks = ""
-            ep_match = re.search(r"(\d+\s*集可觀看)", a.get_text())
-            if ep_match:
-                remarks = ep_match.group(1)
-
-            if not any(v["vod_id"] == full_url for v in videos):
-                videos.append({
-                    "vod_id": full_url,
-                    "vod_name": title,
-                    "vod_pic": pic,
-                    "vod_remarks": remarks
-                })
+        videos = self._extract_cards(soup)
 
         return {
             "list": videos,
             "page": int(pg),
             "pagecount": 22,
             "limit": 24,
-            "total": 1084
+            "total": 1085
         }
 
     def detailContent(self, ids):
@@ -119,16 +159,19 @@ class Spider(Spider):
         pic = img_el["content"] if img_el else ""
 
         play_list = []
-        ep_links = soup.find_all("a", href=re.compile(r"(ep|episode|watch|play)"))
-        for idx, ep in enumerate(ep_links, 1):
-            ep_url = ep.get("href")
-            if not ep_url.startswith("http"):
-                ep_url = self.host + ep_url
-            ep_name = ep.get_text(strip=True) or f"第{idx}集"
-            play_list.append(f"{ep_name}${ep_url}")
+        seen_eps = set()
+        # 尋找詳情頁內所有集數按鈕或連結
+        for a in soup.find_all("a", href=True):
+            ep_href = a.get("href", "").strip()
+            ep_text = a.get_text(strip=True)
+            if re.search(r"(第\s*\d+\s*集|EP\s*\d+|^\d+$)", ep_text, re.I) or re.search(r"/(ep|episode|watch|play)/", ep_href):
+                full_ep = ep_href if ep_href.startswith("http") else self.host + ep_href
+                if full_ep not in seen_eps:
+                    seen_eps.add(full_ep)
+                    play_list.append(f"{ep_text or f'第{len(play_list)+1}集'}${full_ep}")
 
         if not play_list:
-            play_list.append(f"第1集${url}")
+            play_list.append(f"立即觀看${url}")
 
         vod = {
             "vod_id": url,
@@ -144,31 +187,16 @@ class Spider(Spider):
         url = f"{self.host}/zh-hant/library/?q={urllib.parse.quote(key)}&page={pg}"
         res = requests.get(url, headers=self.headers, timeout=10)
         soup = BeautifulSoup(res.text, "html.parser")
-        videos = []
-        for a in soup.find_all("a", href=re.compile(r"/zh-hant/(drama|watch|series)/")):
-            href = a.get("href", "")
-            full_url = href if href.startswith("http") else self.host + href
-            title_el = a.find(["h2", "h3", "h4"])
-            title = title_el.get_text(strip=True) if title_el else ""
-            if title and not any(v["vod_id"] == full_url for v in videos):
-                img_el = a.find("img")
-                pic = img_el.get("src", "") if img_el else ""
-                videos.append({
-                    "vod_id": full_url,
-                    "vod_name": title,
-                    "vod_pic": pic,
-                    "vod_remarks": "短劇"
-                })
-        return {"list": videos}
+        return {"list": self._extract_cards(soup)}
 
     def playerContent(self, flag, id, vipFlags):
         try:
             res = requests.get(id, headers=self.headers, timeout=10)
-            m3u8_match = re.search(r'(https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*)', res.text)
+            m3u8_match = re.search(r'(https?://[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)', res.text)
             if m3u8_match:
                 return {
                     "parse": 0,
-                    "url": m3u8_match.group(1),
+                    "url": m3u8_match.group(1).replace("\\/", "/"),
                     "header": json.dumps(self.headers)
                 }
         except Exception:
