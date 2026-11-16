@@ -8,7 +8,7 @@ import inspect
 from pathlib import Path
 from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, date
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -24,6 +24,7 @@ PY_DIR = BASE_DIR / "py"
 JS_DIR = BASE_DIR / "js"
 COLLECT_DIR = BASE_DIR / "collect"
 REPORT_FILE = BASE_DIR / "SPIDER_STATUS.md"
+HISTORY_FILE = BASE_DIR / "spider_fail_history.json"  # 連續失效日期追蹤檔
 
 BOX_PY_FILE = BASE_DIR / "box_py.json"
 FUN_PY_FILE = BASE_DIR / "fun_py.json"
@@ -151,6 +152,21 @@ def create_reusable_session() -> requests.Session:
 GLOBAL_SESSION = create_reusable_session()
 
 
+def load_fail_history() -> dict:
+    if HISTORY_FILE.exists():
+        try:
+            data = json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
+        except Exception:
+            pass
+    return {}
+
+
+def save_fail_history(history: dict):
+    HISTORY_FILE.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def is_adult_content(file_name: str, code: str, target_url: str) -> bool:
     sample_text = f"{file_name} {target_url} {code[:2000]}"
     return bool(ADULT_REGEX.search(sample_text))
@@ -249,7 +265,6 @@ def has_code_one(text: str) -> bool:
 def test_url_alive(url: str, is_collect: bool = False) -> tuple[bool, str]:
     try:
         test_target = url
-        # 采集站 API 自動補上 ?ac=list 測試標準清單介面
         if is_collect and "provide/vod" in url and "?" not in url:
             test_target = f"{url.rstrip('/')}/?ac=list"
 
@@ -259,7 +274,6 @@ def test_url_alive(url: str, is_collect: bool = False) -> tuple[bool, str]:
             headers["Host"] = parsed.netloc
             headers["Referer"] = f"{parsed.scheme}://{parsed.netloc}/"
 
-        # 采集站模式：直接 GET 並驗證回傳內容是否包含 "code": 1
         if is_collect:
             resp = GLOBAL_SESSION.get(test_target, headers=headers, timeout=12, allow_redirects=True, verify=False)
             body_snippet = resp.text[:4096] if resp.text else ""
@@ -267,14 +281,12 @@ def test_url_alive(url: str, is_collect: bool = False) -> tuple[bool, str]:
             if has_code_one(body_snippet):
                 return True, f"HTTP {resp.status_code} (code:1)"
 
-            # 若未回傳 code:1，檢查是否為常見 CDN/WAF 防護狀態碼
             waf_codes = {401, 403, 405, 406, 412, 429, 502, 503, 520, 521, 522, 523, 524}
             if resp.status_code in waf_codes:
                 return True, f"HTTP {resp.status_code} (WAF/受限)"
 
             return False, f"HTTP {resp.status_code} (無 code:1)"
 
-        # 一般爬蟲模式 (Python / JS)
         try:
             resp = GLOBAL_SESSION.head(test_target, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
             if resp.status_code == 405:
@@ -328,7 +340,6 @@ def check_spider_file(file_info: tuple) -> dict:
 
     candidate_urls = []
 
-    # 若為 Collect 類型且內容是單站 JSON，優先抓取 api 欄位
     if is_collect and ext == "json":
         try:
             parsed_json = json.loads(code)
@@ -402,7 +413,6 @@ def check_spider_file(file_info: tuple) -> dict:
         alive_info = None
         for raw_target in candidate_urls:
             if is_collect:
-                # Collect 優先測完整 API 網址（以驗證 "code":1），失敗才測根網域
                 ping_targets = [raw_target]
                 root_ping = clean_test_url(raw_target)
                 if root_ping not in ping_targets:
@@ -576,9 +586,14 @@ def main():
 
     target_files = []
     collect_bundle_entries = []
-    exclude_outputs = {"box_js.json", "fun_js.json", "box_py.json", "fun_py.json", "box_ct.json", "fun_ct.json"}
+    exclude_outputs = {
+        "box_js.json", "fun_js.json",
+        "box_py.json", "fun_py.json",
+        "box_ct.json", "fun_ct.json",
+        "spider_fail_history.json"
+    }
 
-    # 1. 遞迴搜尋 PY 目錄（避開各層級的 NG 資料夾）
+    # 1. 遞迴搜尋 PY 目錄
     if PY_DIR.exists():
         for root, dirs, files in os.walk(PY_DIR):
             if "NG" in dirs:
@@ -600,7 +615,7 @@ def main():
                     full = Path(root) / f
                     target_files.append(("JS", str(full.relative_to(BASE_DIR)), str(full)))
 
-    # 3. 遞迴搜尋 COLLECT 目錄（支援單站 JSON、多站合集 JSON 與 JS/PY 腳本）
+    # 3. 遞迴搜尋 COLLECT 目錄
     if COLLECT_DIR.exists():
         for root, dirs, files in os.walk(COLLECT_DIR):
             if "NG" in dirs:
@@ -646,21 +661,61 @@ def main():
             results.append(r)
             print(f"[{r['type']}][{r['status']}] {r['file']} ({r['latency_ms']}ms) -> {r['detail']}")
 
-    # 隔離失效檔案
+    # --- 連續兩天失效判定與隔離機制 ---
+    today_str = date.today().isoformat()  # 例如 "2026-11-16"
+    fail_history = load_fail_history()
+    active_keys = {r["file"] for r in results}
+
+    # 清理已不存在或已被手動移走的舊紀錄
+    for stale_key in list(fail_history.keys()):
+        if stale_key not in active_keys:
+            fail_history.pop(stale_key, None)
+
     moved_count = 0
+    watching_count = 0
     valid_results = []
+
     for r in results:
+        file_key = r["file"]
         if "❌" in r["status"]:
-            if not r.get("is_bundle_entry"):
-                try:
-                    new_rel = move_to_ng(r["full_path"])
-                    r["detail"] += f" ➔ 已移至 `{new_rel}`"
-                    moved_count += 1
-                except Exception as e:
-                    r["detail"] += f" (移動失敗: {str(e)[:20]})"
+            record = fail_history.get(file_key)
+            if not record:
+                # 首次失效：登記今日日期，進入觀察期，暫不移入 NG/
+                fail_history[file_key] = {
+                    "first_fail_date": today_str,
+                    "last_fail_date": today_str
+                }
+                r["status"] = "⏳ 觀察中(首日失效)"
+                r["detail"] += f" ➔ 首次失效 ({today_str})，明日仍失效才移入 NG"
+                watching_count += 1
+            else:
+                first_date = record.get("first_fail_date", today_str)
+                if first_date == today_str:
+                    # 同一天內重複執行腳本：維持首日觀察狀態，不誤移
+                    r["status"] = "⏳ 觀察中(首日失效)"
+                    r["detail"] += f" ➔ 今日已記錄首次失效 ({today_str})，明日仍失效才移入 NG"
+                    watching_count += 1
+                else:
+                    # 跨日（連續兩天以上）依然失效：正式移入 NG/ 並清除追蹤紀錄
+                    if not r.get("is_bundle_entry"):
+                        try:
+                            new_rel = move_to_ng(r["full_path"])
+                            r["detail"] += f" ➔ 連續兩天失效 (自 {first_date} 起)，已移至 `{new_rel}`"
+                            moved_count += 1
+                            fail_history.pop(file_key, None)
+                        except Exception as e:
+                            r["detail"] += f" (移動失敗: {str(e)[:20]})"
+                    else:
+                        r["detail"] += f" ➔ 合集條目連續兩天失效 (自 {first_date} 起)"
+                        fail_history[file_key]["last_fail_date"] = today_str
         else:
+            # 檢測通過（或恢復正常）：若先前在觀察名單內則移除紀錄
+            if file_key in fail_history:
+                fail_history.pop(file_key, None)
+                r["detail"] += " (已恢復正常，清除失效紀錄)"
             valid_results.append(r)
 
+    save_fail_history(fail_history)
     valid_results.sort(key=lambda x: x["latency_ms"])
 
     # 匯出 Python 配置
@@ -677,7 +732,7 @@ def main():
     generate_tvbox_json(box_js_items, BOX_JS_FILE, spider_type="js")
     generate_tvbox_json(fun_js_items, FUN_JS_FILE, spider_type="js")
 
-    # 匯出 Collect 采集配置（參考 box1.json 格式）
+    # 匯出 Collect 采集配置
     ct_valid = [r for r in valid_results if r["type"] == "Collect"]
     box_ct_items = deduplicate_sites([r for r in ct_valid if not r["is_adult"]])
     fun_ct_items = deduplicate_sites([r for r in ct_valid if r["is_adult"]])
@@ -691,7 +746,8 @@ def main():
     print(f"🔞 JS/JSON 成人類：{FUN_JS_FILE.name} (可用: {len(fun_js_items)})")
     print(f"✅ Collect 一般類：{BOX_CT_FILE.name} (可用: {len(box_ct_items)})")
     print(f"🔞 Collect 成人類：{FUN_CT_FILE.name} (可用: {len(fun_ct_items)})")
-    print(f"📁 總計失效已隔離檔案：{moved_count} 個")
+    print(f"⏳ 首日失效觀察中：{watching_count} 個")
+    print(f"📁 連續兩天失效已隔離：{moved_count} 個")
     print("=" * 50 + "\n")
 
     # 生成 Markdown 狀態報告
@@ -700,7 +756,7 @@ def main():
     md = [
         "# 🕷️ 影音網站爬蟲有效性檢測與配置生成報告\n",
         f"> **檢測時間**：`{now_str}`  \n",
-        f"> **總檢測項目**：{len(results)} ｜ ✅ 有效可用：**{len(valid_results)}** ｜ ❌ 已隔離至各層 NG：**{moved_count}**\n",
+        f"> **總檢測項目**：{len(results)} ｜ ✅ 有效可用：**{len(valid_results)}** ｜ ⏳ 首日觀察：**{watching_count}** ｜ ❌ 連續兩天失效已隔離：**{moved_count}**\n",
         "### 📦 設定檔匯總\n",
         f"- 📺 **Python 一般類**：[`box_py.json`](./box_py.json) (共 **{len(box_py_items)}** 筆)",
         f"- 🔞 **Python 成人類**：[`fun_py.json`](./fun_py.json) (共 **{len(fun_py_items)}** 筆)",
