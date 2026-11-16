@@ -11,10 +11,10 @@
       "filterable": 1
     },
     {
-      "key": "js_cilixiong",
-      "name": "磁力熊[磁](JS)",
+      "key": "js_index.config",
+      "name": "默认(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/cilixiong.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/index.config.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -29,10 +29,10 @@
       "filterable": 1
     },
     {
-      "key": "js_555影视",
-      "name": "电影(JS)",
+      "key": "js_cilixiong",
+      "name": "磁力熊[磁](JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/555影视.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/cilixiong.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -47,28 +47,10 @@
       "filterable": 1
     },
     {
-      "key": "js_index.config",
-      "name": "默认(JS)",
+      "key": "js_555影视",
+      "name": "电影(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/index.config.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_tzfile",
-      "name": "团长资源(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/tzfile.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_huya",
-      "name": "虎牙直播(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/huya.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/555影视.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -83,28 +65,19 @@
       "filterable": 1
     },
     {
-      "key": "js_meijumi",
-      "name": "美剧迷[磁](JS)",
+      "key": "js_央视频",
+      "name": "央视(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/meijumi.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/央视频.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
     },
     {
-      "key": "js_低端影视",
-      "name": "电影(JS)",
+      "key": "js_tzfile",
+      "name": "团长资源(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/低端影视.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_kkpans",
-      "name": "KK網盤[磁](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/kkpans.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/tzfile.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -119,28 +92,46 @@
       "filterable": 1
     },
     {
+      "key": "js_低端影视",
+      "name": "电影(JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/低端影视.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_huya",
+      "name": "虎牙直播(JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/huya.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_kkpans",
+      "name": "KK網盤[磁](JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/kkpans.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_meijumi",
+      "name": "美剧迷[磁](JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/meijumi.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
       "key": "js_imaple",
       "name": "楓林網(JS)",
       "type": 3,
       "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/imaple.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_新韩剧网",
-      "name": "韩剧(JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/新韩剧网.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "js_xzys",
-      "name": "校长影视[云盘](JS)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/xzys.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -155,10 +146,10 @@
       "filterable": 1
     },
     {
-      "key": "js_B站",
-      "name": "排序(JS)",
+      "key": "js_新韩剧网",
+      "name": "韩剧(JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/B站.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/新韩剧网.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -173,10 +164,10 @@
       "filterable": 1
     },
     {
-      "key": "js_央视频",
-      "name": "央视(JS)",
+      "key": "js_xzys",
+      "name": "校长影视[云盘](JS)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/央视频.js",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/xzys.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -191,10 +182,28 @@
       "filterable": 1
     },
     {
+      "key": "js_B站",
+      "name": "排序(JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/B站.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
       "key": "js_88ball",
       "name": "88看球(JS)",
       "type": 3,
       "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/88ball.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "js_嘀嗒影视",
+      "name": "电影(JS)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/js/嘀嗒影视.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
