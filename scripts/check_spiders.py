@@ -26,9 +26,6 @@ FUN_JS_FILE = BASE_DIR / "fun_js.json"
 BOX_CT_FILE = BASE_DIR / "box_ct.json"
 FUN_CT_FILE = BASE_DIR / "fun_ct.json"
 
-# 統合廣告攔截共用檔
-ADBLOCK_FILE = BASE_DIR / "adblock.json"
-
 # 成人類特徵關鍵字
 ADULT_KEYWORDS = [
     "成人", "福利", "18+", "18禁", "伦理", "倫理", "情色", "色情",
@@ -36,54 +33,53 @@ ADULT_KEYWORDS = [
     "里番", "無碼", "无码", "有碼", "有码", "女優", "女优", "蜜桃", "麻豆"
 ]
 
-# ================= 統合廣告攔截設定中心 =================
-UNIFIED_ADBLOCK = {
-    "ads": [
-        "mimg.0c1q0l.cn", "www.googletagmanager.com", "www.google-analytics.com",
-        "mc.usihnbcq.cn", "mg.g1mm3d.cn", "mscs.svaeuzh.cn", "cnzz.hhttm.top",
-        "tp.vinuxhome.com", "cnzz.mmstat.com", "www.baihuillq.com", "s23.cnzz.com",
-        "z3.cnzz.com", "c.cnzz.com", "stj.v1vo.top", "z12.cnzz.com", "img.mosflower.cn",
-        "tips.gamevvip.com", "ehwe.yhdtns.com", "xdn.cqqc3.com", "www.jixunkyy.cn",
-        "sp.chemacid.cn", "hm.baidu.com", "s9.cnzz.com", "z6.cnzz.com", "um.cavuc.com",
-        "mav.mavuz.com", "wofwk.aoidf3.com", "z5.cnzz.com", "xc.hubeijieshikj.cn",
-        "tj.tianwenhu.com", "xg.gars57.cn", "k.jinxiuzhilv.com", "cdn.bootcss.com",
-        "ppl.xunzhuo123.com", "xomk.jiangjunmh.top", "img.xunzhuo123.com", "z1.cnzz.com",
-        "s13.cnzz.com", "xg.huataisangao.cn", "z7.cnzz.com", "z2.cnzz.com",
-        "s96.cnzz.com", "q11.cnzz.com", "thy.dacedsfa.cn", "xg.whsbpw.cn",
-        "s19.cnzz.com", "z8.cnzz.com", "s4.cnzz.com", "f5w.as12df.top", "ae01.alicdn.com",
-        "www.92424.cn", "k.wudejia.com", "vivovip.mmszxc.top", "qiu.xixiqiu.com",
-        "cdnjs.hnfenxun.com", "cms.qdwght.com", "api.htpan.net",
-        "googlesyndication.com", "doubleclick.net", "adservice.google.com",
-        "pagead2.googlesyndication.com", "umeng.com", "log.aliyuncs.com"
-    ],
-    "rules": [
-        {
-            "name": "量子廣告攔截",
-            "hosts": ["vip.lz", "hd.lz", "v.cdnlz", "cdnlz"],
-            "regex": ["18.5333", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-        },
-        {
-            "name": "非凡廣告攔截",
-            "hosts": ["vip.ffzy", "hd.ffzy", "ffzy"],
-            "regex": ["25.0666", "25.08", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-        },
-        {
-            "name": "暴風廣告攔截",
-            "hosts": ["bfzy", "s5.bfzycdn"],
-            "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-        },
-        {
-            "name": "索尼廣告攔截",
-            "hosts": ["suonizy", "snzy"],
-            "regex": ["15.1666", "15.2666", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-        },
-        {
-            "name": "通用切片廣告過濾",
-            "hosts": ["m3u8"],
-            "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
-        }
-    ]
-}
+# ================= 廣告攔截規則庫 =================
+ADS_DOMAINS = [
+    "mimg.0c1q0l.cn", "www.googletagmanager.com", "www.google-analytics.com",
+    "mc.usihnbcq.cn", "mg.g1mm3d.cn", "mscs.svaeuzh.cn", "cnzz.hhttm.top",
+    "tp.vinuxhome.com", "cnzz.mmstat.com", "www.baihuillq.com", "s23.cnzz.com",
+    "z3.cnzz.com", "c.cnzz.com", "stj.v1vo.top", "z12.cnzz.com", "img.mosflower.cn",
+    "tips.gamevvip.com", "ehwe.yhdtns.com", "xdn.cqqc3.com", "www.jixunkyy.cn",
+    "sp.chemacid.cn", "hm.baidu.com", "s9.cnzz.com", "z6.cnzz.com", "um.cavuc.com",
+    "mav.mavuz.com", "wofwk.aoidf3.com", "z5.cnzz.com", "xc.hubeijieshikj.cn",
+    "tj.tianwenhu.com", "xg.gars57.cn", "k.jinxiuzhilv.com", "cdn.bootcss.com",
+    "ppl.xunzhuo123.com", "xomk.jiangjunmh.top", "img.xunzhuo123.com", "z1.cnzz.com",
+    "s13.cnzz.com", "xg.huataisangao.cn", "z7.cnzz.com", "z2.cnzz.com",
+    "s96.cnzz.com", "q11.cnzz.com", "thy.dacedsfa.cn", "xg.whsbpw.cn",
+    "s19.cnzz.com", "z8.cnzz.com", "s4.cnzz.com", "f5w.as12df.top", "ae01.alicdn.com",
+    "www.92424.cn", "k.wudejia.com", "vivovip.mmszxc.top", "qiu.xixiqiu.com",
+    "cdnjs.hnfenxun.com", "cms.qdwght.com", "api.htpan.net",
+    "googlesyndication.com", "doubleclick.net", "adservice.google.com",
+    "pagead2.googlesyndication.com", "umeng.com", "log.aliyuncs.com"
+]
+
+AD_RULES = [
+    {
+        "name": "量子廣告攔截",
+        "hosts": ["vip.lz", "hd.lz", "v.cdnlz", "cdnlz"],
+        "regex": ["18.5333", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "非凡廣告攔截",
+        "hosts": ["vip.ffzy", "hd.ffzy", "ffzy"],
+        "regex": ["25.0666", "25.08", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "暴風廣告攔截",
+        "hosts": ["bfzy", "s5.bfzycdn"],
+        "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "索尼廣告攔截",
+        "hosts": ["suonizy", "snzy"],
+        "regex": ["15.1666", "15.2666", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "通用切片廣告過濾",
+        "hosts": ["m3u8"],
+        "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    }
+]
 
 TIMEOUT_SECONDS = 8
 MAX_CONCURRENT_TASKS = 20
@@ -91,6 +87,13 @@ MAX_CONCURRENT_TASKS = 20
 SSL_CONTEXT = ssl.create_default_context()
 SSL_CONTEXT.check_hostname = False
 SSL_CONTEXT.verify_mode = ssl.CERT_NONE
+
+
+def attach_adblock(payload: dict) -> dict:
+    """為匯出的 JSON 結構加上廣告攔截規則 (ads 與 rules)"""
+    payload["ads"] = list(ADS_DOMAINS)
+    payload["rules"] = [dict(r) for r in AD_RULES]
+    return payload
 
 
 def load_fail_history(history_file: Path) -> dict:
@@ -121,7 +124,7 @@ def _sync_check_url(url: str) -> tuple[float | None, str, str]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "User-Agent": "okhttp/4.12.0",
             "Accept": "*/*",
             "Connection": "keep-alive"
         }
@@ -186,7 +189,6 @@ def record_or_move_failure(
 
 def extract_url_from_script(code_text: str) -> str:
     """從 .py 或 .js 腳本中提取目標站點 URL 進行存活性測試"""
-    # 優先匹配常見變數賦值：host = "https://...", url: 'https://...', baseUrl = "..."
     patterns = [
         r'(?:host|url|baseUrl|base_url|siteUrl|api)\s*[:=]\s*["\'](https?://[^"\'\s]+)["\']',
         r'["\'](https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^"\'\s]*)["\']'
@@ -203,7 +205,7 @@ def extract_url_from_script(code_text: str) -> str:
 
 async def process_script_file(
     file_path: Path,
-    script_type: str,  # "py" 或 "js"
+    script_type: str,
     ng_dir: Path,
     semaphore: asyncio.Semaphore,
     fail_history: dict,
@@ -216,7 +218,6 @@ async def process_script_file(
             status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "空白腳本檔案", immediate=True)
             return {"_status": status, "file_name": file_path.name}
 
-        # 1. 若為 Python 腳本，先驗證語法是否合法
         if script_type == "py":
             try:
                 ast.parse(raw_code)
@@ -224,7 +225,6 @@ async def process_script_file(
                 status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"Python 語法錯誤: {e.msg}", immediate=True)
                 return {"_status": status, "file_name": file_path.name}
 
-        # 2. 提取腳本內的目標站點網址進行連線測速
         target_url = extract_url_from_script(raw_code)
         snippet = ""
         if target_url:
@@ -233,19 +233,15 @@ async def process_script_file(
                 status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"目標站點失效 {msg} ({target_url})", immediate=False)
                 return {"_status": status, "file_name": file_path.name}
         else:
-            # 純算法/無硬編碼網址腳本，給予基準響應時間
             speed = 500.0
 
-        # 連線成功，清除失效觀察紀錄
         fail_history.pop(file_path.name, None)
 
-        # 提取顯示名稱（嘗試從腳本註解或變數取名，否則用檔名）
         title_match = re.search(r'(?:title|name)\s*[:=]\s*["\']([^"\']+)["\']', raw_code)
         site_name = title_match.group(1).strip() if title_match else file_path.stem
 
         is_adult = check_is_adult(f"{raw_code} {snippet}", file_path.name)
 
-        # 組裝為標準 TVBox site 物件（指向 GitHub Raw 路徑）
         raw_github_url = f"https://raw.githubusercontent.com/WaykeYu/gotv/main/{script_type}/{file_path.name}"
         site_entry = {
             "key": f"{script_type}_{file_path.stem}",
@@ -292,24 +288,30 @@ def parse_flexible_content(file_path: Path):
     return None
 
 
-def extract_primary_url(content) -> str:
+def extract_primary_url_and_name(content, fallback_name: str) -> tuple[str, str]:
+    """提取網址與顯示名稱，供組裝標準多倉格式使用"""
     if isinstance(content, list) and content:
-        return extract_primary_url(content[0])
+        return extract_primary_url_and_name(content[0], fallback_name)
     if not isinstance(content, dict):
-        return ""
+        return "", fallback_name
+
+    name = str(content.get("name") or fallback_name).strip()
+
     for key in ["url", "spider", "jar", "api", "wallpaper", "live"]:
         val = content.get(key, "")
         if isinstance(val, str) and val.startswith(("http://", "https://")):
-            return val.split(";")[0].strip()
+            return val.split(";")[0].strip(), name
+
     for list_key in ["urls", "sites"]:
         items = content.get(list_key, [])
         if isinstance(items, list):
             for item in items:
                 if isinstance(item, dict):
                     u = str(item.get("url") or item.get("api") or "")
+                    item_name = str(item.get("name") or name).strip()
                     if u.startswith(("http://", "https://")):
-                        return u.split(";")[0].strip()
-    return ""
+                        return u.split(";")[0].strip(), item_name
+    return "", name
 
 
 async def process_collect_file(
@@ -327,7 +329,7 @@ async def process_collect_file(
             status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "無法解析內容或空檔", immediate=True)
             return {"_status": status, "file_name": file_path.name}
 
-        primary_url = extract_primary_url(content)
+        primary_url, display_name = extract_primary_url_and_name(content, file_path.stem)
         if not primary_url:
             status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "找不到有效網址", immediate=True)
             return {"_status": status, "file_name": file_path.name}
@@ -348,38 +350,26 @@ async def process_collect_file(
         local_str = json.dumps(content, ensure_ascii=False)
         is_adult = check_is_adult(f"{local_str} {remote_snippet}", file_path.name)
 
-        # 統合注入廣告攔截（若是字典格式）
-        if isinstance(content, dict):
-            old_ads = content.get("ads") if isinstance(content.get("ads"), list) else []
-            content["ads"] = list(dict.fromkeys(old_ads + UNIFIED_ADBLOCK["ads"]))
-            old_rules = content.get("rules") if isinstance(content.get("rules"), list) else []
-            exist_names = {r.get("name") for r in old_rules if isinstance(r, dict)}
-            for r in UNIFIED_ADBLOCK["rules"]:
-                if r["name"] not in exist_names:
-                    old_rules.append(r)
-            content["rules"] = old_rules
-
         return {
             "_status": "valid",
             "file_name": file_path.name,
+            "name": display_name,
+            "url": primary_url,
             "response_time_ms": speed,
-            "is_adult": is_adult,
-            "data": content
+            "is_adult": is_adult
         }
 
 
 def save_script_output(entries: list, box_path: Path, fun_path: Path):
-    """將 PY / JS 有效站點組裝為標準 TVBox 單一設定檔，並於頂層統合掛載廣告攔截"""
+    """匯出 box_py.json / fun_py.json 與 box_js.json / fun_js.json，並各自加上廣告攔截"""
     box_entries = sorted([e for e in entries if not e["is_adult"]], key=lambda x: x["response_time_ms"])
     fun_entries = sorted([e for e in entries if e["is_adult"]], key=lambda x: x["response_time_ms"])
 
     for target_list, out_file in [(box_entries, box_path), (fun_entries, fun_path)]:
-        output_obj = {
+        output_obj = attach_adblock({
             "spider": "",
-            "sites": [e["site_entry"] for e in target_list],
-            "ads": UNIFIED_ADBLOCK["ads"],
-            "rules": UNIFIED_ADBLOCK["rules"]
-        }
+            "sites": [e["site_entry"] for e in target_list]
+        })
         with open(out_file, "w", encoding="utf-8") as f:
             json.dump(output_obj, f, ensure_ascii=False, indent=2)
 
@@ -387,15 +377,22 @@ def save_script_output(entries: list, box_path: Path, fun_path: Path):
 
 
 def save_collect_output(entries: list, box_path: Path, fun_path: Path):
-    """依一般類與成人類拆分 COLLECT，並按響應速度由快到慢排序匯出"""
+    """匯出 box_ct.json 與 fun_ct.json（標準多倉格式），並各自加上廣告攔截"""
     box_entries = sorted([e for e in entries if not e["is_adult"]], key=lambda x: x["response_time_ms"])
     fun_entries = sorted([e for e in entries if e["is_adult"]], key=lambda x: x["response_time_ms"])
 
-    with open(box_path, "w", encoding="utf-8") as f:
-        json.dump([e["data"] for e in box_entries], f, ensure_ascii=False, indent=2)
-
-    with open(fun_path, "w", encoding="utf-8") as f:
-        json.dump([e["data"] for e in fun_entries], f, ensure_ascii=False, indent=2)
+    for target_list, out_file in [(box_entries, box_path), (fun_entries, fun_path)]:
+        multi_repo_obj = attach_adblock({
+            "urls": [
+                {
+                    "url": e["url"],
+                    "name": f"{e['name']} [{int(e['response_time_ms'])}ms]"
+                }
+                for e in target_list
+            ]
+        })
+        with open(out_file, "w", encoding="utf-8") as f:
+            json.dump(multi_repo_obj, f, ensure_ascii=False, indent=2)
 
     return box_entries, fun_entries
 
@@ -474,20 +471,16 @@ async def main():
     seen_urls = set()
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_TASKS)
 
-    # 1. 匯出統合廣告攔截規則檔
-    with open(ADBLOCK_FILE, "w", encoding="utf-8") as f:
-        json.dump(UNIFIED_ADBLOCK, f, ensure_ascii=False, indent=2)
-
-    # 2. 分別處理 PY (*.py)、JS (*.js)、COLLECT (*.json / *.txt)
+    # 分別處理 PY (*.py)、JS (*.js)、COLLECT (*.json / *.txt)，各自寫入廣告攔截規則
     py_stat = await run_script_dir(PY_DIR, "py", BOX_PY_FILE, FUN_PY_FILE, semaphore, today_str)
     js_stat = await run_script_dir(JS_DIR, "js", BOX_JS_FILE, FUN_JS_FILE, semaphore, today_str)
     ct_stat = await run_collect_dir(COLLECT_DIR, BOX_CT_FILE, FUN_CT_FILE, semaphore, seen_urls, today_str)
 
-    # 3. 產生報告
+    # 產生報告
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     report_lines = [
         "# Spider Status Report",
-        f"> 更新時間：{now_str}（已統合廣告攔截規則至 `adblock.json` 及各配置檔）\n",
+        f"> 更新時間：{now_str}（六支匯出檔案皆已內建廣告攔截 `ads` 與 `rules`）\n",
         "### 統計摘要",
         f"- **PY 目錄**：一般類 `{len(py_stat['box'])}` 筆 / 成人類 `{len(py_stat['fun'])}` 筆（觀察中 `{py_stat['pending_count']}` 筆 / 移入 NG `{py_stat['moved_count']}` 筆）",
         f"- **JS 目錄**：一般類 `{len(js_stat['box'])}` 筆 / 成人類 `{len(js_stat['fun'])}` 筆（觀察中 `{js_stat['pending_count']}` 筆 / 移入 NG `{js_stat['moved_count']}` 筆）",
@@ -513,7 +506,7 @@ async def main():
         f.write("\n".join(report_lines) + "\n")
 
     print("\n==========================================")
-    print("所有目錄（PY / JS / COLLECT）檢測、分類與統合廣告攔截完成！")
+    print("六支配置檔（box/fun_py, box/fun_js, box/fun_ct）皆已加上廣告攔截並匯出完成！")
 
 
 if __name__ == "__main__":
