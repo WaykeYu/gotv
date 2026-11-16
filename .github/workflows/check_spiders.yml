@@ -1,4 +1,4 @@
-name: Check Spiders & JS Health
+name: Check Spiders & JS & 採集資源 Health
 
 on:
   schedule:
