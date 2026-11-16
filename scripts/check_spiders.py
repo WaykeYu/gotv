@@ -1,5 +1,6 @@
 import os
 import re
+import ast
 import ssl
 import shutil
 import json
@@ -28,7 +29,7 @@ FUN_CT_FILE = BASE_DIR / "fun_ct.json"
 # 統合廣告攔截共用檔
 ADBLOCK_FILE = BASE_DIR / "adblock.json"
 
-# 成人類特徵關鍵字（涵蓋繁簡中文、英文與常見影視源暗語）
+# 成人類特徵關鍵字
 ADULT_KEYWORDS = [
     "成人", "福利", "18+", "18禁", "伦理", "倫理", "情色", "色情",
     "av", "sex", "adult", "porn", "xxx", "午夜", "限制", "私密",
@@ -92,26 +93,6 @@ SSL_CONTEXT.check_hostname = False
 SSL_CONTEXT.verify_mode = ssl.CERT_NONE
 
 
-def apply_unified_adblock(config_data):
-    """統合廣告攔截：將 UNIFIED_ADBLOCK 合併進設定檔，避免重複與遺漏"""
-    if not isinstance(config_data, dict):
-        return config_data
-
-    # 合併 ads 網域黑名單
-    old_ads = config_data.get("ads") if isinstance(config_data.get("ads"), list) else []
-    config_data["ads"] = list(dict.fromkeys(old_ads + UNIFIED_ADBLOCK["ads"]))
-
-    # 合併 rules 切片過濾規則
-    old_rules = config_data.get("rules") if isinstance(config_data.get("rules"), list) else []
-    existing_names = {r.get("name") for r in old_rules if isinstance(r, dict)}
-    for rule in UNIFIED_ADBLOCK["rules"]:
-        if rule["name"] not in existing_names:
-            old_rules.append(rule)
-    config_data["rules"] = old_rules
-
-    return config_data
-
-
 def load_fail_history(history_file: Path) -> dict:
     if history_file.exists():
         try:
@@ -127,93 +108,20 @@ def save_fail_history(history_file: Path, history: dict):
         json.dump(history, f, ensure_ascii=False, indent=2)
 
 
-def parse_flexible_content(file_path: Path):
-    """彈性解析檔案：支援標準 JSON、含 // 註解的 JSONC，以及純文字網址清單"""
-    raw_text = file_path.read_text(encoding="utf-8", errors="ignore").strip()
-    if not raw_text:
-        return None
-
-    try:
-        return json.loads(raw_text)
-    except Exception:
-        pass
-
-    cleaned_lines = []
-    for line in raw_text.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("//") or stripped.startswith("#"):
-            continue
-        line_no_comment = re.sub(r'(?<!:)\/\/.*$', '', line)
-        cleaned_lines.append(line_no_comment)
-    cleaned_text = "\n".join(cleaned_lines)
-
-    try:
-        return json.loads(cleaned_text)
-    except Exception:
-        pass
-
-    urls = re.findall(r'https?://[^\s"\'<>]+', raw_text)
-    if urls:
-        return {"url": urls[0], "name": file_path.stem}
-
-    return None
-
-
-def extract_primary_url(content) -> str:
-    """從各種可能的欄位結構中提取主要檢測 URL"""
-    if isinstance(content, list) and len(content) > 0:
-        first = content[0]
-        if isinstance(first, dict):
-            return extract_primary_url(first)
-        elif isinstance(first, str) and first.startswith(("http://", "https://")):
-            return first.strip()
-
-    if not isinstance(content, dict):
-        return ""
-
-    for key in ["url", "spider", "jar", "api", "wallpaper", "live"]:
-        val = content.get(key, "")
-        if isinstance(val, str) and val.startswith(("http://", "https://")):
-            return val.split(";")[0].strip()
-
-    urls_list = content.get("urls", [])
-    if isinstance(urls_list, list):
-        for item in urls_list:
-            if isinstance(item, dict) and str(item.get("url", "")).startswith(("http://", "https://")):
-                return item["url"].split(";")[0].strip()
-            elif isinstance(item, str) and item.startswith(("http://", "https://")):
-                return item.split(";")[0].strip()
-
-    sites = content.get("sites", [])
-    if isinstance(sites, list):
-        for site in sites:
-            if isinstance(site, dict):
-                api = str(site.get("api", ""))
-                if api.startswith(("http://", "https://")):
-                    return api.split(";")[0].strip()
-
-    return ""
-
-
-def check_is_adult(content, file_name: str, remote_snippet: str = "") -> bool:
-    """綜合比對：檔名 + 本地內容 + 遠端抓取內容，精準區分成人類與一般類"""
-    local_str = json.dumps(content, ensure_ascii=False) if not isinstance(content, str) else content
-    combined_text = f"{file_name} {local_str} {remote_snippet}".lower()
-    return any(keyword in combined_text for keyword in ADULT_KEYWORDS)
+def check_is_adult(text_content: str, file_name: str) -> bool:
+    combined = f"{file_name} {text_content}".lower()
+    return any(keyword in combined for keyword in ADULT_KEYWORDS)
 
 
 def _sync_check_url(url: str) -> tuple[float | None, str, str]:
-    """
-    測試 URL 連線速度並抓取部分回應內容供分類判定
-    回傳：(毫秒延遲, 狀態說明, 遠端內容片段)
-    """
+    """測試 URL 連線速度並抓取部分回應內容供分類判定"""
     if not url.startswith(("http://", "https://")):
         return None, "無效網址格式", ""
 
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "okhttp/4.12.0",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
             "Accept": "*/*",
             "Connection": "keep-alive"
         }
@@ -223,7 +131,6 @@ def _sync_check_url(url: str) -> tuple[float | None, str, str]:
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
             elapsed_ms = (time.time() - start_time) * 1000
             if response.status < 400:
-                # 讀取前 16KB 文本內容供成人/一般分類辨識
                 raw_bytes = response.read(16384)
                 snippet = raw_bytes.decode("utf-8", errors="ignore")
                 return round(elapsed_ms, 2), f"HTTP {response.status}", snippet
@@ -248,7 +155,7 @@ def record_or_move_failure(
     reason: str,
     immediate: bool = False
 ) -> str:
-    """記錄首次失效日期；僅在跨日連續兩天失效（或明確重覆）時移入 NG"""
+    """記錄首次失效日期；僅在跨日連續兩天失效（或明確損毀/重覆）時移入 NG"""
     file_key = file_path.name
     target_ng_path = ng_dir / file_key
 
@@ -277,7 +184,135 @@ def record_or_move_failure(
         return "pending_day1"
 
 
-async def process_file(
+def extract_url_from_script(code_text: str) -> str:
+    """從 .py 或 .js 腳本中提取目標站點 URL 進行存活性測試"""
+    # 優先匹配常見變數賦值：host = "https://...", url: 'https://...', baseUrl = "..."
+    patterns = [
+        r'(?:host|url|baseUrl|base_url|siteUrl|api)\s*[:=]\s*["\'](https?://[^"\'\s]+)["\']',
+        r'["\'](https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^"\'\s]*)["\']'
+    ]
+    ignore_domains = ("w3.org", "github.com", "githubusercontent.com", "mozilla.org", "google.com", "example.com")
+    
+    for pat in patterns:
+        matches = re.findall(pat, code_text, re.IGNORECASE)
+        for m in matches:
+            if not any(ig in m.lower() for ig in ignore_domains):
+                return m.strip()
+    return ""
+
+
+async def process_script_file(
+    file_path: Path,
+    script_type: str,  # "py" 或 "js"
+    ng_dir: Path,
+    semaphore: asyncio.Semaphore,
+    fail_history: dict,
+    today_str: str
+):
+    """處理 PY 或 JS 爬蟲腳本：檢查語法、提取目標站點測速、並封裝為 TVBox site 條目"""
+    async with semaphore:
+        raw_code = file_path.read_text(encoding="utf-8", errors="ignore").strip()
+        if not raw_code:
+            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "空白腳本檔案", immediate=True)
+            return {"_status": status, "file_name": file_path.name}
+
+        # 1. 若為 Python 腳本，先驗證語法是否合法
+        if script_type == "py":
+            try:
+                ast.parse(raw_code)
+            except SyntaxError as e:
+                status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"Python 語法錯誤: {e.msg}", immediate=True)
+                return {"_status": status, "file_name": file_path.name}
+
+        # 2. 提取腳本內的目標站點網址進行連線測速
+        target_url = extract_url_from_script(raw_code)
+        snippet = ""
+        if target_url:
+            speed, msg, snippet = await test_spider_speed(target_url)
+            if speed is None:
+                status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"目標站點失效 {msg} ({target_url})", immediate=False)
+                return {"_status": status, "file_name": file_path.name}
+        else:
+            # 純算法/無硬編碼網址腳本，給予基準響應時間
+            speed = 500.0
+
+        # 連線成功，清除失效觀察紀錄
+        fail_history.pop(file_path.name, None)
+
+        # 提取顯示名稱（嘗試從腳本註解或變數取名，否則用檔名）
+        title_match = re.search(r'(?:title|name)\s*[:=]\s*["\']([^"\']+)["\']', raw_code)
+        site_name = title_match.group(1).strip() if title_match else file_path.stem
+
+        is_adult = check_is_adult(f"{raw_code} {snippet}", file_path.name)
+
+        # 組裝為標準 TVBox site 物件（指向 GitHub Raw 路徑）
+        raw_github_url = f"https://raw.githubusercontent.com/WaykeYu/gotv/main/{script_type}/{file_path.name}"
+        site_entry = {
+            "key": f"{script_type}_{file_path.stem}",
+            "name": f"{site_name}({script_type.upper()})",
+            "type": 3,
+            "api": raw_github_url,
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1
+        }
+
+        return {
+            "_status": "valid",
+            "file_name": file_path.name,
+            "response_time_ms": speed,
+            "is_adult": is_adult,
+            "site_entry": site_entry
+        }
+
+
+def parse_flexible_content(file_path: Path):
+    """彈性解析 COLLECT 設定檔：支援 JSON、JSONC 及純文字網址"""
+    raw_text = file_path.read_text(encoding="utf-8", errors="ignore").strip()
+    if not raw_text:
+        return None
+    try:
+        return json.loads(raw_text)
+    except Exception:
+        pass
+
+    cleaned_lines = [
+        re.sub(r'(?<!:)\/\/.*$', '', line)
+        for line in raw_text.splitlines()
+        if not line.strip().startswith(("//", "#"))
+    ]
+    try:
+        return json.loads("\n".join(cleaned_lines))
+    except Exception:
+        pass
+
+    urls = re.findall(r'https?://[^\s"\'<>]+', raw_text)
+    if urls:
+        return {"url": urls[0], "name": file_path.stem}
+    return None
+
+
+def extract_primary_url(content) -> str:
+    if isinstance(content, list) and content:
+        return extract_primary_url(content[0])
+    if not isinstance(content, dict):
+        return ""
+    for key in ["url", "spider", "jar", "api", "wallpaper", "live"]:
+        val = content.get(key, "")
+        if isinstance(val, str) and val.startswith(("http://", "https://")):
+            return val.split(";")[0].strip()
+    for list_key in ["urls", "sites"]:
+        items = content.get(list_key, [])
+        if isinstance(items, list):
+            for item in items:
+                if isinstance(item, dict):
+                    u = str(item.get("url") or item.get("api") or "")
+                    if u.startswith(("http://", "https://")):
+                        return u.split(";")[0].strip()
+    return ""
+
+
+async def process_collect_file(
     file_path: Path,
     ng_dir: Path,
     semaphore: asyncio.Semaphore,
@@ -285,6 +320,7 @@ async def process_file(
     fail_history: dict,
     today_str: str
 ):
+    """處理 COLLECT 目錄下的訂閱/配置檔"""
     async with semaphore:
         content = parse_flexible_content(file_path)
         if content is None:
@@ -293,7 +329,7 @@ async def process_file(
 
         primary_url = extract_primary_url(content)
         if not primary_url:
-            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "檔案內找不到有效網址", immediate=True)
+            status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, "找不到有效網址", immediate=True)
             return {"_status": status, "file_name": file_path.name}
 
         if primary_url in seen_urls:
@@ -309,72 +345,82 @@ async def process_file(
 
         fail_history.pop(file_path.name, None)
 
-        # 結合遠端回傳內容進行成人/一般分類判定
-        is_adult = check_is_adult(content, file_path.name, remote_snippet)
+        local_str = json.dumps(content, ensure_ascii=False)
+        is_adult = check_is_adult(f"{local_str} {remote_snippet}", file_path.name)
 
-        # 統合注入廣告攔截規則
-        enriched_content = apply_unified_adblock(content)
+        # 統合注入廣告攔截（若是字典格式）
+        if isinstance(content, dict):
+            old_ads = content.get("ads") if isinstance(content.get("ads"), list) else []
+            content["ads"] = list(dict.fromkeys(old_ads + UNIFIED_ADBLOCK["ads"]))
+            old_rules = content.get("rules") if isinstance(content.get("rules"), list) else []
+            exist_names = {r.get("name") for r in old_rules if isinstance(r, dict)}
+            for r in UNIFIED_ADBLOCK["rules"]:
+                if r["name"] not in exist_names:
+                    old_rules.append(r)
+            content["rules"] = old_rules
 
         return {
             "_status": "valid",
             "file_name": file_path.name,
             "response_time_ms": speed,
             "is_adult": is_adult,
-            "url": primary_url,
-            "data": enriched_content
+            "data": content
         }
 
 
-def save_and_split(entries: list, box_path: Path, fun_path: Path):
-    """分拆一般類 (box) 與成人類 (fun)，各自按響應速度由快到慢排序匯出"""
-    box_list = [e for e in entries if not e["is_adult"]]
-    fun_list = [e for e in entries if e["is_adult"]]
+def save_script_output(entries: list, box_path: Path, fun_path: Path):
+    """將 PY / JS 有效站點組裝為標準 TVBox 單一設定檔，並於頂層統合掛載廣告攔截"""
+    box_entries = sorted([e for e in entries if not e["is_adult"]], key=lambda x: x["response_time_ms"])
+    fun_entries = sorted([e for e in entries if e["is_adult"]], key=lambda x: x["response_time_ms"])
 
-    box_list.sort(key=lambda x: x["response_time_ms"])
-    fun_list.sort(key=lambda x: x["response_time_ms"])
+    for target_list, out_file in [(box_entries, box_path), (fun_entries, fun_path)]:
+        output_obj = {
+            "spider": "",
+            "sites": [e["site_entry"] for e in target_list],
+            "ads": UNIFIED_ADBLOCK["ads"],
+            "rules": UNIFIED_ADBLOCK["rules"]
+        }
+        with open(out_file, "w", encoding="utf-8") as f:
+            json.dump(output_obj, f, ensure_ascii=False, indent=2)
+
+    return box_entries, fun_entries
+
+
+def save_collect_output(entries: list, box_path: Path, fun_path: Path):
+    """依一般類與成人類拆分 COLLECT，並按響應速度由快到慢排序匯出"""
+    box_entries = sorted([e for e in entries if not e["is_adult"]], key=lambda x: x["response_time_ms"])
+    fun_entries = sorted([e for e in entries if e["is_adult"]], key=lambda x: x["response_time_ms"])
 
     with open(box_path, "w", encoding="utf-8") as f:
-        json.dump([e["data"] for e in box_list], f, ensure_ascii=False, indent=2)
+        json.dump([e["data"] for e in box_entries], f, ensure_ascii=False, indent=2)
 
     with open(fun_path, "w", encoding="utf-8") as f:
-        json.dump([e["data"] for e in fun_list], f, ensure_ascii=False, indent=2)
+        json.dump([e["data"] for e in fun_entries], f, ensure_ascii=False, indent=2)
 
-    return box_list, fun_list
+    return box_entries, fun_entries
 
 
-async def process_directory(
-    target_dir: Path,
-    box_out: Path,
-    fun_out: Path,
-    semaphore: asyncio.Semaphore,
-    seen_urls: set,
-    today_str: str
-) -> dict:
-    print(f"\n>>> 開始掃描目錄：{target_dir.name}/")
+async def run_script_dir(target_dir: Path, script_type: str, box_out: Path, fun_out: Path, semaphore: asyncio.Semaphore, today_str: str) -> dict:
+    print(f"\n>>> 開始掃描腳本目錄：{target_dir.name}/ (*.{script_type})")
     ng_dir = target_dir / "NG"
     history_file = target_dir / ".fail_history.json"
     ng_dir.mkdir(parents=True, exist_ok=True)
 
     fail_history = load_fail_history(history_file)
-
     files = []
     if target_dir.exists():
-        for ext in ("*.json", "*.txt"):
-            for f in target_dir.glob(ext):
-                if f.parent != ng_dir and not f.name.startswith("."):
-                    files.append(f)
+        for f in target_dir.glob(f"*.{script_type}"):
+            if f.parent != ng_dir and not f.name.startswith((".", "__")):
+                files.append(f)
 
-    tasks = [
-        process_file(f, ng_dir, semaphore, seen_urls, fail_history, today_str)
-        for f in files
-    ]
+    tasks = [process_script_file(f, script_type, ng_dir, semaphore, fail_history, today_str) for f in files]
     raw_results = await asyncio.gather(*tasks)
 
     valid_list = [r for r in raw_results if r and r.get("_status") == "valid"]
     pending_list = [r for r in raw_results if r and r.get("_status") == "pending_day1"]
     moved_list = [r for r in raw_results if r and r.get("_status") == "moved_ng"]
 
-    box_list, fun_list = save_and_split(valid_list, box_out, fun_out)
+    box_list, fun_list = save_script_output(valid_list, box_out, fun_out)
 
     existing_names = {f.name for f in files}
     fail_history = {k: v for k, v in fail_history.items() if k in existing_names}
@@ -383,10 +429,43 @@ async def process_directory(
     return {
         "box": box_list,
         "fun": fun_list,
-        "valid": valid_list,
         "pending_count": len(pending_list),
-        "moved_count": len(moved_list),
-        "ng_dir": ng_dir
+        "moved_count": len(moved_list)
+    }
+
+
+async def run_collect_dir(target_dir: Path, box_out: Path, fun_out: Path, semaphore: asyncio.Semaphore, seen_urls: set, today_str: str) -> dict:
+    print(f"\n>>> 開始掃描訂閱目錄：{target_dir.name}/")
+    ng_dir = target_dir / "NG"
+    history_file = target_dir / ".fail_history.json"
+    ng_dir.mkdir(parents=True, exist_ok=True)
+
+    fail_history = load_fail_history(history_file)
+    files = []
+    if target_dir.exists():
+        for ext in ("*.json", "*.txt"):
+            for f in target_dir.glob(ext):
+                if f.parent != ng_dir and not f.name.startswith("."):
+                    files.append(f)
+
+    tasks = [process_collect_file(f, ng_dir, semaphore, seen_urls, fail_history, today_str) for f in files]
+    raw_results = await asyncio.gather(*tasks)
+
+    valid_list = [r for r in raw_results if r and r.get("_status") == "valid"]
+    pending_list = [r for r in raw_results if r and r.get("_status") == "pending_day1"]
+    moved_list = [r for r in raw_results if r and r.get("_status") == "moved_ng"]
+
+    box_list, fun_list = save_collect_output(valid_list, box_out, fun_out)
+
+    existing_names = {f.name for f in files}
+    fail_history = {k: v for k, v in fail_history.items() if k in existing_names}
+    save_fail_history(history_file, fail_history)
+
+    return {
+        "box": box_list,
+        "fun": fun_list,
+        "pending_count": len(pending_list),
+        "moved_count": len(moved_list)
     }
 
 
@@ -395,16 +474,16 @@ async def main():
     seen_urls = set()
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_TASKS)
 
-    # 1. 獨立匯出一份全專案統合廣告攔截檔 adblock.json
+    # 1. 匯出統合廣告攔截規則檔
     with open(ADBLOCK_FILE, "w", encoding="utf-8") as f:
         json.dump(UNIFIED_ADBLOCK, f, ensure_ascii=False, indent=2)
 
-    # 2. 分別檢測並產出 PY / JS / COLLECT 的一般類與成人類配置
-    py_stat = await process_directory(PY_DIR, BOX_PY_FILE, FUN_PY_FILE, semaphore, seen_urls, today_str)
-    js_stat = await process_directory(JS_DIR, BOX_JS_FILE, FUN_JS_FILE, semaphore, seen_urls, today_str)
-    ct_stat = await process_directory(COLLECT_DIR, BOX_CT_FILE, FUN_CT_FILE, semaphore, seen_urls, today_str)
+    # 2. 分別處理 PY (*.py)、JS (*.js)、COLLECT (*.json / *.txt)
+    py_stat = await run_script_dir(PY_DIR, "py", BOX_PY_FILE, FUN_PY_FILE, semaphore, today_str)
+    js_stat = await run_script_dir(JS_DIR, "js", BOX_JS_FILE, FUN_JS_FILE, semaphore, today_str)
+    ct_stat = await run_collect_dir(COLLECT_DIR, BOX_CT_FILE, FUN_CT_FILE, semaphore, seen_urls, today_str)
 
-    # 3. 更新狀態報告
+    # 3. 產生報告
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     report_lines = [
         "# Spider Status Report",
@@ -434,8 +513,7 @@ async def main():
         f.write("\n".join(report_lines) + "\n")
 
     print("\n==========================================")
-    print(f"一般類 box_ct.json：{len(ct_stat['box'])} 筆 | 成人類 fun_ct.json：{len(ct_stat['fun'])} 筆")
-    print(f"統合廣告攔截規則已匯出至：{ADBLOCK_FILE.name}")
+    print("所有目錄（PY / JS / COLLECT）檢測、分類與統合廣告攔截完成！")
 
 
 if __name__ == "__main__":
