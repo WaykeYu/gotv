@@ -1,388 +1,414 @@
 {
-  "urls": [
-    {
-      "url": "https://bfzyapi.com/api.php/provide/vod/",
-      "name": "暴風 | 采集 [64ms]"
-    },
-    {
-      "url": "https://155api.com/api.php/provide/vod/",
-      "name": "115 | 采集 [80ms]"
-    },
-    {
-      "url": "https://hsckzy888.com/api.php/provide/vod/",
-      "name": "黃色 | 采集 [100ms]"
-    },
-    {
-      "url": "https://www.huyaapi.com/api.php/provide/vod/",
-      "name": "虎牙 | 采集 [111ms]"
-    },
-    {
-      "url": "https://jyzyapi.com/api.php/provide/vod/",
-      "name": "金鹰 | 采集 [123ms]"
-    },
-    {
-      "url": "https://jkunzyapi.com/api.php/provide/vod",
-      "name": "jkun | 采集 [134ms]"
-    },
-    {
-      "url": "https://jszyapi.com/api.php/provide/vod/",
-      "name": "极速 | 采集 [135ms]"
-    },
-    {
-      "url": "https://api.guangsuapi.com/api.php/provide/vod/",
-      "name": "光速 | 采集 [141ms]"
-    },
-    {
-      "url": "https://caiji.mgzyapi.com/api.php/provide/vod/",
-      "name": "芒果 | 采集 [146ms]"
-    },
-    {
-      "url": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
-      "name": "新浪 | 采集 [156ms]"
-    },
-    {
-      "url": "https://yuanlib.com/api.php/provide/vod/",
-      "name": "免费 | 采集 [175ms]"
-    },
-    {
-      "url": "https://api.huosuapi.cc/api.php/provide/vod/",
-      "name": "火速 | 采集 [183ms]"
-    },
-    {
-      "url": "https://api.apibdzy.com/api.php/provide/vod",
-      "name": "百度云 | 采集 [187ms]"
-    },
-    {
-      "url": "https://api.vnzyz.com/api.php/provide/vod/",
-      "name": "越南 | 采集 [197ms]"
-    },
-    {
-      "url": "https://www.hlzy.my/api.php/provide/vod/",
-      "name": "红楼 | 采集 [201ms]"
-    },
-    {
-      "url": "https://cj.yayazy.net/api.php/provide/vod/",
-      "name": "鸭鸭 | 采集 [205ms]"
-    },
-    {
-      "url": "http://hongniuzy2.com/api.php/provide/vod/",
-      "name": "红牛 | 采集 [208ms]"
-    },
-    {
-      "url": "https://api.douapi.cc/api.php/provide/vod/",
-      "name": "豆豆 | 采集 [208ms]"
-    },
-    {
-      "url": "https://suoniapi.com/api.php/provide/vod/",
-      "name": "索尼 | 采集 [225ms]"
-    },
-    {
-      "url": "https://api.okzyw.net/api.php/provide/vod/",
-      "name": "ok | 采集 [227ms]"
-    },
-    {
-      "url": "https://ckzy.me/api.php/provide/vod/",
-      "name": "ck | 采集 [229ms]"
-    },
-    {
-      "url": "https://ikunzyapi.com/api.php/provide/vod/",
-      "name": "ikun | 采集 [230ms]"
-    },
-    {
-      "url": "https://caiji.semaozy.net/inc/apijson_vod.php",
-      "name": "色猫 | 采集 [240ms]"
-    },
-    {
-      "url": "https://api.niuniuzy.me/api.php/provide/vod/",
-      "name": "牛牛 | 采集 [264ms]"
-    },
-    {
-      "url": "https://tyyszyapi.com/api.php/provide/vod/",
-      "name": "天涯 | 采集 [269ms]"
-    },
-    {
-      "url": "https://xxavs.com/api.php/provide/vod/",
-      "name": "濕乐园 | 采集 [285ms]"
-    },
-    {
-      "url": "https://slapibf.com/api.php/provide/vod/",
-      "name": "森林 | 采集 [299ms]"
-    },
-    {
-      "url": "https://www.msnii.com/api/json.php",
-      "name": "美少女 | 采集 [299ms]"
-    },
-    {
-      "url": "https://apilsbzy1.com/api.php/provide/vod/",
-      "name": "老色P | 采集 [300ms]"
-    },
-    {
-      "url": "https://hhzyapi.com/api.php/provide/vod/",
-      "name": "豪华 | 采集 [307ms]"
-    },
-    {
-      "url": "https://www.pgxdy.com/api/json.php",
-      "name": "黃色AV | 采集 [313ms]"
-    },
-    {
-      "url": "https://caiji.kuaichezy.org/api.php/provide/vod/",
-      "name": "快车 | 采集 [351ms]"
-    },
-    {
-      "url": "https://api.wujinapi.net/api.php/provide/vod/",
-      "name": "无尽 | 采集 [354ms]"
-    },
-    {
-      "url": "https://f-1.cc/api.php/provide/vod/",
-      "name": "看看 | 采集 [355ms]"
-    },
-    {
-      "url": "https://www.xrbsp.com/api/json.php",
-      "name": "淫水機 | 采集 [357ms]"
-    },
-    {
-      "url": "https://sex8zy.com/api.php/provide/vod/",
-      "name": "杏吧 | 采集 [385ms]"
-    },
-    {
-      "url": "https://apidanaizi.com/api.php/provide/vod/",
-      "name": "大奶子 | 采集 [398ms]"
-    },
-    {
-      "url": "https://api.heiapi.cc/api.php/provide/vod/",
-      "name": "嘿嘿 | 采集 [432ms]"
-    },
-    {
-      "url": "https://xyezy.com/api.php/provide/vod/",
-      "name": "星夜 | 采集 [473ms]"
-    },
-    {
-      "url": "https://apiyutu.com/api.php/providedao/vod/",
-      "name": "玉兔 | 采集 [482ms]"
-    },
-    {
-      "url": "https://www.mdzyapi.com/api.php/provide/vod/",
-      "name": "魔都 | 采集 [500ms]"
-    },
-    {
-      "url": "https://api.changzhang.tv/api.php/provide/vod/",
-      "name": "厂长 | 采集 [501ms]"
-    },
-    {
-      "url": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
-      "name": "最大 | 采集 [510ms]"
-    },
-    {
-      "url": "https://api.xjzyapi.com/provide/vod/",
-      "name": "小雞 | 采集 [531ms]"
-    },
-    {
-      "url": "https://naixxzy.com/api.php/provide/vod/",
-      "name": "奶香香 | 采集 [537ms]"
-    },
-    {
-      "url": "https://api.xiaojizy.live/provide/vod/",
-      "name": "小鸡Live | 采集 [641ms]"
-    },
-    {
-      "url": "https://jp98.vip/api.php/provide/vod/",
-      "name": "精品98 | 采集 [646ms]"
-    },
-    {
-      "url": "https://subocaiji.com/api.php/provide/vod/",
-      "name": "速播 | 采集 [726ms]"
-    },
-    {
-      "url": "https://api.maoyanapi.top/api.php/provide/vod/",
-      "name": "猫眼 | 采集 [779ms]"
-    },
-    {
-      "url": "https://www.gdlsp.com/api/json.php",
-      "name": "香x兒 | 采集 [805ms]"
-    },
-    {
-      "url": "https://fqzy.me/api.php/provide/vod/",
-      "name": "番茄 | 采集 [806ms]"
-    },
-    {
-      "url": "https://www.jingpinx.com/api.php/provide/vod/",
-      "name": "souav | 采集 [821ms]"
-    },
-    {
-      "url": "https://fhapi9.com/api.php/provide/vod/",
-      "name": "番号 | 采集 [836ms]"
-    },
-    {
-      "url": "https://thzy1.me/api.php/provide/vod/",
-      "name": "桃花 | 采集 [859ms]"
-    },
-    {
-      "url": "https://apilj.com/api.php/provide/vod/",
-      "name": "辣椒 | 采集 [903ms]"
-    },
-    {
-      "url": "https://www.lovedan.net/api.php/provide/vod/",
-      "name": "艾旦 | 采集 [912ms]"
-    },
-    {
-      "url": "https://lbapi9.com/api.php/provide/vod/",
-      "name": "乐播 | 采集 [936ms]"
-    },
-    {
-      "url": "https://www.heiliaozyapi.com/api.php/provide/vod/",
-      "name": "黑料 | 采集 [997ms]"
-    },
-    {
-      "url": "https://dadiapi.com/api.php/provide/vod/",
-      "name": "大地 | 采集 [1009ms]"
-    },
-    {
-      "url": "https://aosikazy1.com/api.php/provide/vod/",
-      "name": "奥斯卡 | 采集 [1018ms]"
-    },
-    {
-      "url": "https://shayuapi.com/api.php/provide/vod/",
-      "name": "鲨鱼 | 采集 [1021ms]"
-    },
-    {
-      "url": "https://api.juliang.live/api/provide/vod/",
-      "name": "巨量 | 采集 [1132ms]"
-    },
-    {
-      "url": "https://360zy.com/api.php/provide/vod/",
-      "name": "360 | 采集 [1335ms]"
-    },
-    {
-      "url": "https://cj.lziapi.com/api.php/provide/vod/",
-      "name": "量子 | 采集 [1541ms]"
-    },
-    {
-      "url": "https://www.iqiyizyapi.com/api.php/provide/vod/",
-      "name": "爱奇艺 | 采集 [1553ms]"
-    }
-  ],
+  "spider": "./jar/xs.jar",
+  "wallpaper": "./img/0.jpg",
+  "disabled_wallpaper": "./img/0.jpg",
+  "logo": "./img/pg.gif",
+  "warningText": "1",
+  "danmaku": "https://127.0.0.1:9978/proxy?do=danmaku&name={name}&episode={episode}",
   "ads": [
     "mimg.0c1q0l.cn",
     "www.googletagmanager.com",
     "www.google-analytics.com",
     "mc.usihnbcq.cn",
-    "mg.g1mm3d.cn",
-    "mscs.svaeuzh.cn",
-    "cnzz.hhttm.top",
-    "tp.vinuxhome.com",
-    "cnzz.mmstat.com",
-    "www.baihuillq.com",
-    "s23.cnzz.com",
-    "z3.cnzz.com",
-    "c.cnzz.com",
-    "stj.v1vo.top",
-    "z12.cnzz.com",
-    "img.mosflower.cn",
-    "tips.gamevvip.com",
-    "ehwe.yhdtns.com",
-    "xdn.cqqc3.com",
-    "www.jixunkyy.cn",
-    "sp.chemacid.cn",
-    "hm.baidu.com",
-    "s9.cnzz.com",
-    "z6.cnzz.com",
-    "um.cavuc.com",
-    "mav.mavuz.com",
-    "wofwk.aoidf3.com",
-    "z5.cnzz.com",
-    "xc.hubeijieshikj.cn",
-    "tj.tianwenhu.com",
-    "xg.gars57.cn",
-    "k.jinxiuzhilv.com",
-    "cdn.bootcss.com",
-    "ppl.xunzhuo123.com",
-    "xomk.jiangjunmh.top",
-    "img.xunzhuo123.com",
-    "z1.cnzz.com",
-    "s13.cnzz.com",
-    "xg.huataisangao.cn",
-    "z7.cnzz.com",
-    "z2.cnzz.com",
-    "s96.cnzz.com",
-    "q11.cnzz.com",
-    "thy.dacedsfa.cn",
-    "xg.whsbpw.cn",
-    "s19.cnzz.com",
-    "z8.cnzz.com",
-    "s4.cnzz.com",
-    "f5w.as12df.top",
-    "ae01.alicdn.com",
-    "www.92424.cn",
-    "k.wudejia.com",
-    "vivovip.mmszxc.top",
-    "qiu.xixiqiu.com",
-    "cdnjs.hnfenxun.com",
-    "cms.qdwght.com",
-    "api.htpan.net",
-    "googlesyndication.com",
-    "doubleclick.net",
-    "adservice.google.com",
-    "pagead2.googlesyndication.com",
-    "umeng.com",
-    "log.aliyuncs.com"
+    "mg.g1player.com",
+    "m3u8.api.ad",
+    "ad.api",
+    "cdn.ad",
+    "adv.m3u8",
+    "vip.ffzy-play.com",
+    "ffzy.play",
+    "hl.play",
+    "baidu.com",
+    "open.73836.com",
+    "tg.73836.com",
+    "v.tianyicdn.com",
+    "tycdn.net",
+    "qipaiguanggao",
+    "bocai",
+    ".cp.",
+    ".bet.",
+    "casino",
+    "macau",
+    "wnsr",
+    "amjs",
+    "p1.pstatp.com",
+    "toutiaoimg.com"
   ],
   "rules": [
     {
-      "name": "量子廣告攔截",
+      "name": "proxy",
       "hosts": [
-        "vip.lz",
-        "hd.lz",
-        "v.cdnlz",
-        "cdnlz"
+        "raw.githubusercontent.com",
+        "googlevideo.com",
+        "cdn.v82u1l.com",
+        "cdn.iz8qkg.com",
+        "remotetogo.com",
+        "live.52sf.ga",
+        "hlscache.52sf.ga"
       ],
       "regex": [
-        "18.5333",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:.*?\\r*\\n*.*?\\.ts[\\s\\S]*?#EXT-X-DISCONTINUITY"
       ]
     },
     {
-      "name": "非凡廣告攔截",
+      "name": "磁力過濾",
       "hosts": [
-        "vip.ffzy",
-        "hd.ffzy",
-        "ffzy"
+        "magnet"
       ],
       "regex": [
-        "25.0666",
-        "25.08",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        "最热",
+        "最新",
+        "直发",
+        "经典"
       ]
     },
     {
-      "name": "暴風廣告攔截",
+      "name": "主流切片廣告過濾",
       "hosts": [
+        "ffzy",
+        "lz",
+        "sn",
         "bfzy",
-        "s5.bfzycdn"
+        "subo",
+        "kuaiche",
+        "gszy",
+        "hhzy",
+        "mdzy"
       ],
       "regex": [
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.666667,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.400000,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:4.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
       ]
+    }
+  ],
+  "flags": [
+    "youku",
+    "qq",
+    "iqiyi",
+    "qiyi",
+    "letv",
+    "sohu",
+    "tudou",
+    "pptv",
+    "mgtv",
+    "wasu",
+    "bilibili",
+    "cctv"
+  ],
+  "sites": [
+    {
+      "key": "飄零资源",
+      "name": "飄零 | 采集",
+      "type": 1,
+      "api": "https://p2100.net/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
     },
     {
-      "name": "索尼廣告攔截",
-      "hosts": [
-        "suonizy",
-        "snzy"
-      ],
-      "regex": [
-        "15.1666",
-        "15.2666",
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
+      "key": "ikun",
+      "name": "ikun | 采集",
+      "type": 1,
+      "api": "https://ikunzyapi.com/api.php/provide/vod/",
+      "playerType": 1,
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
     },
     {
-      "name": "通用切片廣告過濾",
-      "hosts": [
-        "m3u8"
-      ],
-      "regex": [
-        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-      ]
+      "key": "虎牙资源",
+      "name": "虎牙 | 采集",
+      "type": 1,
+      "api": "https://www.huyaapi.com/api.php/provide/vod/",
+      "playUrl": "https://huyajx.com/play/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "牛牛資源",
+      "name": "牛牛 | 采集",
+      "type": 1,
+      "api": "https://api.niuniuzy.me/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    },
+    {
+      "key": "红牛资源",
+      "name": "红牛 | 采集",
+      "type": 1,
+      "api": "http://hongniuzy2.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
+    },
+    {
+      "key": "百度云资源",
+      "name": "百度云 | 采集",
+      "type": 1,
+      "api": "https://api.apibdzy.com/api.php/provide/vod",
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
+    },
+    {
+      "key": "金鹰",
+      "name": "金鹰 | 采集",
+      "type": 1,
+      "api": "https://jyzyapi.com/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "鸭鸭资源",
+      "name": "鸭鸭 | 采集",
+      "type": 1,
+      "api": "https://cj.yayazy.net/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
+    },
+    {
+      "key": "ok资源",
+      "name": "ok | 采集",
+      "type": 1,
+      "api": "https://api.okzyw.net/api.php/provide/vod/",
+      "playUrl": "https://jiexi.okzyw.org/m3u8/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    },
+    {
+      "key": "光速资源",
+      "name": "光速 | 采集",
+      "type": 1,
+      "api": "https://api.guangsuapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.gszyv.com/m3u8/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "索尼",
+      "name": "索尼 | 采集",
+      "type": 1,
+      "api": "https://suoniapi.com/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "无尽",
+      "name": "无尽 | 采集",
+      "type": 1,
+      "api": "https://api.wujinapi.net/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "极速资源",
+      "name": "极速 | 采集",
+      "type": 1,
+      "api": "https://jszyapi.com/api.php/provide/vod/",
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
+    },
+    {
+      "key": "芒果资源",
+      "name": "芒果 | 采集",
+      "type": 1,
+      "api": "https://caiji.mgzyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "天涯资源",
+      "name": "天涯 | 采集",
+      "type": 1,
+      "api": "https://tyyszyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "樱花資源",
+      "name": "樱花 | 采集",
+      "type": 1,
+      "api": "https://m3u8.apiyhzy.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "优质",
+      "name": "优质 | 采集",
+      "type": 1,
+      "api": "https://api.yyzy-tv.vip/inc/apijson.php",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "厂长資源",
+      "name": "厂长 | 采集",
+      "type": 1,
+      "api": "https://api.changzhang.tv/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "豪华资源",
+      "name": "豪华 | 采集",
+      "type": 1,
+      "api": "https://hhzyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "魔都资源",
+      "name": "魔都 | 采集",
+      "type": 1,
+      "api": "https://www.mdzyapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.modujiexi66.com/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    },
+    {
+      "key": "暴風",
+      "name": "暴風 | 采集",
+      "type": 1,
+      "api": "https://bfzyapi.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "速播",
+      "name": "速播 | 采集",
+      "type": 1,
+      "api": "https://subocaiji.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "新浪",
+      "name": "新浪 | 采集",
+      "type": 1,
+      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "最大资源",
+      "name": "最大 | 采集",
+      "type": 1,
+      "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+      "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    },
+    {
+      "key": "猫眼资源",
+      "name": "猫眼 | 采集",
+      "type": 1,
+      "api": "https://api.maoyanapi.top/api.php/provide/vod/",
+      "playUrl": "https://jx.maoyanjx.top/player/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
+    },
+    {
+      "key": "量子",
+      "name": "量子 | 采集",
+      "type": 1,
+      "api": "https://cj.lziapi.com/api.php/provide/vod/",
+      "quickSearch": 0,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "母鸡资源",
+      "name": "母鸡 | 采集",
+      "type": 1,
+      "api": "https://mujiziyuan00.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "360",
+      "name": "360 | 采集",
+      "type": 1,
+      "api": "https://360zy.com/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "巨量资源",
+      "name": "巨量 | 采集",
+      "type": 1,
+      "api": "https://api.juliang.live/api/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "爱奇艺",
+      "name": "爱奇艺 | 采集",
+      "type": 1,
+      "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+      "playUrl": "https://www.iqiyizyjx.com/?url=",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "非凡",
+      "name": "非凡 | 采集",
+      "type": 1,
+      "api": "https://liuyan.ffzy3.tv/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "创享",
+      "name": "创享 | 采集",
+      "type": 1,
+      "api": "https://ys.cxkjg.cn/api/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
+      "key": "艾旦",
+      "name": "艾旦 | 采集",
+      "type": 1,
+      "api": "https://www.lovedan.net/api.php/provide/vod/",
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1,
+      "ext": "proxy"
     }
   ]
 }
