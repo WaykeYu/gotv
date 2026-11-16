@@ -32,7 +32,7 @@ FUN_JS_FILE = BASE_DIR / "fun_js.json"
 BOX_CT_FILE = BASE_DIR / "box_ct.json"
 FUN_CT_FILE = BASE_DIR / "fun_ct.json"
 
-TIMEOUT = 8
+TIMEOUT = 10
 MAX_WORKERS = 16
 
 for p in [BASE_DIR, PY_DIR, PY_DIR / "base"]:
@@ -48,7 +48,7 @@ BROWSER_HEADERS = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": "application/json, text/html, application/xhtml+xml, */*;q=0.8",
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
     "Sec-Ch-Ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
     "Sec-Ch-Ua-Mobile": "?0",
@@ -61,6 +61,9 @@ ADULT_KEYWORDS = [
     r"18禁", r"無碼", r"有碼", r"成人"
 ]
 ADULT_REGEX = re.compile("|".join(ADULT_KEYWORDS), re.IGNORECASE)
+
+# 匹配采集站標準有效回應："code":1 或 "code": 1
+COLLECT_CODE1_REGEX = re.compile(r'''["']code["']\s*:\s*1\b''')
 
 # --- Collect 匯出全域模板（參考 box1.json）---
 COLLECT_BASE_TEMPLATE = {
@@ -228,20 +231,56 @@ def extract_urls(code: str) -> list[str]:
     return unique_urls
 
 
-def test_url_alive(url: str) -> tuple[bool, str]:
+def has_code_one(text: str) -> bool:
+    """檢查回應內容是否包含 "code":1 或 JSON 內 code == 1"""
+    if not text:
+        return False
+    if COLLECT_CODE1_REGEX.search(text):
+        return True
     try:
-        parsed = urlparse(url)
+        data = json.loads(text)
+        if isinstance(data, dict) and str(data.get("code")) == "1":
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def test_url_alive(url: str, is_collect: bool = False) -> tuple[bool, str]:
+    try:
+        test_target = url
+        # 采集站 API 自動補上 ?ac=list 測試標準清單介面
+        if is_collect and "provide/vod" in url and "?" not in url:
+            test_target = f"{url.rstrip('/')}/?ac=list"
+
+        parsed = urlparse(test_target)
         headers = dict(BROWSER_HEADERS)
         if parsed.netloc:
             headers["Host"] = parsed.netloc
             headers["Referer"] = f"{parsed.scheme}://{parsed.netloc}/"
 
+        # 采集站模式：直接 GET 並驗證回傳內容是否包含 "code": 1
+        if is_collect:
+            resp = GLOBAL_SESSION.get(test_target, headers=headers, timeout=12, allow_redirects=True, verify=False)
+            body_snippet = resp.text[:4096] if resp.text else ""
+
+            if has_code_one(body_snippet):
+                return True, f"HTTP {resp.status_code} (code:1)"
+
+            # 若未回傳 code:1，檢查是否為常見 CDN/WAF 防護狀態碼
+            waf_codes = {401, 403, 405, 406, 412, 429, 502, 503, 520, 521, 522, 523, 524}
+            if resp.status_code in waf_codes:
+                return True, f"HTTP {resp.status_code} (WAF/受限)"
+
+            return False, f"HTTP {resp.status_code} (無 code:1)"
+
+        # 一般爬蟲模式 (Python / JS)
         try:
-            resp = GLOBAL_SESSION.head(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
+            resp = GLOBAL_SESSION.head(test_target, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False)
             if resp.status_code == 405:
-                resp = GLOBAL_SESSION.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False, stream=True)
+                resp = GLOBAL_SESSION.get(test_target, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False, stream=True)
         except requests.RequestException:
-            resp = GLOBAL_SESSION.get(url, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False, stream=True)
+            resp = GLOBAL_SESSION.get(test_target, headers=headers, timeout=TIMEOUT, allow_redirects=True, verify=False, stream=True)
 
         if resp.status_code < 400 or resp.status_code in {401, 403, 405, 502, 503}:
             return True, f"HTTP {resp.status_code}"
@@ -251,7 +290,7 @@ def test_url_alive(url: str) -> tuple[bool, str]:
         return True, "SSL 握手異常 (站點存活)"
     except requests.exceptions.ConnectionError as e:
         err_msg = str(e).lower()
-        if any(k in err_msg for k in ["reset", "disconnected", "abort", "handshake"]):
+        if any(k in err_msg for k in ["reset", "disconnected", "abort", "handshake", "eof", "ssl"]):
             return True, "WAF 阻斷 (站點存活)"
         return False, "連線拒絕/超時"
     except Exception as e:
@@ -264,6 +303,7 @@ def check_spider_file(file_info: tuple) -> dict:
     ext = path_obj.suffix.lower().replace(".", "")
     stem = path_obj.stem
     filename = path_obj.name
+    is_collect = (file_type == "Collect")
 
     start_time = datetime.now()
     result = {
@@ -277,7 +317,7 @@ def check_spider_file(file_info: tuple) -> dict:
         "latency_ms": 99999,
         "is_adult": False,
         "target_url": "",
-        "site_meta": {}  # 保留 collect 站點的原始額外欄位 (playUrl, playerType, ext 等)
+        "site_meta": {}
     }
 
     try:
@@ -288,19 +328,17 @@ def check_spider_file(file_info: tuple) -> dict:
 
     candidate_urls = []
 
-    # 若為 Collect 類型且內容是 JSON，優先解析站點結構與原始 API 網址
-    if file_type == "Collect" and ext == "json":
+    # 若為 Collect 類型且內容是單站 JSON，優先抓取 api 欄位
+    if is_collect and ext == "json":
         try:
             parsed_json = json.loads(code)
-            if isinstance(parsed_json, dict):
-                # 支援單一站點 JSON 格式 {"key": "...", "api": "https://...", ...}
-                if "api" in parsed_json and isinstance(parsed_json["api"], str):
-                    api_url = parsed_json["api"].strip()
-                    if api_url.startswith("http"):
-                        candidate_urls.append(api_url)
-                    result["site_meta"] = parsed_json
-                    if parsed_json.get("key"):
-                        result["name"] = str(parsed_json["key"])
+            if isinstance(parsed_json, dict) and isinstance(parsed_json.get("api"), str):
+                api_url = parsed_json["api"].strip()
+                if api_url.startswith("http"):
+                    candidate_urls.append(api_url)
+                result["site_meta"] = parsed_json
+                if parsed_json.get("key"):
+                    result["name"] = str(parsed_json["key"])
         except Exception:
             pass
 
@@ -363,14 +401,17 @@ def check_spider_file(file_info: tuple) -> dict:
     if candidate_urls:
         alive_info = None
         for raw_target in candidate_urls:
-            # Collect 采集站建議直接測完整 API 路徑（若失敗再退回主機根目錄）
-            ping_targets = [raw_target] if file_type == "Collect" else []
-            root_ping = clean_test_url(raw_target)
-            if root_ping not in ping_targets:
-                ping_targets.append(root_ping)
+            if is_collect:
+                # Collect 優先測完整 API 網址（以驗證 "code":1），失敗才測根網域
+                ping_targets = [raw_target]
+                root_ping = clean_test_url(raw_target)
+                if root_ping not in ping_targets:
+                    ping_targets.append(root_ping)
+            else:
+                ping_targets = [clean_test_url(raw_target)]
 
             for p_url in ping_targets:
-                alive, msg = test_url_alive(p_url)
+                alive, msg = test_url_alive(p_url, is_collect=is_collect)
                 cost = int((datetime.now() - start_time).total_seconds() * 1000)
                 if alive:
                     alive_info = (raw_target, msg, cost)
@@ -380,8 +421,9 @@ def check_spider_file(file_info: tuple) -> dict:
 
         if alive_info:
             target_url, msg, cost = alive_info
+            is_healthy = ("200" in msg or "code:1" in msg)
             result.update({
-                "status": "✅ 正常" if "200" in msg else "⚠️ 站點存活(載入受限)",
+                "status": "✅ 正常" if is_healthy else "⚠️ 站點存活(載入受限)",
                 "detail": f"{target_url} ({msg})",
                 "latency_ms": cost,
                 "target_url": target_url,
@@ -390,7 +432,7 @@ def check_spider_file(file_info: tuple) -> dict:
         else:
             result.update({
                 "status": "❌ 失效",
-                "detail": f"連線無響應/超時 (已測 {len(candidate_urls)} 個候選網址)",
+                "detail": f"無效或連線超時 (已測 {len(candidate_urls)} 個候選網址)",
                 "latency_ms": int((datetime.now() - start_time).total_seconds() * 1000),
                 "target_url": candidate_urls[0]
             })
@@ -404,7 +446,7 @@ def check_spider_file(file_info: tuple) -> dict:
 
 
 def check_collect_site_entry(entry_info: tuple) -> dict:
-    """專門檢測 collect/ 內多站點合集 JSON 中的單一 site 條目"""
+    """專門檢測 collect/ 內多站點合集 JSON 中的單一 site 條目（驗證 "code":1）"""
     rel_path, full_path, site_obj = entry_info
     start_time = datetime.now()
     key = str(site_obj.get("key") or site_obj.get("name") or "unknown")
@@ -417,7 +459,7 @@ def check_collect_site_entry(entry_info: tuple) -> dict:
         "name": key,
         "file": f"{rel_path.replace(chr(92), '/')}#{key}",
         "full_path": str(full_path),
-        "is_bundle_entry": True,  # 標記為合集內的單筆項目，失效時不移動整份合集檔案
+        "is_bundle_entry": True,
         "status": "❌ 失效",
         "detail": "缺少有效 api 網址",
         "latency_ms": 99999,
@@ -429,24 +471,14 @@ def check_collect_site_entry(entry_info: tuple) -> dict:
     if not api_url.startswith("http"):
         return result
 
-    ping_targets = [api_url]
-    root_ping = clean_test_url(api_url)
-    if root_ping not in ping_targets:
-        ping_targets.append(root_ping)
-
-    alive_info = None
-    for p_url in ping_targets:
-        alive, msg = test_url_alive(p_url)
-        cost = int((datetime.now() - start_time).total_seconds() * 1000)
-        if alive:
-            alive_info = (msg, cost)
-            break
-
+    alive, msg = test_url_alive(api_url, is_collect=True)
+    cost = int((datetime.now() - start_time).total_seconds() * 1000)
     meta_text = json.dumps(site_obj, ensure_ascii=False)
-    if alive_info:
-        msg, cost = alive_info
+
+    if alive:
+        is_healthy = ("200" in msg or "code:1" in msg)
         result.update({
-            "status": "✅ 正常" if "200" in msg else "⚠️ 站點存活(載入受限)",
+            "status": "✅ 正常" if is_healthy else "⚠️ 站點存活(載入受限)",
             "detail": f"{api_url} ({msg})",
             "latency_ms": cost,
             "is_adult": is_adult_content(raw_name, meta_text, api_url)
@@ -454,8 +486,8 @@ def check_collect_site_entry(entry_info: tuple) -> dict:
     else:
         result.update({
             "status": "❌ 失效",
-            "detail": f"連線無響應/超時 ({api_url})",
-            "latency_ms": int((datetime.now() - start_time).total_seconds() * 1000)
+            "detail": f"{api_url} ({msg})",
+            "latency_ms": cost
         })
 
     return result
@@ -527,8 +559,7 @@ def generate_collect_json(items: list, output_filepath: Path):
             "changeable": meta.get("changeable", 1),
         }
 
-        # 保留原始站點的特殊播放與代理參數
-        for opt_key in ("playUrl", "playerType", "ext", "categories"):
+        for opt_key in ("playUrl", "playerType", "filterable", "ext", "categories"):
             if opt_key in meta and meta[opt_key] is not None:
                 site_entry[opt_key] = meta[opt_key]
 
@@ -583,7 +614,6 @@ def main():
                 if f.endswith(".json"):
                     try:
                         data = json.loads(full.read_text(encoding="utf-8", errors="ignore"))
-                        # 若 JSON 包含 sites 陣列（類似 box1.json 合集格式），拆分為獨立站點檢測
                         if isinstance(data, dict) and isinstance(data.get("sites"), list):
                             for s in data["sites"]:
                                 if isinstance(s, dict):
@@ -616,7 +646,7 @@ def main():
             results.append(r)
             print(f"[{r['type']}][{r['status']}] {r['file']} ({r['latency_ms']}ms) -> {r['detail']}")
 
-    # 隔離失效檔案：移入該檔案所在同層目錄下的 NG 資料夾（合集內單筆條目僅跳過不移動整份檔案）
+    # 隔離失效檔案
     moved_count = 0
     valid_results = []
     for r in results:
