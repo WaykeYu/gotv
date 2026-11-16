@@ -30,12 +30,86 @@ ADULT_KEYWORDS = [
     "情色", "av", "sex", "adult", "色情", "午夜", "限制", "私密"
 ]
 
+# ================= 標準廣告攔截規則庫 =================
+DEFAULT_ADS_DOMAINS = [
+    "mimg.0c1q0l.cn", "www.googletagmanager.com", "www.google-analytics.com",
+    "mc.usihnbcq.cn", "mg.g1mm3d.cn", "mscs.svaeuzh.cn", "cnzz.hhttm.top",
+    "tp.vinuxhome.com", "cnzz.mmstat.com", "www.baihuillq.com", "s23.cnzz.com",
+    "z3.cnzz.com", "c.cnzz.com", "stj.v1vo.top", "z12.cnzz.com", "img.mosflower.cn",
+    "tips.gamevvip.com", "ehwe.yhdtns.com", "xdn.cqqc3.com", "www.jixunkyy.cn",
+    "sp.chemacid.cn", "hm.baidu.com", "s9.cnzz.com", "z6.cnzz.com", "um.cavuc.com",
+    "mav.mavuz.com", "wofwk.aoidf3.com", "z5.cnzz.com", "xc.hubeijieshikj.cn",
+    "tj.tianwenhu.com", "xg.gars57.cn", "k.jinxiuzhilv.com", "cdn.bootcss.com",
+    "ppl.xunzhuo123.com", "xomk.jiangjunmh.top", "img.xunzhuo123.com", "z1.cnzz.com",
+    "s13.cnzz.com", "xg.huataisangao.cn", "z7.cnzz.com", "xg.huataisangao.cn",
+    "z2.cnzz.com", "s96.cnzz.com", "q11.cnzz.com", "thy.dacedsfa.cn", "xg.whsbpw.cn",
+    "s19.cnzz.com", "z8.cnzz.com", "s4.cnzz.com", "f5w.as12df.top", "ae01.alicdn.com",
+    "www.92424.cn", "k.wudejia.com", "vivovip.mmszxc.top", "qiu.xixiqiu.com",
+    "cdnjs.hnfenxun.com", "cms.qdwght.com", "api.htpan.net",
+    "googlesyndication.com", "doubleclick.net", "adservice.google.com",
+    "pagead2.googlesyndication.com", "umeng.com", "log.aliyuncs.com"
+]
+
+DEFAULT_AD_RULES = [
+    {
+        "name": "量子廣告攔截",
+        "hosts": ["vip.lz", "hd.lz", "v.cdnlz", "cdnlz"],
+        "regex": ["18.5333", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "非凡廣告攔截",
+        "hosts": ["vip.ffzy", "hd.ffzy", "ffzy"],
+        "regex": ["25.0666", "25.08", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "暴風廣告攔截",
+        "hosts": ["bfzy", "s5.bfzycdn"],
+        "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "索尼廣告攔截",
+        "hosts": ["suonizy", "snzy"],
+        "regex": ["15.1666", "15.2666", "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    },
+    {
+        "name": "通用切片廣告過濾",
+        "hosts": ["m3u8"],
+        "regex": ["#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"]
+    }
+]
+
 TIMEOUT_SECONDS = 8
 MAX_CONCURRENT_TASKS = 20
 
 SSL_CONTEXT = ssl.create_default_context()
 SSL_CONTEXT.check_hostname = False
 SSL_CONTEXT.verify_mode = ssl.CERT_NONE
+
+
+def inject_adblock_rules(config_data):
+    """為匯出的配置資料注入廣告攔截網域 (ads) 與切片過濾規則 (rules)"""
+    if not isinstance(config_data, dict):
+        return config_data
+
+    # 1. 合併並去重 ads 網域清單
+    existing_ads = config_data.get("ads", [])
+    if not isinstance(existing_ads, list):
+        existing_ads = []
+    merged_ads = list(dict.fromkeys(existing_ads + DEFAULT_ADS_DOMAINS))
+    config_data["ads"] = merged_ads
+
+    # 2. 合併並去重 rules 切片規則（依規則名稱比對避免重複注入）
+    existing_rules = config_data.get("rules", [])
+    if not isinstance(existing_rules, list):
+        existing_rules = []
+    existing_rule_names = {r.get("name") for r in existing_rules if isinstance(r, dict)}
+    
+    for rule in DEFAULT_AD_RULES:
+        if rule["name"] not in existing_rule_names:
+            existing_rules.append(rule)
+    config_data["rules"] = existing_rules
+
+    return config_data
 
 
 def load_fail_history(history_file: Path) -> dict:
@@ -54,27 +128,21 @@ def save_fail_history(history_file: Path, history: dict):
 
 
 def parse_flexible_content(file_path: Path):
-    """
-    彈性解析檔案：
-    支援標準 JSON、含 // 註解的 JSONC，以及純文字網址清單
-    """
+    """彈性解析檔案：支援標準 JSON、含 // 註解的 JSONC，以及純文字網址清單"""
     raw_text = file_path.read_text(encoding="utf-8", errors="ignore").strip()
     if not raw_text:
         return None
 
-    # 1. 嘗試直接解析 JSON
     try:
         return json.loads(raw_text)
     except Exception:
         pass
 
-    # 2. 移除 // 單行註解後再嘗試解析 JSONC
     cleaned_lines = []
     for line in raw_text.splitlines():
         stripped = line.strip()
         if stripped.startswith("//") or stripped.startswith("#"):
             continue
-        # 移除行尾註解（避開 http:// 與 https://）
         line_no_comment = re.sub(r'(?<!:)\/\/.*$', '', line)
         cleaned_lines.append(line_no_comment)
     cleaned_text = "\n".join(cleaned_lines)
@@ -84,10 +152,9 @@ def parse_flexible_content(file_path: Path):
     except Exception:
         pass
 
-    # 3. 若為純文字清單（每行一個網址），轉換為標準格式字典
     urls = re.findall(r'https?://[^\s"\'<>]+', raw_text)
     if urls:
-        return {"url": urls[0], "name": file_path.stem, "_raw_urls": urls}
+        return {"url": urls[0], "name": file_path.stem}
 
     return None
 
@@ -104,14 +171,11 @@ def extract_primary_url(content) -> str:
     if not isinstance(content, dict):
         return ""
 
-    # 依序檢查常見的頂層鍵值
     for key in ["url", "spider", "jar", "api", "wallpaper", "live"]:
         val = content.get(key, "")
         if isinstance(val, str) and val.startswith(("http://", "https://")):
-            # 處理 spider 常見的 "http://xxx.jar;md5;xxxx" 格式，僅取網址本體測速
             return val.split(";")[0].strip()
 
-    # 檢查多倉 urls 陣列
     urls_list = content.get("urls", [])
     if isinstance(urls_list, list):
         for item in urls_list:
@@ -120,7 +184,6 @@ def extract_primary_url(content) -> str:
             elif isinstance(item, str) and item.startswith(("http://", "https://")):
                 return item.split(";")[0].strip()
 
-    # 檢查 sites 站點陣列
     sites = content.get("sites", [])
     if isinstance(sites, list):
         for site in sites:
@@ -146,7 +209,7 @@ def _sync_check_url(url: str) -> tuple[float | None, str]:
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "okhttp/4.12.0",  # TVBox 常用 UA，避免被專擋瀏覽器的來源封鎖
+            "User-Agent": "okhttp/4.12.0",
             "Accept": "*/*",
             "Connection": "keep-alive"
         }
@@ -159,7 +222,6 @@ def _sync_check_url(url: str) -> tuple[float | None, str]:
                 return round(elapsed_ms, 2), f"HTTP {response.status}"
             return None, f"HTTP {response.status}"
     except urllib.error.HTTPError as e:
-        # 部分伺服器不支援直接 GET 根目錄但回傳 403/405，代表主機仍在線
         if e.code in [403, 405]:
             return 999.0, f"HTTP {e.code} (主機在線)"
         return None, f"HTTP Error {e.code}"
@@ -177,8 +239,7 @@ def record_or_move_failure(
     fail_history: dict,
     today_str: str,
     reason: str,
-    immediate: bool = False,
-    dry_run_move: bool = False
+    immediate: bool = False
 ) -> str:
     """記錄首次失效日期；僅在跨日連續兩天失效（或明確重覆）時移入 NG"""
     file_key = file_path.name
@@ -186,7 +247,7 @@ def record_or_move_failure(
 
     if immediate:
         fail_history.pop(file_key, None)
-        if not dry_run_move and file_path.resolve() != target_ng_path.resolve():
+        if file_path.resolve() != target_ng_path.resolve():
             shutil.move(str(file_path), str(target_ng_path))
         print(f"  [立即移入NG] {file_key} -> 原因: {reason}")
         return "moved_ng"
@@ -200,7 +261,7 @@ def record_or_move_failure(
     days_elapsed = (date.fromisoformat(today_str) - date.fromisoformat(first_fail_str)).days
     if days_elapsed >= 1:
         fail_history.pop(file_key, None)
-        if not dry_run_move and file_path.resolve() != target_ng_path.resolve():
+        if file_path.resolve() != target_ng_path.resolve():
             shutil.move(str(file_path), str(target_ng_path))
         print(f"  [連續{days_elapsed + 1}天失效移入NG] {file_key} -> 原因: {reason}")
         return "moved_ng"
@@ -239,20 +300,23 @@ async def process_file(
             status = record_or_move_failure(file_path, ng_dir, fail_history, today_str, f"{msg} ({primary_url})", immediate=False)
             return {"_status": status, "file_name": file_path.name}
 
-        # 連線成功，清除歷史失效紀錄
         fail_history.pop(file_path.name, None)
+
+        # 注入廣告攔截規則
+        enriched_content = inject_adblock_rules(content)
 
         return {
             "_status": "valid",
             "file_name": file_path.name,
             "response_time_ms": speed,
-            "is_adult": is_adult_content(content, file_path.name),
+            "is_adult": is_adult_content(enriched_content, file_path.name),
             "url": primary_url,
-            "data": content
+            "data": enriched_content
         }
 
 
 def save_and_split(entries: list, box_path: Path, fun_path: Path):
+    """依一般類與成人類拆分，按延遲由低到高排序，並確保包含廣告攔截規則"""
     box_list = [e for e in entries if not e["is_adult"]]
     fun_list = [e for e in entries if e["is_adult"]]
 
@@ -285,7 +349,6 @@ async def process_directory(
 
     files = []
     if target_dir.exists():
-        # 同時支援 .json 與 .txt
         for ext in ("*.json", "*.txt"):
             for f in target_dir.glob(ext):
                 if f.parent != ng_dir and not f.name.startswith("."):
@@ -329,7 +392,7 @@ async def main():
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     report_lines = [
         "# Spider Status Report",
-        f"> 更新時間：{now_str}\n",
+        f"> 更新時間：{now_str}（已自動注入廣告攔截 `ads` 與 `rules` 規則）\n",
         "### 統計摘要",
         f"- **PY 目錄**：一般類 `{len(py_stat['box'])}` 筆 / 成人類 `{len(py_stat['fun'])}` 筆（觀察中 `{py_stat['pending_count']}` 筆 / 移入 NG `{py_stat['moved_count']}` 筆）",
         f"- **JS 目錄**：一般類 `{len(js_stat['box'])}` 筆 / 成人類 `{len(js_stat['fun'])}` 筆（觀察中 `{js_stat['pending_count']}` 筆 / 移入 NG `{js_stat['moved_count']}` 筆）",
@@ -348,7 +411,7 @@ async def main():
         f.write("\n".join(report_lines) + "\n")
 
     print("\n==========================================")
-    print("所有目錄檢測與分類完成！")
+    print("所有目錄檢測、分類與廣告攔截規則注入完成！")
 
 
 if __name__ == "__main__":
