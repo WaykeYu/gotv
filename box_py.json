@@ -11,10 +11,10 @@
       "filterable": 1
     },
     {
-      "key": "py_盘友圈",
-      "name": "盘友圈(PY)",
+      "key": "py_yysub",
+      "name": "S%02dE%02d(PY)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/盘友圈.py",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/yysub.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -47,33 +47,6 @@
       "filterable": 1
     },
     {
-      "key": "py_yysub",
-      "name": "S%02dE%02d(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/yysub.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_央视影视",
-      "name": "央视影视(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/央视影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_wxty",
-      "name": "上海看看(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/wxty.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
       "key": "py_猎手影视",
       "name": "猎手影视(PY)",
       "type": 3,
@@ -83,19 +56,10 @@
       "filterable": 1
     },
     {
-      "key": "py_618",
-      "name": "618(PY)",
+      "key": "py_红果网页",
+      "name": "红果网页(PY)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/618.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_MiFun动漫",
-      "name": "MiFun动漫(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/MiFun动漫.py",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/红果网页.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -119,24 +83,6 @@
       "filterable": 1
     },
     {
-      "key": "py_歪比巴卜",
-      "name": "+ urllib.parse.quote(title)\n        return url\n\n    def _extract_m3u8(self, html):\n        m = re.search(r(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/歪比巴卜.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "py_红果网页",
-      "name": "红果网页(PY)",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/红果网页.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
       "key": "py_py_imaple",
       "name": "py_imaple(PY)",
       "type": 3,
@@ -146,10 +92,19 @@
       "filterable": 1
     },
     {
-      "key": "py_dsystv",
-      "name": "([^(PY)",
+      "key": "py_歪比巴卜",
+      "name": "+ urllib.parse.quote(title)\n        return url\n\n    def _extract_m3u8(self, html):\n        m = re.search(r(PY)",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/dsystv.py",
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/歪比巴卜.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_aikanbot",
+      "name": "aikanbot(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/aikanbot.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -159,6 +114,42 @@
       "name": "零度影视(PY)",
       "type": 3,
       "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/零度影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_618",
+      "name": "618(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/618.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_wxty",
+      "name": "上海看看(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/wxty.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_MiFun动漫",
+      "name": "MiFun动漫(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/MiFun动漫.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_央视影视",
+      "name": "央视影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/央视影视.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
