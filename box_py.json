@@ -1,1 +1,300 @@
-[]
+{
+  "spider": "",
+  "sites": [
+    {
+      "key": "py_盘友圈",
+      "name": "盘友圈(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/盘友圈.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_爱瓜影视",
+      "name": "爱瓜影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/爱瓜影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_魔方影视",
+      "name": "魔方影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/魔方影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_py_电影猎手",
+      "name": "py_电影猎手(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/py_电影猎手.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_盘链",
+      "name": "盘链(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/盘链.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_618",
+      "name": "618(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/618.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_红果网页",
+      "name": "红果网页(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/红果网页.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_dsystv",
+      "name": "([^(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/dsystv.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_juzong",
+      "name": "剧踪(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/juzong.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_共青春影院",
+      "name": "共青春影院(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/共青春影院.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_py_imaple",
+      "name": "py_imaple(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/py_imaple.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_歪比巴卜",
+      "name": "+ urllib.parse.quote(title)\n        return url\n\n    def _extract_m3u8(self, html):\n        m = re.search(r(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/歪比巴卜.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_零度影视",
+      "name": "零度影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/零度影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_央视影视",
+      "name": "央视影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/央视影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_猎手影视",
+      "name": "猎手影视(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/猎手影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_yysub",
+      "name": "S%02dE%02d(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/yysub.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_MiFun动漫",
+      "name": "MiFun动漫(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/MiFun动漫.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_wxty",
+      "name": "上海看看(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/wxty.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "py_熊猫视频",
+      "name": "熊猫视频(PY)",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/WaykeYu/gotv/main/py/熊猫视频.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    }
+  ],
+  "ads": [
+    "mimg.0c1q0l.cn",
+    "www.googletagmanager.com",
+    "www.google-analytics.com",
+    "mc.usihnbcq.cn",
+    "mg.g1mm3d.cn",
+    "mscs.svaeuzh.cn",
+    "cnzz.hhttm.top",
+    "tp.vinuxhome.com",
+    "cnzz.mmstat.com",
+    "www.baihuillq.com",
+    "s23.cnzz.com",
+    "z3.cnzz.com",
+    "c.cnzz.com",
+    "stj.v1vo.top",
+    "z12.cnzz.com",
+    "img.mosflower.cn",
+    "tips.gamevvip.com",
+    "ehwe.yhdtns.com",
+    "xdn.cqqc3.com",
+    "www.jixunkyy.cn",
+    "sp.chemacid.cn",
+    "hm.baidu.com",
+    "s9.cnzz.com",
+    "z6.cnzz.com",
+    "um.cavuc.com",
+    "mav.mavuz.com",
+    "wofwk.aoidf3.com",
+    "z5.cnzz.com",
+    "xc.hubeijieshikj.cn",
+    "tj.tianwenhu.com",
+    "xg.gars57.cn",
+    "k.jinxiuzhilv.com",
+    "cdn.bootcss.com",
+    "ppl.xunzhuo123.com",
+    "xomk.jiangjunmh.top",
+    "img.xunzhuo123.com",
+    "z1.cnzz.com",
+    "s13.cnzz.com",
+    "xg.huataisangao.cn",
+    "z7.cnzz.com",
+    "z2.cnzz.com",
+    "s96.cnzz.com",
+    "q11.cnzz.com",
+    "thy.dacedsfa.cn",
+    "xg.whsbpw.cn",
+    "s19.cnzz.com",
+    "z8.cnzz.com",
+    "s4.cnzz.com",
+    "f5w.as12df.top",
+    "ae01.alicdn.com",
+    "www.92424.cn",
+    "k.wudejia.com",
+    "vivovip.mmszxc.top",
+    "qiu.xixiqiu.com",
+    "cdnjs.hnfenxun.com",
+    "cms.qdwght.com",
+    "api.htpan.net",
+    "googlesyndication.com",
+    "doubleclick.net",
+    "adservice.google.com",
+    "pagead2.googlesyndication.com",
+    "umeng.com",
+    "log.aliyuncs.com"
+  ],
+  "rules": [
+    {
+      "name": "量子廣告攔截",
+      "hosts": [
+        "vip.lz",
+        "hd.lz",
+        "v.cdnlz",
+        "cdnlz"
+      ],
+      "regex": [
+        "18.5333",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+      ]
+    },
+    {
+      "name": "非凡廣告攔截",
+      "hosts": [
+        "vip.ffzy",
+        "hd.ffzy",
+        "ffzy"
+      ],
+      "regex": [
+        "25.0666",
+        "25.08",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+      ]
+    },
+    {
+      "name": "暴風廣告攔截",
+      "hosts": [
+        "bfzy",
+        "s5.bfzycdn"
+      ],
+      "regex": [
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+      ]
+    },
+    {
+      "name": "索尼廣告攔截",
+      "hosts": [
+        "suonizy",
+        "snzy"
+      ],
+      "regex": [
+        "15.1666",
+        "15.2666",
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+      ]
+    },
+    {
+      "name": "通用切片廣告過濾",
+      "hosts": [
+        "m3u8"
+      ],
+      "regex": [
+        "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+      ]
+    }
+  ]
+}
