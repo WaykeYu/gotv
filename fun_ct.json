@@ -133,12 +133,418 @@
     ]
   },
   {
-    "key": "极速资源",
-    "name": "极速 | 采集",
+    "key": "115資源",
+    "name": "115 | 采集",
     "type": 1,
-    "api": "https://jszyapi.com/api.php/provide/vod/",
+    "api": "https://155api.com/api.php/provide/vod/",
+    "playUrl": "https://www.155jx.com/?url=",
     "searchable": 1,
     "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "jkun資源",
+    "name": "jkun | 采集",
+    "type": 1,
+    "api": "https://jkunzyapi.com/api.php/provide/vod",
+    "playUrl": "https://jkunjiexi.com/?url=",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "最大资源",
+    "name": "最大 | 采集",
+    "type": 1,
+    "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
+    "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ext": "proxy",
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "光速资源",
+    "name": "光速 | 采集",
+    "type": 1,
+    "api": "https://api.guangsuapi.com/api.php/provide/vod/",
+    "playUrl": "https://www.gszyv.com/m3u8/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
@@ -270,141 +676,6 @@
     "name": "黃色 | 采集",
     "type": 1,
     "api": "https://hsckzy888.com/api.php/provide/vod/",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "115資源",
-    "name": "115 | 采集",
-    "type": 1,
-    "api": "https://155api.com/api.php/provide/vod/",
-    "playUrl": "https://www.155jx.com/?url=",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -670,146 +941,13 @@
     ]
   },
   {
-    "key": "ikun",
-    "name": "ikun | 采集",
+    "key": "ck資源",
+    "name": "ck | 采集",
     "type": 1,
-    "api": "https://ikunzyapi.com/api.php/provide/vod/",
-    "playerType": 1,
+    "api": "https://ckzy.me/api.php/provide/vod/",
+    "searchable": 1,
     "quickSearch": 1,
-    "searchable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "新浪",
-    "name": "新浪 | 采集",
-    "type": 1,
-    "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
-    "quickSearch": 0,
-    "searchable": 1,
+    "filterable": 1,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
@@ -1337,13 +1475,547 @@
     ]
   },
   {
-    "key": "火速资源站",
-    "name": "火速 | 采集",
+    "key": "ok资源",
+    "name": "ok | 采集",
     "type": 1,
-    "api": "https://api.huosuapi.cc/api.php/provide/vod/",
+    "api": "https://api.okzyw.net/api.php/provide/vod/",
+    "playUrl": "https://jiexi.okzyw.org/m3u8/?url=",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ext": "proxy",
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "小鸡资源",
+    "name": "小鸡Live | 采集",
+    "type": 1,
+    "api": "https://api.xiaojizy.live/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "新浪",
+    "name": "新浪 | 采集",
+    "type": 1,
+    "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
+    "quickSearch": 0,
+    "searchable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "无尽",
+    "name": "无尽 | 采集",
+    "type": 1,
+    "api": "https://api.wujinapi.net/api.php/provide/vod/",
+    "quickSearch": 0,
+    "searchable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "极速资源",
+    "name": "极速 | 采集",
+    "type": 1,
+    "api": "https://jszyapi.com/api.php/provide/vod/",
+    "searchable": 1,
+    "quickSearch": 1,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
@@ -1605,10 +2277,10 @@
     ]
   },
   {
-    "key": "ck資源",
-    "name": "ck | 采集",
+    "key": "火速资源站",
+    "name": "火速 | 采集",
     "type": 1,
-    "api": "https://ckzy.me/api.php/provide/vod/",
+    "api": "https://api.huosuapi.cc/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -1739,280 +2411,12 @@
     ]
   },
   {
-    "key": "光速资源",
-    "name": "光速 | 采集",
+    "key": "ikun",
+    "name": "ikun | 采集",
     "type": 1,
-    "api": "https://api.guangsuapi.com/api.php/provide/vod/",
-    "playUrl": "https://www.gszyv.com/m3u8/?url=",
+    "api": "https://ikunzyapi.com/api.php/provide/vod/",
+    "playerType": 1,
     "quickSearch": 1,
-    "searchable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "ok资源",
-    "name": "ok | 采集",
-    "type": 1,
-    "api": "https://api.okzyw.net/api.php/provide/vod/",
-    "playUrl": "https://jiexi.okzyw.org/m3u8/?url=",
-    "quickSearch": 1,
-    "searchable": 1,
-    "changeable": 1,
-    "ext": "proxy",
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "无尽",
-    "name": "无尽 | 采集",
-    "type": 1,
-    "api": "https://api.wujinapi.net/api.php/provide/vod/",
-    "quickSearch": 0,
     "searchable": 1,
     "changeable": 1,
     "ads": [
@@ -2274,10 +2678,10 @@
     ]
   },
   {
-    "key": "濕乐园资源",
-    "name": "濕乐园 | 采集",
+    "key": "看看资源",
+    "name": "看看 | 采集",
     "type": 1,
-    "api": "https://xxavs.com/api.php/provide/vod/",
+    "api": "https://f-1.cc/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -2543,279 +2947,277 @@
     ]
   },
   {
+    "key": "暴風",
+    "name": "暴風 | 采集",
+    "type": 1,
+    "api": "https://bfzyapi.com/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "濕乐园资源",
+    "name": "濕乐园 | 采集",
+    "type": 1,
+    "api": "https://xxavs.com/api.php/provide/vod/",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
     "key": "淫水機资源",
     "name": "淫水機 | 采集",
     "type": 1,
     "api": "https://www.xrbsp.com/api/json.php",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "jkun資源",
-    "name": "jkun | 采集",
-    "type": 1,
-    "api": "https://jkunzyapi.com/api.php/provide/vod",
-    "playUrl": "https://jkunjiexi.com/?url=",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "大奶子資源",
-    "name": "大奶子 | 采集",
-    "type": 1,
-    "api": "https://apidanaizi.com/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -3081,144 +3483,10 @@
     ]
   },
   {
-    "key": "看看资源",
-    "name": "看看 | 采集",
+    "key": "乐播",
+    "name": "乐播 | 采集",
     "type": 1,
-    "api": "https://f-1.cc/api.php/provide/vod/",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "小雞資源",
-    "name": "小雞 | 采集",
-    "type": 1,
-    "api": "https://api.xjzyapi.com/provide/vod/",
+    "api": "https://lbapi9.com/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -3483,10 +3751,10 @@
     ]
   },
   {
-    "key": "小鸡资源",
-    "name": "小鸡Live | 采集",
+    "key": "大奶子資源",
+    "name": "大奶子 | 采集",
     "type": 1,
-    "api": "https://api.xiaojizy.live/provide/vod/",
+    "api": "https://apidanaizi.com/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -3752,280 +4020,12 @@
     ]
   },
   {
-    "key": "暴風",
-    "name": "暴風 | 采集",
-    "type": 1,
-    "api": "https://bfzyapi.com/api.php/provide/vod/",
-    "quickSearch": 1,
-    "searchable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
     "key": "厂长資源",
     "name": "厂长 | 采集",
     "type": 1,
     "api": "https://api.changzhang.tv/api.php/provide/vod/",
     "quickSearch": 1,
     "searchable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "精品98",
-    "name": "精品98 | 采集",
-    "type": 1,
-    "api": "https://jp98.vip/api.php/provide/vod/",
-    "playUrl": "https://jp998.vip/?url=",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
@@ -4161,275 +4161,6 @@
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "最大资源",
-    "name": "最大 | 采集",
-    "type": 1,
-    "api": "https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/",
-    "playUrl": "https://jx.zdplay.cc/m3u8Player/?url=",
-    "quickSearch": 1,
-    "searchable": 1,
-    "changeable": 1,
-    "ext": "proxy",
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "番号",
-    "name": "番号 | 采集",
-    "type": 1,
-    "api": "https://fhapi9.com/api.php/provide/vod/",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 0,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
@@ -4825,6 +4556,141 @@
     ]
   },
   {
+    "key": "精品98",
+    "name": "精品98 | 采集",
+    "type": 1,
+    "api": "https://jp98.vip/api.php/provide/vod/",
+    "playUrl": "https://jp998.vip/?url=",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
     "key": "百花资源",
     "name": "百花 | 采集",
     "type": 1,
@@ -4959,10 +4825,145 @@
     ]
   },
   {
-    "key": "星夜资源",
-    "name": "星夜 | 采集",
+    "key": "番号",
+    "name": "番号 | 采集",
     "type": 1,
-    "api": "https://xyezy.com/api.php/provide/vod/",
+    "api": "https://fhapi9.com/api.php/provide/vod/",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 0,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "黑料资源站",
+    "name": "黑料 | 采集",
+    "type": 1,
+    "api": "https://www.heiliaozyapi.com/api.php/provide/vod/",
+    "playUrl": "https://www.heiliaozyjx.com/?url=",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -5093,11 +5094,10 @@
     ]
   },
   {
-    "key": "番茄資源",
-    "name": "番茄 | 采集",
+    "key": "星夜资源",
+    "name": "星夜 | 采集",
     "type": 1,
-    "api": "https://fqzy.me/api.php/provide/vod/",
-    "playUrl": "https://xxb-player.com/player.php?url=",
+    "api": "https://xyezy.com/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -5363,414 +5363,278 @@
     ]
   },
   {
-    "key": "桃花資源",
-    "name": "桃花 | 采集",
-    "type": 1,
-    "api": "https://thzy1.me/api.php/provide/vod/",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "乐播",
-    "name": "乐播 | 采集",
-    "type": 1,
-    "api": "https://lbapi9.com/api.php/provide/vod/",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
-    "key": "黑料资源站",
-    "name": "黑料 | 采集",
-    "type": 1,
-    "api": "https://www.heiliaozyapi.com/api.php/provide/vod/",
-    "playUrl": "https://www.heiliaozyjx.com/?url=",
-    "searchable": 1,
-    "quickSearch": 1,
-    "filterable": 1,
-    "changeable": 1,
-    "ads": [
-      "mimg.0c1q0l.cn",
-      "www.googletagmanager.com",
-      "www.google-analytics.com",
-      "mc.usihnbcq.cn",
-      "mg.g1mm3d.cn",
-      "mscs.svaeuzh.cn",
-      "cnzz.hhttm.top",
-      "tp.vinuxhome.com",
-      "cnzz.mmstat.com",
-      "www.baihuillq.com",
-      "s23.cnzz.com",
-      "z3.cnzz.com",
-      "c.cnzz.com",
-      "stj.v1vo.top",
-      "z12.cnzz.com",
-      "img.mosflower.cn",
-      "tips.gamevvip.com",
-      "ehwe.yhdtns.com",
-      "xdn.cqqc3.com",
-      "www.jixunkyy.cn",
-      "sp.chemacid.cn",
-      "hm.baidu.com",
-      "s9.cnzz.com",
-      "z6.cnzz.com",
-      "um.cavuc.com",
-      "mav.mavuz.com",
-      "wofwk.aoidf3.com",
-      "z5.cnzz.com",
-      "xc.hubeijieshikj.cn",
-      "tj.tianwenhu.com",
-      "xg.gars57.cn",
-      "k.jinxiuzhilv.com",
-      "cdn.bootcss.com",
-      "ppl.xunzhuo123.com",
-      "xomk.jiangjunmh.top",
-      "img.xunzhuo123.com",
-      "z1.cnzz.com",
-      "s13.cnzz.com",
-      "xg.huataisangao.cn",
-      "z7.cnzz.com",
-      "z2.cnzz.com",
-      "s96.cnzz.com",
-      "q11.cnzz.com",
-      "thy.dacedsfa.cn",
-      "xg.whsbpw.cn",
-      "s19.cnzz.com",
-      "z8.cnzz.com",
-      "s4.cnzz.com",
-      "f5w.as12df.top",
-      "ae01.alicdn.com",
-      "www.92424.cn",
-      "k.wudejia.com",
-      "vivovip.mmszxc.top",
-      "qiu.xixiqiu.com",
-      "cdnjs.hnfenxun.com",
-      "cms.qdwght.com",
-      "api.htpan.net",
-      "googlesyndication.com",
-      "doubleclick.net",
-      "adservice.google.com",
-      "pagead2.googlesyndication.com",
-      "umeng.com",
-      "log.aliyuncs.com"
-    ],
-    "rules": [
-      {
-        "name": "量子廣告攔截",
-        "hosts": [
-          "vip.lz",
-          "hd.lz",
-          "v.cdnlz",
-          "cdnlz"
-        ],
-        "regex": [
-          "18.5333",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "非凡廣告攔截",
-        "hosts": [
-          "vip.ffzy",
-          "hd.ffzy",
-          "ffzy"
-        ],
-        "regex": [
-          "25.0666",
-          "25.08",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "暴風廣告攔截",
-        "hosts": [
-          "bfzy",
-          "s5.bfzycdn"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "索尼廣告攔截",
-        "hosts": [
-          "suonizy",
-          "snzy"
-        ],
-        "regex": [
-          "15.1666",
-          "15.2666",
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      },
-      {
-        "name": "通用切片廣告過濾",
-        "hosts": [
-          "m3u8"
-        ],
-        "regex": [
-          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
-        ]
-      }
-    ]
-  },
-  {
     "key": "大地资源",
     "name": "大地 | 采集",
     "type": 1,
     "api": "https://dadiapi.com/api.php/provide/vod/",
     "playUrl": "https://play.dadiapi.com/watch?url=",
+    "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "母鸡资源",
+    "name": "母鸡 | 采集",
+    "type": 1,
+    "api": "https://mujiziyuan00.com/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "桃花資源",
+    "name": "桃花 | 采集",
+    "type": 1,
+    "api": "https://thzy1.me/api.php/provide/vod/",
     "searchable": 1,
     "quickSearch": 1,
     "filterable": 1,
@@ -6034,12 +5898,14 @@
     ]
   },
   {
-    "key": "母鸡资源",
-    "name": "母鸡 | 采集",
+    "key": "番茄資源",
+    "name": "番茄 | 采集",
     "type": 1,
-    "api": "https://mujiziyuan00.com/api.php/provide/vod/",
-    "quickSearch": 1,
+    "api": "https://fqzy.me/api.php/provide/vod/",
+    "playUrl": "https://xxb-player.com/player.php?url=",
     "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
@@ -6434,6 +6300,139 @@
     ]
   },
   {
+    "key": "爱奇艺",
+    "name": "爱奇艺 | 采集",
+    "type": 1,
+    "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
+    "quickSearch": 1,
+    "searchable": 1,
+    "changeable": 1,
+    "ads": [
+      "mimg.0c1q0l.cn",
+      "www.googletagmanager.com",
+      "www.google-analytics.com",
+      "mc.usihnbcq.cn",
+      "mg.g1mm3d.cn",
+      "mscs.svaeuzh.cn",
+      "cnzz.hhttm.top",
+      "tp.vinuxhome.com",
+      "cnzz.mmstat.com",
+      "www.baihuillq.com",
+      "s23.cnzz.com",
+      "z3.cnzz.com",
+      "c.cnzz.com",
+      "stj.v1vo.top",
+      "z12.cnzz.com",
+      "img.mosflower.cn",
+      "tips.gamevvip.com",
+      "ehwe.yhdtns.com",
+      "xdn.cqqc3.com",
+      "www.jixunkyy.cn",
+      "sp.chemacid.cn",
+      "hm.baidu.com",
+      "s9.cnzz.com",
+      "z6.cnzz.com",
+      "um.cavuc.com",
+      "mav.mavuz.com",
+      "wofwk.aoidf3.com",
+      "z5.cnzz.com",
+      "xc.hubeijieshikj.cn",
+      "tj.tianwenhu.com",
+      "xg.gars57.cn",
+      "k.jinxiuzhilv.com",
+      "cdn.bootcss.com",
+      "ppl.xunzhuo123.com",
+      "xomk.jiangjunmh.top",
+      "img.xunzhuo123.com",
+      "z1.cnzz.com",
+      "s13.cnzz.com",
+      "xg.huataisangao.cn",
+      "z7.cnzz.com",
+      "z2.cnzz.com",
+      "s96.cnzz.com",
+      "q11.cnzz.com",
+      "thy.dacedsfa.cn",
+      "xg.whsbpw.cn",
+      "s19.cnzz.com",
+      "z8.cnzz.com",
+      "s4.cnzz.com",
+      "f5w.as12df.top",
+      "ae01.alicdn.com",
+      "www.92424.cn",
+      "k.wudejia.com",
+      "vivovip.mmszxc.top",
+      "qiu.xixiqiu.com",
+      "cdnjs.hnfenxun.com",
+      "cms.qdwght.com",
+      "api.htpan.net",
+      "googlesyndication.com",
+      "doubleclick.net",
+      "adservice.google.com",
+      "pagead2.googlesyndication.com",
+      "umeng.com",
+      "log.aliyuncs.com"
+    ],
+    "rules": [
+      {
+        "name": "量子廣告攔截",
+        "hosts": [
+          "vip.lz",
+          "hd.lz",
+          "v.cdnlz",
+          "cdnlz"
+        ],
+        "regex": [
+          "18.5333",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "非凡廣告攔截",
+        "hosts": [
+          "vip.ffzy",
+          "hd.ffzy",
+          "ffzy"
+        ],
+        "regex": [
+          "25.0666",
+          "25.08",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:25.066667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "暴風廣告攔截",
+        "hosts": [
+          "bfzy",
+          "s5.bfzycdn"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "索尼廣告攔截",
+        "hosts": [
+          "suonizy",
+          "snzy"
+        ],
+        "regex": [
+          "15.1666",
+          "15.2666",
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:15.266667,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      },
+      {
+        "name": "通用切片廣告過濾",
+        "hosts": [
+          "m3u8"
+        ],
+        "regex": [
+          "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:5.000000,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+        ]
+      }
+    ]
+  },
+  {
     "key": "360",
     "name": "360 | 采集",
     "type": 1,
@@ -6567,12 +6566,13 @@
     ]
   },
   {
-    "key": "爱奇艺",
-    "name": "爱奇艺 | 采集",
+    "key": "小雞資源",
+    "name": "小雞 | 采集",
     "type": 1,
-    "api": "https://www.iqiyizyapi.com/api.php/provide/vod/",
-    "quickSearch": 1,
+    "api": "https://api.xjzyapi.com/provide/vod/",
     "searchable": 1,
+    "quickSearch": 1,
+    "filterable": 1,
     "changeable": 1,
     "ads": [
       "mimg.0c1q0l.cn",
