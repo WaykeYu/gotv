@@ -1,9 +1,10 @@
 import os
+import ssl
 import shutil
 import json
 import time
 import asyncio
-import aiohttp
+import urllib.request
 from pathlib import Path
 from datetime import datetime, date
 
@@ -29,6 +30,11 @@ ADULT_KEYWORDS = [
 
 TIMEOUT_SECONDS = 6
 MAX_CONCURRENT_TASKS = 25
+
+# 建立忽略 SSL 憑證驗證的 Context
+SSL_CONTEXT = ssl.create_default_context()
+SSL_CONTEXT.check_hostname = False
+SSL_CONTEXT.verify_mode = ssl.CERT_NONE
 
 
 def load_fail_history(history_file: Path) -> dict:
@@ -81,19 +87,30 @@ def extract_primary_url(content: dict) -> str:
     return ""
 
 
-async def test_spider_speed(session: aiohttp.ClientSession, url: str) -> float | None:
-    """測試 URL 響應速度，回傳毫秒；連線失敗或超時回傳 None"""
+def _sync_check_url(url: str) -> float | None:
+    """使用內建 urllib 同步測試連線速度（供非同步執行緒池呼叫）"""
     if not url.startswith(("http://", "https://")):
         return None
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        }
+    )
     try:
         start_time = time.time()
-        async with session.get(url, timeout=TIMEOUT_SECONDS, ssl=False) as response:
+        with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS, context=SSL_CONTEXT) as response:
             if response.status in [200, 206, 301, 302]:
                 elapsed_ms = (time.time() - start_time) * 1000
                 return round(elapsed_ms, 2)
     except Exception:
         pass
     return None
+
+
+async def test_spider_speed(url: str) -> float | None:
+    """非同步包裝測速函式"""
+    return await asyncio.to_thread(_sync_check_url, url)
 
 
 def handle_failure(
@@ -107,7 +124,6 @@ def handle_failure(
     處理檔案失效：
     - immediate=True（重覆或 JSON 格式毀損）：立即移入對應的 NG/
     - immediate=False（連線超時/失效）：檢查是否已跨日連續兩天失效，達標才移入對應的 NG/
-    回傳狀態標記：'moved_ng' 或 'pending_day1'
     """
     ng_dir.mkdir(parents=True, exist_ok=True)
     target_ng_path = ng_dir / file_path.name
@@ -121,30 +137,25 @@ def handle_failure(
 
     first_fail_str = fail_history.get(file_key)
     if not first_fail_str:
-        # 第一次失效，登記今天日期並留待觀察
         fail_history[file_key] = today_str
         return "pending_day1"
 
-    # 計算首次失效至今的日曆天數差
     first_fail_date = date.fromisoformat(first_fail_str)
     today_date = date.fromisoformat(today_str)
     days_elapsed = (today_date - first_fail_date).days
 
     if days_elapsed >= 1:
-        # 已跨越至第二天（或以上）仍檢測失效 -> 正式移入 NG
         fail_history.pop(file_key, None)
         if file_path.resolve() != target_ng_path.resolve():
             shutil.move(str(file_path), str(target_ng_path))
         return "moved_ng"
     else:
-        # 同一天內重複執行腳本，維持觀察狀態
         return "pending_day1"
 
 
 async def process_file(
     file_path: Path,
     ng_dir: Path,
-    session: aiohttp.ClientSession,
     semaphore: asyncio.Semaphore,
     seen_urls: set,
     fail_history: dict,
@@ -152,7 +163,6 @@ async def process_file(
 ):
     """檢驗單一設定檔並執行去重、測速與跨日失效處置"""
     async with semaphore:
-        # 1. 讀取並驗證 JSON 格式（毀損視為立即無效）
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = json.load(f)
@@ -160,7 +170,6 @@ async def process_file(
             status = handle_failure(file_path, ng_dir, fail_history, today_str, immediate=True)
             return {"_status": status, "file_name": file_path.name}
 
-        # 2. 提取 URL 並判定重覆（重覆 URL 視為立即淘汰）
         primary_url = extract_primary_url(content)
         if not primary_url or primary_url in seen_urls:
             status = handle_failure(file_path, ng_dir, fail_history, today_str, immediate=True)
@@ -168,13 +177,11 @@ async def process_file(
 
         seen_urls.add(primary_url)
 
-        # 3. 測試響應速度（連線失敗需連續兩天確認才移入 NG）
-        speed = await test_spider_speed(session, primary_url)
+        speed = await test_spider_speed(primary_url)
         if speed is None:
             status = handle_failure(file_path, ng_dir, fail_history, today_str, immediate=False)
             return {"_status": status, "file_name": file_path.name}
 
-        # 4. 連線成功：若先前有失效紀錄，立即清除觀察狀態
         fail_history.pop(file_path.name, None)
 
         is_adult = is_adult_content(content, file_path.name)
@@ -210,7 +217,6 @@ async def process_directory(
     target_dir: Path,
     box_out: Path,
     fun_out: Path,
-    session: aiohttp.ClientSession,
     semaphore: asyncio.Semaphore,
     seen_urls: set,
     today_str: str
@@ -229,7 +235,7 @@ async def process_directory(
                 files.append(f)
 
     tasks = [
-        process_file(f, ng_dir, session, semaphore, seen_urls, fail_history, today_str)
+        process_file(f, ng_dir, semaphore, seen_urls, fail_history, today_str)
         for f in files
     ]
     raw_results = await asyncio.gather(*tasks)
@@ -240,7 +246,6 @@ async def process_directory(
 
     box_list, fun_list = save_and_split(valid_list, box_out, fun_out)
 
-    # 清理已不存在於該目錄的過期紀錄並存檔
     existing_names = {f.name for f in files}
     fail_history = {k: v for k, v in fail_history.items() if k in existing_names}
     save_fail_history(history_file, fail_history)
@@ -259,18 +264,11 @@ async def main():
     today_str = date.today().isoformat()
     seen_urls = set()
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_TASKS)
-    
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-    }
-    conn = aiohttp.TCPConnector(ssl=False, limit=MAX_CONCURRENT_TASKS)
 
-    async with aiohttp.ClientSession(connector=conn, headers=headers) as session:
-        py_stat = await process_directory(PY_DIR, BOX_PY_FILE, FUN_PY_FILE, session, semaphore, seen_urls, today_str)
-        js_stat = await process_directory(JS_DIR, BOX_JS_FILE, FUN_JS_FILE, session, semaphore, seen_urls, today_str)
-        ct_stat = await process_directory(COLLECT_DIR, BOX_CT_FILE, FUN_CT_FILE, session, semaphore, seen_urls, today_str)
+    py_stat = await process_directory(PY_DIR, BOX_PY_FILE, FUN_PY_FILE, semaphore, seen_urls, today_str)
+    js_stat = await process_directory(JS_DIR, BOX_JS_FILE, FUN_JS_FILE, semaphore, seen_urls, today_str)
+    ct_stat = await process_directory(COLLECT_DIR, BOX_CT_FILE, FUN_CT_FILE, semaphore, seen_urls, today_str)
 
-    # 產生 SPIDER_STATUS.md 狀態報告
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     report_lines = [
         "# Spider Status Report",
