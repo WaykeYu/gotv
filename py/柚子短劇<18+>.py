@@ -87,7 +87,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與選集（支援多集 URL 與單頁多集 UUID 提取）
+    # 3. 影片詳情與選集（同時支援分集網頁連結與內嵌 UUID 列表）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -119,7 +119,7 @@ class Spider(Spider):
             episodes = []
             seen_ep = set()
 
-            # 方式 A：抓取同劇集下的分集子頁面連結（如 /dramas/xxx/season-1/ep-1/）
+            # 方式 A：抓取同劇集下的分集子頁面連結（如 /dramas/xxx/season-1-episode-1/）
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
@@ -131,7 +131,7 @@ class Spider(Spider):
                     label = ep_text if ep_text else f"第{len(episodes)+1}集"
                     episodes.append(f"{label}${href}")
 
-            # 方式 B：若該劇所有集數的 /media/{drama_uuid}/{episode_uuid} 直接內嵌在頁面 JSON 中
+            # 方式 B：若分集連結未直接展開在 <a> 標籤中，從頁面腳本提取 /media/{drama_uuid}/{ep_uuid} 列表
             if len(episodes) <= 1:
                 media_pairs = re.findall(
                     r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
@@ -146,7 +146,8 @@ class Spider(Spider):
                 if len(unique_pairs) > 1:
                     episodes = []
                     for idx, (d_uuid, e_uuid) in enumerate(unique_pairs):
-                        episodes.append(f"第{idx+1}集$direct_media:{d_uuid}/{e_uuid}")
+                        # 優先將 e_uuid 與 d_uuid 傳給 playerContent 呼叫 /api/playback/
+                        episodes.append(f"第{idx+1}集$uuid:{e_uuid}|{d_uuid}")
 
             if not episodes:
                 episodes.append(f"立即播放${vid}")
@@ -174,88 +175,81 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 純 Python 直連解析播放清單（免 WebView 嗅探）
+    # 5. 核心播放解析：呼叫 POST /api/playback/{uuid}?mode=mse&startup=1 取得 .m3u8
     def playerContent(self, flag, id, vipFlags):
         play_headers = {
             "User-Agent": self.headers["User-Agent"],
             "Referer": self.host + "/",
-            "Origin": self.host
+            "Origin": self.host,
+            "Accept": "application/json, text/plain, */*"
         }
 
-        # 若為 detailContent 提取出的 direct_media:{drama_uuid}/{episode_uuid}
-        if id.startswith("direct_media:"):
-            media_path = id.split(":", 1)[1]
-            # 依序探測標準清單檔名（master.m3u8 / playlist.m3u8 / manifest.mpd）
-            for manifest in ["master.m3u8", "playlist.m3u8", "index.m3u8", "manifest.mpd"]:
-                test_url = f"{self.host}/media/{media_path}/{manifest}"
-                try:
-                    r = requests.head(test_url, headers=play_headers, timeout=5)
-                    if r.status_code == 200:
+        candidate_uuids = []
+        play_page = ""
+
+        if id.startswith("uuid:"):
+            # 格式為 uuid:{e_uuid}|{d_uuid}
+            raw = id.split(":", 1)[1]
+            candidate_uuids.extend([u for u in raw.split("|") if u])
+        else:
+            play_page = id if id.startswith('http') else f"{self.host}{id}"
+            play_headers["Referer"] = play_page
+            try:
+                resp = requests.get(play_page, headers=play_headers, timeout=10)
+                resp.encoding = 'utf-8'
+                html = resp.text
+
+                # 若頁面內有 /media/{drama_uuid}/{episode_uuid}，優先提取兩個 UUID 依序嘗試 playback API
+                media_match = re.search(
+                    r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+                    html,
+                    re.I
+                )
+                if media_match:
+                    candidate_uuids.append(media_match.group(2))
+                    candidate_uuids.append(media_match.group(1))
+
+                # 補充提取頁面內其他 UUID（例如劇集或單集 ID）
+                all_uuids = re.findall(
+                    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                    html,
+                    re.I
+                )
+                for u in all_uuids:
+                    if u not in candidate_uuids:
+                        candidate_uuids.append(u)
+            except Exception:
+                pass
+
+        # 依序向 /api/playback/{uuid}?mode=mse&startup=1 發送 POST 請求
+        for uid in candidate_uuids[:6]:
+            api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
+            try:
+                r = requests.post(api_url, headers=play_headers, timeout=8)
+                if r.status_code == 200:
+                    data = r.json()
+                    m3u8_path = data.get("url", "")
+                    if m3u8_path:
+                        stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
+                        stream_headers = {
+                            "User-Agent": self.headers["User-Agent"],
+                            "Referer": play_page or (self.host + "/"),
+                            "Origin": self.host
+                        }
                         return {
                             "parse": 0,
                             "playUrl": "",
-                            "url": test_url,
-                            "header": json.dumps(play_headers)
+                            "url": stream_url,
+                            "header": json.dumps(stream_headers)
                         }
-                except Exception:
-                    continue
+            except Exception:
+                continue
 
-        play_page = id if id.startswith('http') else f"{self.host}{id}"
-        play_headers["Referer"] = play_page
-
-        try:
-            resp = requests.get(play_page, headers=play_headers, timeout=10)
-            resp.encoding = 'utf-8'
-            html = resp.text
-
-            # 1. 優先從 HTML / Next.js 資料中提取完整 .m3u8 或 .mpd 網址
-            manifest_match = re.search(
-                r'((?:https?:)?//[^\s"\'\\<>]*/media/[^\s"\'\\<>]+?\.(?:m3u8|mpd)(?:\?[^\s"\'\\<>]*)?|/media/[^\s"\'\\<>]+?\.(?:m3u8|mpd)(?:\?[^\s"\'\\<>]*)?)',
-                html
-            )
-            if manifest_match:
-                stream_url = manifest_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
-                if stream_url.startswith('//'):
-                    stream_url = 'https:' + stream_url
-                elif stream_url.startswith('/'):
-                    stream_url = self.host + stream_url
-
-                return {
-                    "parse": 0,
-                    "playUrl": "",
-                    "url": stream_url,
-                    "header": json.dumps(play_headers)
-                }
-
-            # 2. 若頁面僅包含 /media/{drama_uuid}/{episode_uuid} 基礎路徑，自動拼接主播放清單
-            uuid_match = re.search(
-                r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
-                html,
-                re.I
-            )
-            if uuid_match:
-                base_media = f"{self.host}/media/{uuid_match.group(1)}"
-                for manifest in ["master.m3u8", "playlist.m3u8", "index.m3u8", "manifest.mpd"]:
-                    test_url = f"{base_media}/{manifest}"
-                    try:
-                        r = requests.head(test_url, headers=play_headers, timeout=5)
-                        if r.status_code == 200:
-                            return {
-                                "parse": 0,
-                                "playUrl": "",
-                                "url": test_url,
-                                "header": json.dumps(play_headers)
-                            }
-                    except Exception:
-                        continue
-        except Exception:
-            pass
-
-        # 3. 備援：若仍需前端執行 JS 簽發，交由內建嗅探器處理
+        # 失敗時回傳 parse: 0 空連結，避免 langhuan/spider 殼觸發 MissingPluginException
         return {
-            "parse": 1,
+            "parse": 0,
             "playUrl": "",
-            "url": play_page,
+            "url": "",
             "header": json.dumps(play_headers)
         }
 
