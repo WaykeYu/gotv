@@ -183,18 +183,21 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 核心播放解析：回傳標準 dict 格式 header 並自動測試所有候選 UUID
+# 5. 核心播放解析（附帶精準 API 狀態碼診斷）
     def playerContent(self, flag, id, vipFlags):
         play_page = id if id.startswith('http') else f"{self.host}{id}"
         if not play_page.endswith('/'):
             play_page += '/'
 
         candidate_uuids = []
+        page_status = 0
         try:
             resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
+            page_status = resp.status_code
             resp.encoding = 'utf-8'
             html = resp.text
 
+            # 1. 優先提取緊跟在 playback / episode / current / video 旁的 UUID
             priority_uuids = re.findall(
                 r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
                 html,
@@ -204,6 +207,7 @@ class Spider(Spider):
                 if u not in candidate_uuids:
                     candidate_uuids.append(u)
 
+            # 2. 提取頁面內所有其他 UUID
             all_uuids = re.findall(
                 r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
                 html,
@@ -212,8 +216,8 @@ class Spider(Spider):
             for u in all_uuids:
                 if u not in candidate_uuids:
                     candidate_uuids.append(u)
-        except Exception:
-            pass
+        except Exception as e:
+            page_status = -1
 
         api_headers = {
             "User-Agent": self.ua,
@@ -228,16 +232,21 @@ class Spider(Spider):
             "Sec-Fetch-Site": "same-origin"
         }
 
-        for uid in candidate_uuids[:30]:
+        last_api_status = 0
+        last_api_text = ""
+
+        for uid in candidate_uuids[:25]:
             api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
             try:
                 r = self.session.post(api_url, headers=api_headers, data="{}", timeout=6)
+                last_api_status = r.status_code
+                last_api_text = r.text[:60]
                 if r.status_code == 200:
                     data = r.json()
                     m3u8_path = data.get("url", "")
                     if m3u8_path:
                         stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
-                        # 同時相容不同殼層：header 直接給 dict（大部分 Flutter/Dart 殼要求 dict）
+                        # 注意：部分殼層要求 header 為 json 字串，部分要求 dict，這裡轉回標準 json 字串
                         player_headers = {
                             "User-Agent": self.ua,
                             "Referer": play_page,
@@ -248,16 +257,19 @@ class Spider(Spider):
                             "parse": 0,
                             "playUrl": "",
                             "url": stream_url,
-                            "header": player_headers
+                            "header": json.dumps(player_headers)
                         }
-            except Exception:
+            except Exception as e:
+                last_api_text = str(e)[:40]
                 continue
 
+        # 將診斷結果寫入網址回傳，避免「没有获取到播放地址」，並可在錯誤畫面或抓包看到狀態
+        diag_url = f"http://127.0.0.1/page_{page_status}_uuids_{len(candidate_uuids)}_api_{last_api_status}.m3u8"
         return {
             "parse": 0,
             "playUrl": "",
-            "url": "",
-            "header": {}
+            "url": diag_url,
+            "header": "{}"
         }
 
     # 核心解析：抓取所有指向 /dramas/ 的短劇卡片
