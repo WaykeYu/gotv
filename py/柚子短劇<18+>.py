@@ -2,6 +2,7 @@
 import sys
 import re
 import json
+import urllib.parse
 import requests
 from bs4 import BeautifulSoup
 
@@ -97,7 +98,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與選集
+    # 3. 影片詳情與完整選集（第1集保證用真實入口頁，後續集數自動展開並交由 playerContent 容錯解析）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -129,53 +130,31 @@ class Spider(Spider):
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
+            # 偵測總集數
+            max_ep = 0
+            for n in re.findall(r'season-\d+-episode-(\d+)', html, re.I):
+                max_ep = max(max_ep, int(n))
+            for n in re.findall(r'"(?:episode_?count|total_?episodes|episodes_?count|episode_?number|number)"\s*:\s*(\d+)', html, re.I):
+                val = int(n)
+                if 1 <= val <= 300:
+                    max_ep = max(max_ep, val)
+            for n in re.findall(r'(?:全|共|更新至|第)\s*(\d+)\s*集', soup.get_text()):
+                val = int(n)
+                if 1 <= val <= 300:
+                    max_ep = max(max_ep, val)
+
+            if max_ep <= 1 and drama_prefix:
+                max_ep = 60
+
             episodes = []
-            seen_ep = set()
-
             if drama_prefix:
-                raw_paths = re.findall(rf'({re.escape(drama_prefix)}[a-zA-Z0-9\-_/]+)', html)
-                valid_paths = []
-                for p in raw_paths:
-                    clean_p = p.split('"')[0].split("'")[0].split('\\')[0]
-                    if not clean_p.endswith('/'):
-                        clean_p += '/'
-                    if clean_p != drama_prefix and clean_p not in seen_ep:
-                        seen_ep.add(clean_p)
-                        num_m = re.search(r'(?:episode|ep|season)-?(\d+)', clean_p, re.I)
-                        ep_num = int(num_m.group(1)) if num_m else 9999
-                        valid_paths.append((ep_num, clean_p))
-
-                valid_paths.sort(key=lambda x: x[0])
-                for idx, (ep_num, path) in enumerate(valid_paths):
-                    label = f"第{ep_num}集" if ep_num != 9999 else f"第{idx+1}集"
-                    episodes.append(f"{label}${path}")
-
-            if len(episodes) <= 1:
-                unescaped_html = html.replace('\\"', '"')
-                ep_objs = re.findall(
-                    r'"(?:episode_?number|episodeNumber|number|index|ep)"\s*:\s*(\d+)[^{}]{0,250}?"(?:id|uuid|episode_?id|episodeId|playbackId)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"',
-                    unescaped_html,
-                    re.I
-                )
-                if not ep_objs:
-                    rev_objs = re.findall(
-                        r'"(?:id|uuid|episode_?id|episodeId|playbackId)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"[^{}]{0,250}?"(?:episode_?number|episodeNumber|number|index|ep)"\s*:\s*(\d+)',
-                        unescaped_html,
-                        re.I
-                    )
-                    ep_objs = [(num, uid) for uid, num in rev_objs]
-
-                if ep_objs:
-                    seen_uid = set()
-                    sorted_eps = sorted(ep_objs, key=lambda x: int(x[0]))
-                    episodes = []
-                    for num, uid in sorted_eps:
-                        if uid not in seen_uid:
-                            seen_uid.add(uid)
-                            episodes.append(f"第{num}集$uuid:{uid}|{vid}")
-
-            if not episodes:
-                episodes.append(f"立即播放${vid}")
+                # 第 1 集直接綁定原始入口網址 vid（保證 200 OK 不會 404）
+                episodes.append(f"第1集${vid}")
+                # 第 2 集起傳遞劇集主路徑與集數編號，交由 playerContent 自動探測實際路由
+                for ep in range(2, max_ep + 1):
+                    episodes.append(f"第{ep}集$ep:{drama_prefix}|{ep}")
+            else:
+                episodes.append(f"第1集${vid}")
 
             vod = {
                 "vod_id": vid,
@@ -200,44 +179,59 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 核心播放解析（header 直接回傳 dict 字典）
+    # 5. 核心播放解析：自動適配多集路由 + 透過 localProxy 全程帶 Cookie 代理 m3u8/m4s 徹底防 403
     def playerContent(self, flag, id, vipFlags):
-        candidate_uuids = []
-        play_page = self.host + "/"
+        play_page = ""
+        html = ""
 
-        if id.startswith("uuid:"):
-            parts = id.split(":", 1)[1].split("|", 1)
-            candidate_uuids.append(parts[0])
-            if len(parts) > 1 and parts[1]:
-                play_page = parts[1] if parts[1].startswith("http") else f"{self.host}{parts[1]}"
+        if id.startswith("ep:"):
+            # 格式為 ep:{drama_prefix}|{ep_num}
+            prefix, ep_num = id.split(":", 1)[1].split("|", 1)
+            candidate_urls = [
+                f"{self.host}{prefix}season-1-episode-{ep_num}/",
+                f"{self.host}{prefix}episode-{ep_num}/",
+                f"{self.host}{prefix}season-{ep_num}/"
+            ]
+            for test_u in candidate_urls:
+                try:
+                    r = self.session.get(test_u, headers={"Referer": self.host + "/"}, timeout=8)
+                    if r.status_code == 200:
+                        play_page = test_u
+                        r.encoding = 'utf-8'
+                        html = r.text.replace('\\"', '"')
+                        break
+                except Exception:
+                    continue
         else:
             play_page = id if id.startswith('http') else f"{self.host}{id}"
-
-        if not candidate_uuids:
             try:
-                resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
-                resp.encoding = 'utf-8'
-                html = resp.text.replace('\\"', '"')
-
-                priority_uuids = re.findall(
-                    r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
-                    html,
-                    re.I
-                )
-                for u in priority_uuids:
-                    if u not in candidate_uuids:
-                        candidate_uuids.append(u)
-
-                all_uuids = re.findall(
-                    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                    html,
-                    re.I
-                )
-                for u in all_uuids:
-                    if u not in candidate_uuids:
-                        candidate_uuids.append(u)
+                r = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
+                r.encoding = 'utf-8'
+                html = r.text.replace('\\"', '"')
             except Exception:
                 pass
+
+        if not html:
+            return {"parse": 0, "playUrl": "", "url": "", "header": {}}
+
+        candidate_uuids = []
+        priority_uuids = re.findall(
+            r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+            html,
+            re.I
+        )
+        for u in priority_uuids:
+            if u not in candidate_uuids:
+                candidate_uuids.append(u)
+
+        all_uuids = re.findall(
+            r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+            html,
+            re.I
+        )
+        for u in all_uuids:
+            if u not in candidate_uuids:
+                candidate_uuids.append(u)
 
         api_headers = {
             "User-Agent": self.ua,
@@ -261,17 +255,15 @@ class Spider(Spider):
                     m3u8_path = data.get("url", "")
                     if m3u8_path:
                         stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
-                        player_headers = {
-                            "User-Agent": self.ua,
-                            "Referer": play_page,
-                            "Origin": self.host,
-                            "Cookie": self.full_cookie
-                        }
+                        # 交由 localProxy 代理並重寫切片路徑，確保所有子請求 100% 帶上完整 Cookie 與 Referer
+                        encoded_url = urllib.parse.quote(stream_url, safe='')
+                        encoded_ref = urllib.parse.quote(play_page, safe='')
+                        proxy_url = f"{self.getProxyUrl()}&url={encoded_url}&ref={encoded_ref}&type=m3u8"
                         return {
                             "parse": 0,
                             "playUrl": "",
-                            "url": stream_url,
-                            "header": player_headers
+                            "url": proxy_url,
+                            "header": {}
                         }
             except Exception:
                 continue
@@ -282,6 +274,56 @@ class Spider(Spider):
             "url": "",
             "header": {}
         }
+
+    # 本機代理：代為向 youzidj.com 請求 m3u8 與 m4s/mp4 切片（附帶完整 Cookie，徹底消除 HTTP 403）
+    def localProxy(self, param):
+        target_url = urllib.parse.unquote(param.get("url", ""))
+        ref_url = urllib.parse.unquote(param.get("ref", self.host + "/"))
+        if not target_url:
+            return [404, "text/plain", b"", {}]
+
+        req_headers = {
+            "User-Agent": self.ua,
+            "Referer": ref_url,
+            "Origin": self.host,
+            "Cookie": self.full_cookie
+        }
+
+        try:
+            r = self.session.get(target_url, headers=req_headers, timeout=10)
+            if r.status_code != 200:
+                return [r.status_code, "text/plain", b"", {}]
+
+            if ".m3u8" in target_url or param.get("type") == "m3u8":
+                base_url = target_url.rsplit("/", 1)[0] + "/"
+                lines = r.text.splitlines()
+                new_lines = []
+                for line in lines:
+                    line_strip = line.strip()
+                    if not line_strip:
+                        new_lines.append(line)
+                    elif line_strip.startswith("#"):
+                        def replace_uri(match):
+                            uri = match.group(1)
+                            abs_uri = uri if uri.startswith("http") else urllib.parse.urljoin(base_url, uri)
+                            p_uri = f"{self.getProxyUrl()}&url={urllib.parse.quote(abs_uri, safe='')}&ref={urllib.parse.quote(ref_url, safe='')}"
+                            return f'URI="{p_uri}"'
+
+                        new_line = re.sub(r'URI="([^"]+)"', replace_uri, line_strip)
+                        new_lines.append(new_line)
+                    else:
+                        abs_seg = line_strip if line_strip.startswith("http") else urllib.parse.urljoin(base_url, line_strip)
+                        seg_type = "&type=m3u8" if ".m3u8" in abs_seg else ""
+                        p_seg = f"{self.getProxyUrl()}&url={urllib.parse.quote(abs_seg, safe='')}&ref={urllib.parse.quote(ref_url, safe='')}{seg_type}"
+                        new_lines.append(p_seg)
+
+                m3u8_content = "\n".join(new_lines).encode("utf-8")
+                return [200, "application/vnd.apple.mpegurl", m3u8_content, {}]
+
+            content_type = r.headers.get("Content-Type", "video/mp4")
+            return [200, content_type, r.content, {}]
+        except Exception:
+            return [500, "text/plain", b"", {}]
 
     # 核心解析：抓取所有指向 /dramas/ 的短劇卡片
     def _parse_drama_cards(self, soup):
@@ -322,6 +364,3 @@ class Spider(Spider):
                 })
 
         return videos
-
-    def localProxy(self, param):
-        return [200, "video/MP2T", "", {}]
