@@ -18,11 +18,12 @@ class Spider(Spider):
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             "Referer": self.host + "/",
+            "Origin": self.host,
             "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"
         }
 
     def isVideoFormat(self, url):
-        return bool(re.search(r'\.(m3u8|mp4|flv|mkv)(\?|$)', url, re.I))
+        return bool(re.search(r'\.(m3u8|mpd|mp4|flv|mkv)(\?|$)', url, re.I))
 
     def manualVideoCheck(self):
         return False
@@ -42,7 +43,6 @@ class Spider(Spider):
             resp.encoding = 'utf-8'
             soup = BeautifulSoup(resp.text, 'lxml')
 
-            # 自動從導覽列抓取其他真實分類連結（排除首頁與外部連結）
             nav_classes = []
             seen_hrefs = {"/", "/dramas/"}
             for a in soup.select('header a[href], nav a[href]'):
@@ -67,7 +67,6 @@ class Spider(Spider):
     def categoryContent(self, tid, pg, filter, extend):
         result = {}
         base_path = tid if tid.startswith('http') else f"{self.host}{tid}"
-        # 常見現代網站分頁參數（?page=2 或 /page/2/）
         if str(pg) == "1":
             url = base_path
         else:
@@ -88,7 +87,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與分集（如 /dramas/high-school-love-story/season-1/）
+    # 3. 影片詳情與分集
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -97,11 +96,9 @@ class Spider(Spider):
             resp.encoding = 'utf-8'
             soup = BeautifulSoup(resp.text, 'lxml')
 
-            # 標題
             h1 = soup.select_one('h1')
             title = h1.get_text(strip=True) if h1 else "未知短劇"
 
-            # 封面
             pic = ""
             og_img = soup.select_one('meta[property="og:image"]')
             if og_img and og_img.get('content'):
@@ -113,27 +110,25 @@ class Spider(Spider):
             if pic.startswith('/'):
                 pic = self.host + pic
 
-            # 簡介
             desc = ""
             og_desc = soup.select_one('meta[name="description"], meta[property="og:description"]')
             if og_desc and og_desc.get('content'):
                 desc = og_desc.get('content')
 
-            # 尋找該劇的所有集數或季數連結（同前綴路徑下的子連結）
             episodes = []
             seen_ep = set()
             # 取得劇集主路徑，例如 /dramas/high-school-love-story/
-            drama_prefix = "/".join(vid.rstrip('/').split('/')[:3])
+            parts = [p for p in vid.split('/') if p]
+            drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
             for a in soup.select('a[href]'):
                 href = a.get('href', '').strip()
                 ep_text = a.get_text(strip=True)
-                if drama_prefix and href.startswith(drama_prefix) and href != drama_prefix + "/" and href not in seen_ep:
+                if drama_prefix and href.startswith(drama_prefix) and href != drama_prefix and href not in seen_ep:
                     seen_ep.add(href)
                     label = ep_text if ep_text else f"第{len(episodes)+1}集"
                     episodes.append(f"{label}${href}")
 
-            # 若該頁面本身就是直接播放頁（單頁切換集數），至少加入當前頁作為第1集
             if not episodes:
                 episodes.append(f"立即播放${vid}")
 
@@ -151,7 +146,6 @@ class Spider(Spider):
 
     # 4. 關鍵字搜尋
     def searchContent(self, key, quick, pg="1"):
-        # 嘗試常見搜尋參數 ?q= 或 ?s= 或 /search?q=
         url = f"{self.host}/dramas/?q={requests.utils.quote(key)}"
         try:
             resp = requests.get(url, headers=self.headers, timeout=10)
@@ -161,47 +155,62 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 解析播放頁真實串流（提取 <video>、<source> 或腳本內的 m3u8 / mp4）
+    # 5. 解析播放頁真實串流（針對 /media/.../delivery-v2/ 結構）
     def playerContent(self, flag, id, vipFlags):
         play_page = id if id.startswith('http') else f"{self.host}{id}"
+        play_headers = {
+            "User-Agent": self.headers["User-Agent"],
+            "Referer": play_page,
+            "Origin": self.host
+        }
+
         try:
-            resp = requests.get(play_page, headers=self.headers, timeout=10)
+            resp = requests.get(play_page, headers=play_headers, timeout=10)
             resp.encoding = 'utf-8'
             html = resp.text
-            soup = BeautifulSoup(html, 'lxml')
 
-            # 方法 A：直接找 HTML5 <video src="..."> 或 <source src="...">
-            video_tag = soup.select_one('video source[src], video[src]')
-            if video_tag and video_tag.get('src'):
-                src = video_tag.get('src')
-                if src.startswith('/'):
-                    src = self.host + src
+            # 優先比對該站特有的 /media/.../delivery-v2/... 主播放清單（.m3u8 或 .mpd）
+            delivery_match = re.search(
+                r'((?:https?:)?//[^\s"\'\\<>]*/media/[^\s"\'\\<>]+?\.(?:m3u8|mpd)(?:\?[^\s"\'\\<>]*)?|/media/[^\s"\'\\<>]+?\.(?:m3u8|mpd)(?:\?[^\s"\'\\<>]*)?)',
+                html
+            )
+            if delivery_match:
+                stream_url = delivery_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
+                if stream_url.startswith('//'):
+                    stream_url = 'https:' + stream_url
+                elif stream_url.startswith('/'):
+                    stream_url = self.host + stream_url
+
                 return {
                     "parse": 0,
                     "playUrl": "",
-                    "url": src,
-                    "header": json.dumps(self.headers)
+                    "url": stream_url,
+                    "header": json.dumps(play_headers)
                 }
 
-            # 方法 B：從網頁原始碼或 Next.js JSON 資料中正則提取 .m3u8 或 .mp4
-            media_match = re.search(r'(https?://[^\s"\'\\<>]+\.(?:m3u8|mp4)(?:\?[^\s"\'\\<>]*)?)', html)
-            if media_match:
-                real_url = media_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
-                return {
-                    "parse": 0,
-                    "playUrl": "",
-                    "url": real_url,
-                    "header": json.dumps(self.headers)
-                }
+            # 其次比對其他通用 .m3u8 / .mpd / .mp4（排除 init.mp4 分片）
+            generic_match = re.search(
+                r'(https?://[^\s"\'\\<>]+?\.(?:m3u8|mpd|mp4)(?:\?[^\s"\'\\<>]*)?)',
+                html
+            )
+            if generic_match:
+                stream_url = generic_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
+                if not stream_url.endswith('init.mp4'):
+                    return {
+                        "parse": 0,
+                        "playUrl": "",
+                        "url": stream_url,
+                        "header": json.dumps(play_headers)
+                    }
         except Exception:
             pass
 
-        # 方法 C：交由 TVBox 內建 WebView 嗅探器自動攔截播放請求
+        # 若 token 是由前端 JS 動態請求 API 取得，交由 TVBox WebView 自動執行 JS 並嗅探 .m3u8/.mpd
         return {
             "parse": 1,
             "playUrl": "",
             "url": play_page,
-            "header": json.dumps(self.headers)
+            "header": json.dumps(play_headers)
         }
 
     # 核心解析：自動抓取所有指向 /dramas/ 的短劇卡片
@@ -211,11 +220,9 @@ class Spider(Spider):
 
         for a in soup.select('a[href*="/dramas/"]'):
             href = a.get('href', '').strip()
-            # 排除純分類首頁 /dramas/ 本身，以及重複連結
             if href in ('/dramas', '/dramas/') or href in seen_urls:
                 continue
 
-            # 尋找卡片內的圖片（可能在 <a> 裡面，也可能在父層容器裡）
             img = a.select_one('img') or (a.parent and a.parent.select_one('img'))
             if not img:
                 continue
@@ -224,7 +231,6 @@ class Spider(Spider):
             if pic.startswith('/'):
                 pic = self.host + pic
 
-            # 提取劇名（優先找標題標籤或 img alt，其次找連結文字）
             title_el = a.select_one('h2, h3, h4, [class*="title"], [class*="name"]')
             title = (
                 (title_el.get_text(strip=True) if title_el else "")
@@ -233,7 +239,6 @@ class Spider(Spider):
                 or a.get_text(strip=True)
             )
 
-            # 提取集數或標籤（如 "全60集"、"更新至12集"）
             remark_el = a.select_one('[class*="ep"], [class*="badge"], [class*="tag"], span')
             remark = remark_el.get_text(strip=True) if remark_el and remark_el.get_text(strip=True) != title else ""
 
