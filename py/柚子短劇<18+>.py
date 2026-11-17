@@ -15,12 +15,29 @@ class Spider(Spider):
 
     def init(self, extend=""):
         self.host = "https://youzidj.com"
+        self.base_cookie = (
+            "eden_age_v2=accepted.1794883431.1794969831.rC%2FUb99IEpmeivtisgFBCfvpBX%2B5ut0HN2J9UYzvaGY%3D; "
+            "eden_account=fed6f3c03defd79fa12ae79766bbcf3bb1822153343144434752faa4a599d28e; "
+            "__Host-eden_analytics=994da745ac4b31de1b5bfe24bf924eba6a8a77c4266a2c85d1f70306ffc5c643"
+        )
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             "Referer": self.host + "/",
             "Origin": self.host,
-            "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"
+            "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
+            "Cookie": self.base_cookie
         }
+        self.session = requests.Session()
+        self.session.headers.update(self.headers)
+        self._init_session()
+
+    def _init_session(self):
+        """初始化並刷新訪客/帳號驗證 Cookie"""
+        try:
+            self.session.get(f"{self.host}/api/viewer", timeout=6)
+            self.session.get(f"{self.host}/api/account", timeout=6)
+        except Exception:
+            pass
 
     def isVideoFormat(self, url):
         return bool(re.search(r'\.(m3u8|mpd|mp4|flv|mkv)(\?|$)', url, re.I))
@@ -39,7 +56,7 @@ class Spider(Spider):
         }
 
         try:
-            resp = requests.get(self.host, headers=self.headers, timeout=10)
+            resp = self.session.get(self.host, timeout=10)
             resp.encoding = 'utf-8'
             soup = BeautifulSoup(resp.text, 'lxml')
 
@@ -74,7 +91,7 @@ class Spider(Spider):
             url = f"{base_path}{sep}page={pg}"
 
         try:
-            resp = requests.get(url, headers=self.headers, timeout=10)
+            resp = self.session.get(url, timeout=10)
             resp.encoding = 'utf-8'
             soup = BeautifulSoup(resp.text, 'lxml')
             videos = self._parse_drama_cards(soup)
@@ -87,12 +104,12 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與完整選集生成（依據 season-1-episode-N 路由規則）
+    # 3. 影片詳情與選集
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
         try:
-            resp = requests.get(url, headers=self.headers, timeout=10)
+            resp = self.session.get(url, timeout=10)
             resp.encoding = 'utf-8'
             html = resp.text
             soup = BeautifulSoup(html, 'lxml')
@@ -116,48 +133,30 @@ class Spider(Spider):
             if og_desc and og_desc.get('content'):
                 desc = og_desc.get('content')
 
-            # 取得劇集主路徑，例如 /dramas/high-school-love-story/
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
-            # 偵測目前是第幾季（預設 season-1）
-            season_match = re.search(r'season-(\d+)', vid, re.I)
-            season_num = season_match.group(1) if season_match else "1"
-
-            # 尋找頁面中出現的最大集數編號
-            max_ep = 0
-
-            # 1. 從原始碼中所有 season-X-episode-Y 路徑找出最大集數
-            ep_nums = re.findall(r'season-\d+-episode-(\d+)', html, re.I)
-            for n in ep_nums:
-                if int(n) > max_ep:
-                    max_ep = int(n)
-
-            # 2. 從 JSON 欄位（如 "episodeCount": 60 或 "total_episodes": 60 或 "number": 60）找最大集數
-            json_nums = re.findall(r'"(?:episode_?count|total_?episodes|episodes_?count|episode_?number|number)"\s*:\s*(\d+)', html, re.I)
-            for n in json_nums:
-                val = int(n)
-                if 1 <= val <= 300 and val > max_ep:
-                    max_ep = val
-
-            # 3. 從中文文字（如「全60集」、「共80集」、「更新至45集」）提取總集數
-            text_nums = re.findall(r'(?:全|共|更新至|第)\s*(\d+)\s*集', soup.get_text())
-            for n in text_nums:
-                val = int(n)
-                if 1 <= val <= 300 and val > max_ep:
-                    max_ep = val
-
             episodes = []
-            if drama_prefix and max_ep > 1:
-                for ep in range(1, max_ep + 1):
-                    ep_url = f"{drama_prefix}season-{season_num}-episode-{ep}/"
-                    episodes.append(f"第{ep}集${ep_url}")
-            elif drama_prefix:
-                # 若無法偵測到總集數，預設先生成第 1 集（或當前網址）
-                first_url = vid if "episode-" in vid else f"{drama_prefix}season-{season_num}-episode-1/"
-                episodes.append(f"第1集${first_url}")
-            else:
-                episodes.append(f"立即播放${vid}")
+            seen_ep = set()
+
+            if drama_prefix:
+                raw_paths = re.findall(rf'({re.escape(drama_prefix)}[a-zA-Z0-9\-_/]+)', html)
+                valid_paths = []
+                for p in raw_paths:
+                    clean_p = p.split('"')[0].split("'")[0].split('\\')[0]
+                    if clean_p.rstrip('/') != drama_prefix.rstrip('/') and clean_p not in seen_ep:
+                        seen_ep.add(clean_p)
+                        num_m = re.search(r'episode-?(\d+)', clean_p, re.I)
+                        ep_num = int(num_m.group(1)) if num_m else 9999
+                        valid_paths.append((ep_num, clean_p))
+
+                valid_paths.sort(key=lambda x: x[0])
+                for idx, (ep_num, path) in enumerate(valid_paths):
+                    label = f"第{ep_num}集" if ep_num != 9999 else f"第{idx+1}集"
+                    episodes.append(f"{label}${path}")
+
+            if not episodes:
+                episodes.append(f"第1集${vid}")
 
             vod = {
                 "vod_id": vid,
@@ -175,40 +174,32 @@ class Spider(Spider):
     def searchContent(self, key, quick, pg="1"):
         url = f"{self.host}/dramas/?q={requests.utils.quote(key)}"
         try:
-            resp = requests.get(url, headers=self.headers, timeout=10)
+            resp = self.session.get(url, timeout=10)
             resp.encoding = 'utf-8'
             soup = BeautifulSoup(resp.text, 'lxml')
             return {"list": self._parse_drama_cards(soup)}
         except Exception:
             return {"list": []}
 
-    # 5. 核心播放解析：訪問該集網址取得專屬 UUID，並呼叫 POST /api/playback/{uuid}?mode=mse&startup=1
+    # 5. 核心播放解析：帶完整 Cookie 呼叫 POST /api/playback/{uuid}?mode=mse&startup=1
     def playerContent(self, flag, id, vipFlags):
         play_page = id if id.startswith('http') else f"{self.host}{id}"
-        play_headers = {
-            "User-Agent": self.headers["User-Agent"],
-            "Referer": play_page,
-            "Origin": self.host,
-            "Accept": "application/json, text/plain, */*"
-        }
-
         candidate_uuids = []
+
         try:
-            resp = requests.get(play_page, headers=play_headers, timeout=10)
+            resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
             resp.encoding = 'utf-8'
             html = resp.text
 
-            # 優先尋找 JSON 中與當前單集綁定的 episodeId / playbackId / id
-            ep_id_matches = re.findall(
-                r'"(?:episode_?id|playback_?id|video_?id|id)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"',
+            priority_uuids = re.findall(
+                r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
                 html,
                 re.I
             )
-            for u in ep_id_matches:
+            for u in priority_uuids:
                 if u not in candidate_uuids:
                     candidate_uuids.append(u)
 
-            # 補充提取頁面內所有其他 UUID 作為備選
             all_uuids = re.findall(
                 r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
                 html,
@@ -220,11 +211,21 @@ class Spider(Spider):
         except Exception:
             pass
 
-        # 依序向 /api/playback/{uuid}?mode=mse&startup=1 發送 POST 請求
-        for uid in candidate_uuids[:8]:
+        api_headers = {
+            "Referer": play_page,
+            "Origin": self.host,
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/plain, */*"
+        }
+
+        # 合併 Session 最新取得的所有 Cookies
+        current_cookies = "; ".join([f"{k}={v}" for k, v in self.session.cookies.get_dict().items()])
+        final_cookie = f"{self.base_cookie}; {current_cookies}" if current_cookies else self.base_cookie
+
+        for uid in candidate_uuids[:25]:
             api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
             try:
-                r = requests.post(api_url, headers=play_headers, timeout=8)
+                r = self.session.post(api_url, headers=api_headers, json={}, timeout=6)
                 if r.status_code == 200:
                     data = r.json()
                     m3u8_path = data.get("url", "")
@@ -233,7 +234,8 @@ class Spider(Spider):
                         stream_headers = {
                             "User-Agent": self.headers["User-Agent"],
                             "Referer": play_page,
-                            "Origin": self.host
+                            "Origin": self.host,
+                            "Cookie": final_cookie
                         }
                         return {
                             "parse": 0,
@@ -248,7 +250,7 @@ class Spider(Spider):
             "parse": 0,
             "playUrl": "",
             "url": "",
-            "header": json.dumps(play_headers)
+            "header": json.dumps(api_headers)
         }
 
     # 核心解析：抓取所有指向 /dramas/ 的短劇卡片
