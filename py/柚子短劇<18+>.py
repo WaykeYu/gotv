@@ -96,8 +96,7 @@ class Spider(Spider):
         except Exception:
             result['list'] = []
         return result
-
-    # 3. 影片詳情與完整選集展開（附帶播放測試狀態診斷）
+# 3. 影片詳情與選集（直接於線路名稱顯示第1集 API 測試結果）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -156,112 +155,47 @@ class Spider(Spider):
             else:
                 episodes.append(f"第1集${vid}")
 
-            # 診斷資訊：確認頁面抓到的 UUID 數量與 HTTP 狀態碼
-            uuids_found = re.findall(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', html, re.I)
-            diag = f"[HTTP:{resp.status_code} | UUID數:{len(set(uuids_found))}] "
+            # 現場實測第 1 集網址與 POST playback API 的真實狀態碼
+            first_ep_path = episodes[0].split('$')[1]
+            first_ep_url = first_ep_path if first_ep_path.startswith('http') else f"{self.host}{first_ep_path}"
+            r_ep = self.session.get(first_ep_url, timeout=8)
+            ep_uuids = list(dict.fromkeys(re.findall(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', r_ep.text, re.I)))
+
+            api_status = "未測"
+            if ep_uuids:
+                test_api = f"{self.host}/api/playback/{ep_uuids[0]}?mode=mse&startup=1"
+                r_api = self.session.post(
+                    test_api,
+                    headers={
+                        "User-Agent": self.ua,
+                        "Content-Type": "application/json",
+                        "Origin": self.host,
+                        "Referer": first_ep_url,
+                        "Cookie": self.full_cookie
+                    },
+                    data="{}",
+                    timeout=6
+                )
+                api_status = f"{r_api.status_code}:{r_api.text[:25]}"
+
+            diag_tab = f"柚子[頁{r_ep.status_code}|U:{len(ep_uuids)}|API:{api_status}]"
 
             vod = {
                 "vod_id": vid,
                 "vod_name": title,
                 "vod_pic": pic,
-                "vod_content": diag + desc,
-                "vod_play_from": "柚子線路",
+                "vod_content": desc,
+                "vod_play_from": diag_tab,
                 "vod_play_url": "#".join(episodes)
             }
             return {"list": [vod]}
         except Exception as e:
-            return {"list": []}
-
-    # 4. 關鍵字搜尋
-    def searchContent(self, key, quick, pg="1"):
-        url = f"{self.host}/dramas/?q={requests.utils.quote(key)}"
-        try:
-            resp = self.session.get(url, timeout=10)
-            resp.encoding = 'utf-8'
-            soup = BeautifulSoup(resp.text, 'lxml')
-            return {"list": self._parse_drama_cards(soup)}
-        except Exception:
-            return {"list": []}
-
-# 5. 核心播放解析（附帶精準 API 狀態碼診斷）
-    def playerContent(self, flag, id, vipFlags):
-        play_page = id if id.startswith('http') else f"{self.host}{id}"
-        if not play_page.endswith('/'):
-            play_page += '/'
-
-        candidate_uuids = []
-        page_status = 0
-        try:
-            resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
-            page_status = resp.status_code
-            resp.encoding = 'utf-8'
-            html = resp.text
-
-            # 1. 優先提取緊跟在 playback / episode / current / video 旁的 UUID
-            priority_uuids = re.findall(
-                r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
-                html,
-                re.I
-            )
-            for u in priority_uuids:
-                if u not in candidate_uuids:
-                    candidate_uuids.append(u)
-
-            # 2. 提取頁面內所有其他 UUID
-            all_uuids = re.findall(
-                r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                html,
-                re.I
-            )
-            for u in all_uuids:
-                if u not in candidate_uuids:
-                    candidate_uuids.append(u)
-        except Exception as e:
-            page_status = -1
-
-        api_headers = {
-            "User-Agent": self.ua,
-            "Accept": "*/*",
-            "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Content-Type": "application/json",
-            "Origin": self.host,
-            "Referer": play_page,
-            "Cookie": self.full_cookie,
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin"
-        }
-
-        last_api_status = 0
-        last_api_text = ""
-
-        for uid in candidate_uuids[:25]:
-            api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
-            try:
-                r = self.session.post(api_url, headers=api_headers, data="{}", timeout=6)
-                last_api_status = r.status_code
-                last_api_text = r.text[:60]
-                if r.status_code == 200:
-                    data = r.json()
-                    m3u8_path = data.get("url", "")
-                    if m3u8_path:
-                        stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
-                        # 注意：部分殼層要求 header 為 json 字串，部分要求 dict，這裡轉回標準 json 字串
-                        player_headers = {
-                            "User-Agent": self.ua,
-                            "Referer": play_page,
-                            "Origin": self.host,
-                            "Cookie": self.full_cookie
-                        }
-                        return {
-                            "parse": 0,
-                            "playUrl": "",
-                            "url": stream_url,
-                            "header": json.dumps(player_headers)
-                        }
-            except Exception as e:
-                last_api_text = str(e)[:40]
-                continue
+            return {"list": [{
+                "vod_id": vid,
+                "vod_name": "錯誤",
+                "vod_play_from": f"異常:{str(e)[:30]}",
+                "vod_play_url": "第1集$err"
+            }]}
 
         # 將診斷結果寫入網址回傳，避免「没有获取到播放地址」，並可在錯誤畫面或抓包看到狀態
         diag_url = f"http://127.0.0.1/page_{page_status}_uuids_{len(candidate_uuids)}_api_{last_api_status}.m3u8"
