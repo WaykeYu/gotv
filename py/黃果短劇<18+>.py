@@ -15,11 +15,11 @@ class Spider(Spider):
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
             "Referer": f"{self.host}/zh-hant/library/",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"
         }
 
     def homeContent(self, filter):
-        # 1. 動態從片庫頁面抓取真實的英文路徑分類（如 /zh-hant/library/stepmom/），失敗則使用預設列表
         classes = [{"type_id": "all", "type_name": "全部作品"}]
         seen_ids = {"all"}
 
@@ -60,7 +60,6 @@ class Spider(Spider):
             for path, name in fallback:
                 classes.append({"type_id": path, "type_name": name})
 
-        # 2. 定義通用二級篩選條件（題材與標籤 + 中文字幕/配音過濾）
         genre_values = [
             {"n": "全部題材", "v": ""},
             {"n": "豪門", "v": "豪門"},
@@ -93,55 +92,78 @@ class Spider(Spider):
             {"key": "zh", "name": "語言字幕", "value": lang_values}
         ]
 
-        # 為每一個一級分類綁定這組二級篩選器
-        filters = {c["type_id"]: common_filters for c in classes}
-
         return {
             "class": classes,
-            "filters": filters
+            "filters": {c["type_id"]: common_filters for c in classes}
         }
 
     def homeVideoContent(self):
         return self.categoryContent("all", "1", False, {})
 
-    def _parse_videos(self, html):
+    def _normalize_url(self, href):
+        if href.startswith("http"):
+            return href
+        if href.startswith("/"):
+            return self.host + href
+        return f"{self.host}/zh-hant/library/{href.lstrip('./')}"
+
+    def _parse_videos(self, html, status_code=200):
         videos = []
         seen_urls = set()
         soup = BeautifulSoup(html, "html.parser")
 
-        # 1. 匹配純數字作品 ID 路徑（如 /zh-hant/library/169029/）
-        for a in soup.find_all("a", href=re.compile(r"/zh-hant/(?:library/|drama/|watch/)?\d+/?$")):
+        for a in soup.find_all("a", href=True):
             href = a.get("href", "").strip()
-            full_url = href if href.startswith("http") else self.host + href
+            if not re.search(r"(?:^|/)\d{3,10}(?:/|$|\?)", href):
+                continue
+            if any(x in href for x in ["page=", "login", "register", "novels", "comics"]):
+                continue
+
+            full_url = self._normalize_url(href)
             if full_url in seen_urls:
                 continue
 
             card = a
-            for _ in range(3):
-                if card.parent and card.parent.name in ["div", "article", "li"]:
-                    txt = card.parent.get_text()
-                    if "集可觀看" in txt or "開始觀看" in txt:
-                        card = card.parent
-                        break
-                    card = card.parent
+            curr = a.parent
+            for _ in range(6):
+                if not curr or curr.name not in ["div", "article", "li", "section"]:
+                    break
+                txt = curr.get_text(" ", strip=True)
+                if txt.count("開始觀看") > 1 or txt.count("集可觀看") > 1:
+                    break
+                card = curr
+                if "集可觀看" in txt:
+                    break
+                curr = curr.parent
 
             title = ""
-            for tag in card.find_all(["h2", "h3", "h4", "strong"]):
+            for tag in card.find_all(["h1", "h2", "h3", "h4", "strong"]):
                 t = tag.get_text(strip=True)
                 if t and "集可觀看" not in t and "開始觀看" not in t and len(t) >= 2:
                     title = t
                     break
+
             if not title:
-                t = a.get_text(strip=True)
-                if t and "開始觀看" not in t and "集可觀看" not in t and len(t) >= 2:
-                    title = t
+                img = card.find("img")
+                if img and img.get("alt"):
+                    alt_t = img.get("alt").strip()
+                    if len(alt_t) >= 2 and "logo" not in alt_t.lower():
+                        title = alt_t
+
+            if not title:
+                for line in card.get_text("\n", strip=True).split("\n"):
+                    line = line.strip()
+                    if len(line) >= 2 and not any(k in line for k in ["集可觀看", "開始觀看", "分", "國產", "歐美", "日本"]):
+                        title = line
+                        break
+
             if not title:
                 continue
 
             pic = ""
-            img = card.find("img")
-            if img:
-                pic = img.get("src") or img.get("data-src") or ""
+            img_el = card.find("img")
+            if img_el:
+                pic = img_el.get("src") or img_el.get("data-src") or img_el.get("srcset", "").split(" ")[0]
                 if pic and not pic.startswith("http"):
                     pic = self.host + pic
 
@@ -158,13 +180,12 @@ class Spider(Spider):
                 "vod_remarks": remarks
             })
 
-        # 2. 備援：從 Next.js __next_f 序列化資料提取純數字 ID 與標題
         if not videos:
             unescaped = html.replace('\\"', '"').replace('\\\\/', '/')
-            for m in re.finditer(r'"id"\s*:\s*(\d{3,10})[^{}]{0,250}?"title"\s*:\s*"([^"\\]{2,60})"', unescaped):
+            for m in re.finditer(r'"id"\s*:\s*"?(\d{3,10})"?[^{}]{0,300}?"title"\s*:\s*"([^"\\]{2,60})"', unescaped):
                 vid_num, title = m.group(1), m.group(2)
                 full_url = f"{self.host}/zh-hant/library/{vid_num}/"
-                if full_url not in seen_urls:
+                if full_url not in seen_urls and not any(k in title for k in ["黃果", "片庫", "首頁"]):
                     seen_urls.add(full_url)
                     videos.append({
                         "vod_id": full_url,
@@ -172,6 +193,15 @@ class Spider(Spider):
                         "vod_pic": "",
                         "vod_remarks": "短劇"
                     })
+
+        if not videos:
+            sample_hrefs = [a.get("href", "") for a in soup.find_all("a", href=True) if any(c.isdigit() for c in a.get("href", ""))][:3]
+            videos.append({
+                "vod_id": f"{self.host}/zh-hant/library/",
+                "vod_name": f"[診斷] HTTP:{status_code} | 樣本:{','.join(sample_hrefs) or '無數字連結'}",
+                "vod_pic": "",
+                "vod_remarks": f"HTML長度:{len(html)}"
+            })
 
         return videos
 
@@ -181,26 +211,29 @@ class Spider(Spider):
         else:
             base_url = tid if tid.startswith("http") else self.host + tid
 
-        # 組合分頁與二級篩選查詢參數
         query_params = {}
         if str(pg) != "1":
             query_params["page"] = str(pg)
-
-        tag_val = extend.get("tag", "")
-        if tag_val:
-            query_params["tag"] = tag_val
-
-        zh_val = extend.get("zh", "")
-        if zh_val:
-            query_params["zh"] = zh_val
+        if extend.get("tag"):
+            query_params["tag"] = extend["tag"]
+        if extend.get("zh"):
+            query_params["zh"] = extend["zh"]
 
         url = base_url
         if query_params:
             sep = "&" if "?" in base_url else "?"
             url = f"{base_url}{sep}{urllib.parse.urlencode(query_params)}"
 
-        res = requests.get(url, headers=self.headers, timeout=10)
-        videos = self._parse_videos(res.text)
+        try:
+            res = requests.get(url, headers=self.headers, timeout=10)
+            videos = self._parse_videos(res.text, res.status_code)
+        except Exception as e:
+            videos = [{
+                "vod_id": url,
+                "vod_name": f"[連線異常] {str(e)[:40]}",
+                "vod_pic": "",
+                "vod_remarks": "請求失敗"
+            }]
 
         return {
             "list": videos,
@@ -231,7 +264,7 @@ class Spider(Spider):
             ep_text = a.get_text(strip=True)
             is_ep_link = (vid_num and re.search(rf"/{vid_num}/(?:ep-?|episode-?|watch/)?\d+", ep_href)) or re.search(r"^(第\s*\d+\s*集|EP\s*\d+|\d+)$", ep_text, re.I)
             if is_ep_link:
-                full_ep = ep_href if ep_href.startswith("http") else self.host + ep_href
+                full_ep = self._normalize_url(ep_href)
                 if full_ep not in seen_eps:
                     seen_eps.add(full_ep)
                     play_list.append(f"{ep_text or f'第{len(play_list)+1}集'}${full_ep}")
@@ -251,7 +284,7 @@ class Spider(Spider):
     def searchContent(self, key, quick, pg="1"):
         url = f"{self.host}/zh-hant/library/?q={urllib.parse.quote(key)}&page={pg}"
         res = requests.get(url, headers=self.headers, timeout=10)
-        return {"list": self._parse_videos(res.text)}
+        return {"list": self._parse_videos(res.text, res.status_code)}
 
     def playerContent(self, flag, id, vipFlags):
         try:
