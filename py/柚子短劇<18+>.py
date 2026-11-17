@@ -87,14 +87,15 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與分集
+    # 3. 影片詳情與選集（支援多集 URL 與單頁多集 UUID 提取）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
         try:
             resp = requests.get(url, headers=self.headers, timeout=10)
             resp.encoding = 'utf-8'
-            soup = BeautifulSoup(resp.text, 'lxml')
+            html = resp.text
+            soup = BeautifulSoup(html, 'lxml')
 
             h1 = soup.select_one('h1')
             title = h1.get_text(strip=True) if h1 else "未知短劇"
@@ -117,7 +118,8 @@ class Spider(Spider):
 
             episodes = []
             seen_ep = set()
-            # 取得劇集主路徑，例如 /dramas/high-school-love-story/
+
+            # 方式 A：抓取同劇集下的分集子頁面連結（如 /dramas/xxx/season-1/ep-1/）
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
@@ -128,6 +130,23 @@ class Spider(Spider):
                     seen_ep.add(href)
                     label = ep_text if ep_text else f"第{len(episodes)+1}集"
                     episodes.append(f"{label}${href}")
+
+            # 方式 B：若該劇所有集數的 /media/{drama_uuid}/{episode_uuid} 直接內嵌在頁面 JSON 中
+            if len(episodes) <= 1:
+                media_pairs = re.findall(
+                    r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+                    html,
+                    re.I
+                )
+                unique_pairs = []
+                for pair in media_pairs:
+                    if pair not in unique_pairs:
+                        unique_pairs.append(pair)
+
+                if len(unique_pairs) > 1:
+                    episodes = []
+                    for idx, (d_uuid, e_uuid) in enumerate(unique_pairs):
+                        episodes.append(f"第{idx+1}集$direct_media:{d_uuid}/{e_uuid}")
 
             if not episodes:
                 episodes.append(f"立即播放${vid}")
@@ -155,27 +174,47 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 解析播放頁真實串流（針對 /media/.../delivery-v2/ 結構）
+    # 5. 純 Python 直連解析播放清單（免 WebView 嗅探）
     def playerContent(self, flag, id, vipFlags):
-        play_page = id if id.startswith('http') else f"{self.host}{id}"
         play_headers = {
             "User-Agent": self.headers["User-Agent"],
-            "Referer": play_page,
+            "Referer": self.host + "/",
             "Origin": self.host
         }
+
+        # 若為 detailContent 提取出的 direct_media:{drama_uuid}/{episode_uuid}
+        if id.startswith("direct_media:"):
+            media_path = id.split(":", 1)[1]
+            # 依序探測標準清單檔名（master.m3u8 / playlist.m3u8 / manifest.mpd）
+            for manifest in ["master.m3u8", "playlist.m3u8", "index.m3u8", "manifest.mpd"]:
+                test_url = f"{self.host}/media/{media_path}/{manifest}"
+                try:
+                    r = requests.head(test_url, headers=play_headers, timeout=5)
+                    if r.status_code == 200:
+                        return {
+                            "parse": 0,
+                            "playUrl": "",
+                            "url": test_url,
+                            "header": json.dumps(play_headers)
+                        }
+                except Exception:
+                    continue
+
+        play_page = id if id.startswith('http') else f"{self.host}{id}"
+        play_headers["Referer"] = play_page
 
         try:
             resp = requests.get(play_page, headers=play_headers, timeout=10)
             resp.encoding = 'utf-8'
             html = resp.text
 
-            # 優先比對該站特有的 /media/.../delivery-v2/... 主播放清單（.m3u8 或 .mpd）
-            delivery_match = re.search(
+            # 1. 優先從 HTML / Next.js 資料中提取完整 .m3u8 或 .mpd 網址
+            manifest_match = re.search(
                 r'((?:https?:)?//[^\s"\'\\<>]*/media/[^\s"\'\\<>]+?\.(?:m3u8|mpd)(?:\?[^\s"\'\\<>]*)?|/media/[^\s"\'\\<>]+?\.(?:m3u8|mpd)(?:\?[^\s"\'\\<>]*)?)',
                 html
             )
-            if delivery_match:
-                stream_url = delivery_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
+            if manifest_match:
+                stream_url = manifest_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
                 if stream_url.startswith('//'):
                     stream_url = 'https:' + stream_url
                 elif stream_url.startswith('/'):
@@ -188,24 +227,31 @@ class Spider(Spider):
                     "header": json.dumps(play_headers)
                 }
 
-            # 其次比對其他通用 .m3u8 / .mpd / .mp4（排除 init.mp4 分片）
-            generic_match = re.search(
-                r'(https?://[^\s"\'\\<>]+?\.(?:m3u8|mpd|mp4)(?:\?[^\s"\'\\<>]*)?)',
-                html
+            # 2. 若頁面僅包含 /media/{drama_uuid}/{episode_uuid} 基礎路徑，自動拼接主播放清單
+            uuid_match = re.search(
+                r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+                html,
+                re.I
             )
-            if generic_match:
-                stream_url = generic_match.group(1).replace('\\u002F', '/').replace('\\/', '/')
-                if not stream_url.endswith('init.mp4'):
-                    return {
-                        "parse": 0,
-                        "playUrl": "",
-                        "url": stream_url,
-                        "header": json.dumps(play_headers)
-                    }
+            if uuid_match:
+                base_media = f"{self.host}/media/{uuid_match.group(1)}"
+                for manifest in ["master.m3u8", "playlist.m3u8", "index.m3u8", "manifest.mpd"]:
+                    test_url = f"{base_media}/{manifest}"
+                    try:
+                        r = requests.head(test_url, headers=play_headers, timeout=5)
+                        if r.status_code == 200:
+                            return {
+                                "parse": 0,
+                                "playUrl": "",
+                                "url": test_url,
+                                "header": json.dumps(play_headers)
+                            }
+                    except Exception:
+                        continue
         except Exception:
             pass
 
-        # 若 token 是由前端 JS 動態請求 API 取得，交由 TVBox WebView 自動執行 JS 並嗅探 .m3u8/.mpd
+        # 3. 備援：若仍需前端執行 JS 簽發，交由內建嗅探器處理
         return {
             "parse": 1,
             "playUrl": "",
@@ -213,7 +259,7 @@ class Spider(Spider):
             "header": json.dumps(play_headers)
         }
 
-    # 核心解析：自動抓取所有指向 /dramas/ 的短劇卡片
+    # 核心解析：抓取所有指向 /dramas/ 的短劇卡片
     def _parse_drama_cards(self, soup):
         videos = []
         seen_urls = set()
