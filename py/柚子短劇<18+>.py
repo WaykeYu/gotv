@@ -96,7 +96,8 @@ class Spider(Spider):
         except Exception:
             result['list'] = []
         return result
-# 3. 影片詳情與選集（直接於線路名稱顯示第1集 API 測試結果）
+
+    # 3. 影片詳情與選集（直接從劇集主頁提取真實集數路徑或內嵌 UUID，絕不盲猜 404 網址）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -128,81 +129,162 @@ class Spider(Spider):
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
-            max_ep = 0
-            for n in re.findall(r'season-\d+-episode-(\d+)', html, re.I):
-                max_ep = max(max_ep, int(n))
-            for n in re.findall(r'"(?:episode_?count|total_?episodes|episodes_?count|episode_?number|number)"\s*:\s*(\d+)', html, re.I):
-                val = int(n)
-                if 1 <= val <= 300:
-                    max_ep = max(max_ep, val)
-            for n in re.findall(r'(?:全|共|更新至|第)\s*(\d+)\s*集', soup.get_text()):
-                val = int(n)
-                if 1 <= val <= 300:
-                    max_ep = max(max_ep, val)
-
-            if max_ep <= 1 and drama_prefix:
-                max_ep = 60
-
             episodes = []
+            seen_ep = set()
+
+            # 方式 A：直接從網頁原始碼中撈出所有真實存在的同劇集子路徑（如 /dramas/xxx/season-1/ 或 /dramas/xxx/season-1-episode-2/）
             if drama_prefix:
-                use_season_only = bool(re.search(rf'{re.escape(drama_prefix)}season-1/(?!episode)', html, re.I)) and not bool(re.search(r'season-1-episode-\d+', html, re.I))
-                if use_season_only:
-                    episodes.append(f"第1集${drama_prefix}season-1/")
-                else:
-                    for ep in range(1, max_ep + 1):
-                        ep_url = f"{drama_prefix}season-1-episode-{ep}/"
-                        episodes.append(f"第{ep}集${ep_url}")
-            else:
-                episodes.append(f"第1集${vid}")
+                raw_paths = re.findall(rf'({re.escape(drama_prefix)}[a-zA-Z0-9\-_/]+)', html)
+                valid_paths = []
+                for p in raw_paths:
+                    clean_p = p.split('"')[0].split("'")[0].split('\\')[0]
+                    # 確保結尾有斜線且不是主目錄本身
+                    if not clean_p.endswith('/'):
+                        clean_p += '/'
+                    if clean_p != drama_prefix and clean_p not in seen_ep:
+                        seen_ep.add(clean_p)
+                        num_m = re.search(r'(?:episode|ep|season)-?(\d+)', clean_p, re.I)
+                        ep_num = int(num_m.group(1)) if num_m else 9999
+                        valid_paths.append((ep_num, clean_p))
 
-            # 現場實測第 1 集網址與 POST playback API 的真實狀態碼
-            first_ep_path = episodes[0].split('$')[1]
-            first_ep_url = first_ep_path if first_ep_path.startswith('http') else f"{self.host}{first_ep_path}"
-            r_ep = self.session.get(first_ep_url, timeout=8)
-            ep_uuids = list(dict.fromkeys(re.findall(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', r_ep.text, re.I)))
+                valid_paths.sort(key=lambda x: x[0])
+                for idx, (ep_num, path) in enumerate(valid_paths):
+                    label = f"第{ep_num}集" if ep_num != 9999 else f"第{idx+1}集"
+                    episodes.append(f"{label}${path}")
 
-            api_status = "未測"
-            if ep_uuids:
-                test_api = f"{self.host}/api/playback/{ep_uuids[0]}?mode=mse&startup=1"
-                r_api = self.session.post(
-                    test_api,
-                    headers={
-                        "User-Agent": self.ua,
-                        "Content-Type": "application/json",
-                        "Origin": self.host,
-                        "Referer": first_ep_url,
-                        "Cookie": self.full_cookie
-                    },
-                    data="{}",
-                    timeout=6
+            # 方式 B：從內嵌 JSON 提取每一集的專屬 UUID（"number":1 ... "id":"uuid"）
+            if len(episodes) <= 1:
+                # 先把脫逸引號 \" 還原成正常雙引號，方便正則匹配 Next.js flight data
+                unescaped_html = html.replace('\\"', '"')
+                ep_objs = re.findall(
+                    r'"(?:episode_?number|episodeNumber|number|index|ep)"\s*:\s*(\d+)[^{}]{0,250}?"(?:id|uuid|episode_?id|episodeId|playbackId)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"',
+                    unescaped_html,
+                    re.I
                 )
-                api_status = f"{r_api.status_code}:{r_api.text[:25]}"
+                if not ep_objs:
+                    rev_objs = re.findall(
+                        r'"(?:id|uuid|episode_?id|episodeId|playbackId)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"[^{}]{0,250}?"(?:episode_?number|episodeNumber|number|index|ep)"\s*:\s*(\d+)',
+                        unescaped_html,
+                        re.I
+                    )
+                    ep_objs = [(num, uid) for uid, num in rev_objs]
 
-            diag_tab = f"柚子[頁{r_ep.status_code}|U:{len(ep_uuids)}|API:{api_status}]"
+                if ep_objs:
+                    seen_uid = set()
+                    sorted_eps = sorted(ep_objs, key=lambda x: int(x[0]))
+                    episodes = []
+                    for num, uid in sorted_eps:
+                        if uid not in seen_uid:
+                            seen_uid.add(uid)
+                            episodes.append(f"第{num}集$uuid:{uid}|{vid}")
+
+            # 方式 C：保底使用當前傳入的真實網址（保證 200 OK）
+            if not episodes:
+                episodes.append(f"立即播放${vid}")
 
             vod = {
                 "vod_id": vid,
                 "vod_name": title,
                 "vod_pic": pic,
                 "vod_content": desc,
-                "vod_play_from": diag_tab,
+                "vod_play_from": "柚子線路",
                 "vod_play_url": "#".join(episodes)
             }
             return {"list": [vod]}
-        except Exception as e:
-            return {"list": [{
-                "vod_id": vid,
-                "vod_name": "錯誤",
-                "vod_play_from": f"異常:{str(e)[:30]}",
-                "vod_play_url": "第1集$err"
-            }]}
+        except Exception:
+            return {"list": []}
 
-        # 將診斷結果寫入網址回傳，避免「没有获取到播放地址」，並可在錯誤畫面或抓包看到狀態
-        diag_url = f"http://127.0.0.1/page_{page_status}_uuids_{len(candidate_uuids)}_api_{last_api_status}.m3u8"
+    # 4. 關鍵字搜尋
+    def searchContent(self, key, quick, pg="1"):
+        url = f"{self.host}/dramas/?q={requests.utils.quote(key)}"
+        try:
+            resp = self.session.get(url, timeout=10)
+            resp.encoding = 'utf-8'
+            soup = BeautifulSoup(resp.text, 'lxml')
+            return {"list": self._parse_drama_cards(soup)}
+        except Exception:
+            return {"list": []}
+
+    # 5. 核心播放解析：支援直接傳入單集 UUID 或訪問真實存在頁面取得 UUID
+    def playerContent(self, flag, id, vipFlags):
+        candidate_uuids = []
+        play_page = self.host + "/"
+
+        if id.startswith("uuid:"):
+            parts = id.split(":", 1)[1].split("|", 1)
+            candidate_uuids.append(parts[0])
+            if len(parts) > 1 and parts[1]:
+                play_page = parts[1] if parts[1].startswith("http") else f"{self.host}{parts[1]}"
+        else:
+            play_page = id if id.startswith('http') else f"{self.host}{id}"
+
+        if not candidate_uuids:
+            try:
+                resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
+                resp.encoding = 'utf-8'
+                html = resp.text.replace('\\"', '"')
+
+                priority_uuids = re.findall(
+                    r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+                    html,
+                    re.I
+                )
+                for u in priority_uuids:
+                    if u not in candidate_uuids:
+                        candidate_uuids.append(u)
+
+                all_uuids = re.findall(
+                    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                    html,
+                    re.I
+                )
+                for u in all_uuids:
+                    if u not in candidate_uuids:
+                        candidate_uuids.append(u)
+            except Exception:
+                pass
+
+        api_headers = {
+            "User-Agent": self.ua,
+            "Accept": "*/*",
+            "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Content-Type": "application/json",
+            "Origin": self.host,
+            "Referer": play_page,
+            "Cookie": self.full_cookie,
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin"
+        }
+
+        for uid in candidate_uuids[:30]:
+            api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
+            try:
+                r = self.session.post(api_url, headers=api_headers, data="{}", timeout=6)
+                if r.status_code == 200:
+                    data = r.json()
+                    m3u8_path = data.get("url", "")
+                    if m3u8_path:
+                        stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
+                        player_headers = {
+                            "User-Agent": self.ua,
+                            "Referer": play_page,
+                            "Origin": self.host,
+                            "Cookie": self.full_cookie
+                        }
+                        return {
+                            "parse": 0,
+                            "playUrl": "",
+                            "url": stream_url,
+                            "header": json.dumps(player_headers)
+                        }
+            except Exception:
+                continue
+
         return {
             "parse": 0,
             "playUrl": "",
-            "url": diag_url,
+            "url": "",
             "header": "{}"
         }
 
