@@ -104,7 +104,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與完整選集展開（自動偵測總集數並生成 1 ~ N 集）
+# 3. 影片詳情與選集（精準抓取真實分集路由與內嵌集數 UUID，不盲猜 404 網址）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -136,32 +136,52 @@ class Spider(Spider):
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
-            season_match = re.search(r'season-(\d+)', vid, re.I)
-            season_num = season_match.group(1) if season_match else "1"
-
-            # 從多種來源偵測總集數
-            max_ep = 0
-            for n in re.findall(r'season-\d+-episode-(\d+)', html, re.I):
-                max_ep = max(max_ep, int(n))
-            for n in re.findall(r'"(?:episode_?count|total_?episodes|episodes_?count|episode_?number|number)"\s*:\s*(\d+)', html, re.I):
-                val = int(n)
-                if 1 <= val <= 300:
-                    max_ep = max(max_ep, val)
-            for n in re.findall(r'(?:全|共|更新至|第)\s*(\d+)\s*集', soup.get_text()):
-                val = int(n)
-                if 1 <= val <= 300:
-                    max_ep = max(max_ep, val)
-
-            # 若網頁未明確寫出總集數，預設展開 60 集供點選（短劇常見集數）
-            if max_ep <= 1 and drama_prefix:
-                max_ep = 60
-
             episodes = []
+            seen_ep = set()
+
+            # 1. 優先抓取網頁 HTML 與 Next.js script 中真實存在的同劇集子路徑（如 /dramas/xxx/season-1/ 或 /dramas/xxx/season-1-episode-1/）
             if drama_prefix:
-                for ep in range(1, max_ep + 1):
-                    ep_url = f"{drama_prefix}season-{season_num}-episode-{ep}/"
-                    episodes.append(f"第{ep}集${ep_url}")
-            else:
+                raw_paths = re.findall(rf'({re.escape(drama_prefix)}[a-zA-Z0-9\-_/]+)', html)
+                valid_paths = []
+                for p in raw_paths:
+                    clean_p = p.split('"')[0].split("'")[0].split('\\')[0]
+                    if clean_p.rstrip('/') != drama_prefix.rstrip('/') and clean_p not in seen_ep:
+                        seen_ep.add(clean_p)
+                        num_m = re.search(r'(?:episode|ep|season)-?(\d+)', clean_p, re.I)
+                        ep_num = int(num_m.group(1)) if num_m else 9999
+                        valid_paths.append((ep_num, clean_p))
+
+                valid_paths.sort(key=lambda x: x[0])
+                for idx, (ep_num, path) in enumerate(valid_paths):
+                    label = f"第{ep_num}集" if ep_num != 9999 else f"第{idx+1}集"
+                    episodes.append(f"{label}${path}")
+
+            # 2. 若未在路徑中找到多集，從頁面 JSON 提取各集物件（集數編號 + 專屬 UUID）
+            if len(episodes) <= 1:
+                ep_objs = re.findall(
+                    r'"(?:episode_?number|number|index|ep)"\s*:\s*(\d+)[^{}]*?"(?:id|uuid|episode_?id)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"',
+                    html,
+                    re.I
+                )
+                if not ep_objs:
+                    rev_objs = re.findall(
+                        r'"(?:id|uuid|episode_?id)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"[^{}]*?"(?:episode_?number|number|index|ep)"\s*:\s*(\d+)',
+                        html,
+                        re.I
+                    )
+                    ep_objs = [(num, uid) for uid, num in rev_objs]
+
+                if ep_objs:
+                    seen_uid = set()
+                    sorted_eps = sorted(ep_objs, key=lambda x: int(x[0]))
+                    episodes = []
+                    for num, uid in sorted_eps:
+                        if uid not in seen_uid:
+                            seen_uid.add(uid)
+                            episodes.append(f"第{num}集$uuid:{uid}|{vid}")
+
+            # 3. 保底：確保當前點擊進來的真實網址 vid 一定在選集清單裡（不會因為猜錯網址導致 404）
+            if not episodes:
                 episodes.append(f"第1集${vid}")
 
             vod = {
@@ -176,46 +196,53 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 4. 關鍵字搜尋
-    def searchContent(self, key, quick, pg="1"):
-        url = f"{self.host}/dramas/?q={requests.utils.quote(key)}"
-        try:
-            resp = self.session.get(url, timeout=10)
-            resp.encoding = 'utf-8'
-            soup = BeautifulSoup(resp.text, 'lxml')
-            return {"list": self._parse_drama_cards(soup)}
-        except Exception:
-            return {"list": []}
-
-    # 5. 核心播放解析：透過 localProxy 代理請求 m3u8 與切片，徹底解決播放器掉 Cookie 導致 HTTP 403
+    # 5. 核心播放解析：支援直接傳入單集 UUID 或訪問真實頁面取得 UUID，並透過 localProxy 防 403
     def playerContent(self, flag, id, vipFlags):
-        play_page = id if id.startswith('http') else f"{self.host}{id}"
         candidate_uuids = []
+        play_page = self.host + "/"
 
-        try:
-            resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
-            resp.encoding = 'utf-8'
-            html = resp.text
+        if id.startswith("uuid:"):
+            # 格式為 uuid:{uid}|{fallback_page}
+            parts = id.split(":", 1)[1].split("|", 1)
+            candidate_uuids.append(parts[0])
+            if len(parts) > 1 and parts[1]:
+                play_page = parts[1] if parts[1].startswith("http") else f"{self.host}{parts[1]}"
+        else:
+            play_page = id if id.startswith('http') else f"{self.host}{id}"
 
-            priority_uuids = re.findall(
-                r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
-                html,
-                re.I
-            )
-            for u in priority_uuids:
-                if u not in candidate_uuids:
-                    candidate_uuids.append(u)
+        # 若還沒拿到 UUID，先抓取網頁 HTML 提取
+        if not candidate_uuids:
+            try:
+                resp = self.session.get(play_page, headers={"Referer": self.host + "/"}, timeout=10)
+                # 若分集子路徑 404，自動退回劇集主目錄頁抓取
+                if resp.status_code == 404 and "/dramas/" in play_page:
+                    p_list = [p for p in urllib.parse.urlparse(play_page).path.split('/') if p]
+                    if len(p_list) >= 2:
+                        fallback_url = f"{self.host}/{p_list[0]}/{p_list[1]}/"
+                        resp = self.session.get(fallback_url, headers={"Referer": self.host + "/"}, timeout=10)
 
-            all_uuids = re.findall(
-                r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                html,
-                re.I
-            )
-            for u in all_uuids:
-                if u not in candidate_uuids:
-                    candidate_uuids.append(u)
-        except Exception:
-            pass
+                resp.encoding = 'utf-8'
+                html = resp.text
+
+                priority_uuids = re.findall(
+                    r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+                    html,
+                    re.I
+                )
+                for u in priority_uuids:
+                    if u not in candidate_uuids:
+                        candidate_uuids.append(u)
+
+                all_uuids = re.findall(
+                    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                    html,
+                    re.I
+                )
+                for u in all_uuids:
+                    if u not in candidate_uuids:
+                        candidate_uuids.append(u)
+            except Exception:
+                pass
 
         api_headers = {
             "Referer": play_page,
@@ -233,7 +260,6 @@ class Spider(Spider):
                     m3u8_path = data.get("url", "")
                     if m3u8_path:
                         stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
-                        # 將真實 m3u8 網址交給本機代理 localProxy 轉發，確保每一個切片請求都帶上完整 Cookie 與 Referer
                         encoded_url = urllib.parse.quote(stream_url, safe='')
                         encoded_ref = urllib.parse.quote(play_page, safe='')
                         proxy_url = f"{self.getProxyUrl()}&url={encoded_url}&ref={encoded_ref}"
@@ -250,7 +276,6 @@ class Spider(Spider):
             "playUrl": "",
             "url": ""
         }
-
     # 本機代理：代為向 youzidj.com 請求 m3u8 與 m4s/mp4 切片，並重寫 m3u8 內部相對路徑
     def localProxy(self, param):
         target_url = urllib.parse.unquote(param.get("url", ""))
