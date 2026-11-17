@@ -3,7 +3,7 @@
   "sites": [
     {
       "key": "js_cilixiong",
-      "name": "[JS] cilixiong (67ms)",
+      "name": "[JS] cilixiong (66ms)",
       "type": 3,
       "api": "./js/cilixiong.js",
       "searchable": 1,
@@ -12,28 +12,8 @@
       "ext": "https://www.cilixiong.com"
     },
     {
-      "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (118ms)",
-      "type": 3,
-      "api": "./js/欧乐影院.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.oleol.com"
-    },
-    {
-      "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (140ms)",
-      "type": 3,
-      "api": "./js/ss/pronlulu.json",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.pornlulu.com"
-    },
-    {
       "key": "js_注视影视",
-      "name": "[JS] 注视影视 (241ms)",
+      "name": "[JS] 注视影视 (77ms)",
       "type": 3,
       "api": "./js/注视影视.js",
       "searchable": 1,
@@ -42,18 +22,28 @@
       "ext": "https://gaze.run"
     },
     {
-      "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (290ms)",
+      "key": "json_pronlulu",
+      "name": "[JSON] pronlulu (117ms)",
       "type": 3,
-      "api": "./js/嘀嗒影视.js",
+      "api": "./js/ss/pronlulu.json",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.didahd.pro"
+      "ext": "https://www.pornlulu.com"
+    },
+    {
+      "key": "js_欧乐影院",
+      "name": "[JS] 欧乐影院 (124ms)",
+      "type": 3,
+      "api": "./js/欧乐影院.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.oleol.com"
     },
     {
       "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (714ms)",
+      "name": "[JSON] 农民影视 (222ms)",
       "type": 3,
       "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
@@ -62,8 +52,18 @@
       "ext": "https://vip.wwgz.cn:5200/vod-list-id-{cateId}-pg-{catePg}-order--by-time-class-0-year-{year}-letter--area-{area}-lang-.html"
     },
     {
+      "key": "js_嘀嗒影视",
+      "name": "[JS] 嘀嗒影视 (325ms)",
+      "type": 3,
+      "api": "./js/嘀嗒影视.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.didahd.pro"
+    },
+    {
       "key": "js_B站",
-      "name": "[JS] B站 (856ms)",
+      "name": "[JS] B站 (810ms)",
       "type": 3,
       "api": "./js/B站.js",
       "searchable": 1,
@@ -83,7 +83,7 @@
     },
     {
       "key": "js_央视频",
-      "name": "[JS] 央视频 (1232ms)",
+      "name": "[JS] 央视频 (1338ms)",
       "type": 3,
       "api": "./js/央视频.js",
       "searchable": 1,
