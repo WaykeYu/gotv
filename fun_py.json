@@ -22,16 +22,6 @@
       "ext": "https://zh.stripchat.com"
     },
     {
-      "key": "py_麻豆社<18+>",
-      "name": "[PY] 麻豆社<18+> (128ms)",
-      "type": 3,
-      "api": "./py/麻豆社<18+>.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://madou.club"
-    },
-    {
       "key": "py_禁片天堂<18+>",
       "name": "[PY] 禁片天堂<18+> (135ms)",
       "type": 3,
