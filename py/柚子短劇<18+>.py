@@ -276,7 +276,18 @@ class Spider(Spider):
                             "parse": 0,
                             "playUrl": "",
                             "url": stream_url,
-                            "header": json.dumps(player_headers)
+                            player_headers = {
+                            "User-Agent": self.ua,
+                            "Referer": play_page,
+                            "Origin": self.host,
+                            "Cookie": self.full_cookie
+                        }
+                        return {
+                            "parse": 0,
+                            "playUrl": "",
+                            "url": stream_url,
+                            "header": player_headers
+                        }
                         }
             except Exception:
                 continue
