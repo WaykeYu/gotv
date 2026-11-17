@@ -97,7 +97,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與選集（直接從劇集主頁提取真實集數路徑或內嵌 UUID，絕不盲猜 404 網址）
+    # 3. 影片詳情與選集
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -132,13 +132,11 @@ class Spider(Spider):
             episodes = []
             seen_ep = set()
 
-            # 方式 A：直接從網頁原始碼中撈出所有真實存在的同劇集子路徑（如 /dramas/xxx/season-1/ 或 /dramas/xxx/season-1-episode-2/）
             if drama_prefix:
                 raw_paths = re.findall(rf'({re.escape(drama_prefix)}[a-zA-Z0-9\-_/]+)', html)
                 valid_paths = []
                 for p in raw_paths:
                     clean_p = p.split('"')[0].split("'")[0].split('\\')[0]
-                    # 確保結尾有斜線且不是主目錄本身
                     if not clean_p.endswith('/'):
                         clean_p += '/'
                     if clean_p != drama_prefix and clean_p not in seen_ep:
@@ -152,9 +150,7 @@ class Spider(Spider):
                     label = f"第{ep_num}集" if ep_num != 9999 else f"第{idx+1}集"
                     episodes.append(f"{label}${path}")
 
-            # 方式 B：從內嵌 JSON 提取每一集的專屬 UUID（"number":1 ... "id":"uuid"）
             if len(episodes) <= 1:
-                # 先把脫逸引號 \" 還原成正常雙引號，方便正則匹配 Next.js flight data
                 unescaped_html = html.replace('\\"', '"')
                 ep_objs = re.findall(
                     r'"(?:episode_?number|episodeNumber|number|index|ep)"\s*:\s*(\d+)[^{}]{0,250}?"(?:id|uuid|episode_?id|episodeId|playbackId)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"',
@@ -178,7 +174,6 @@ class Spider(Spider):
                             seen_uid.add(uid)
                             episodes.append(f"第{num}集$uuid:{uid}|{vid}")
 
-            # 方式 C：保底使用當前傳入的真實網址（保證 200 OK）
             if not episodes:
                 episodes.append(f"立即播放${vid}")
 
@@ -205,7 +200,7 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 核心播放解析：支援直接傳入單集 UUID 或訪問真實存在頁面取得 UUID
+    # 5. 核心播放解析（header 直接回傳 dict 字典）
     def playerContent(self, flag, id, vipFlags):
         candidate_uuids = []
         play_page = self.host + "/"
@@ -276,18 +271,7 @@ class Spider(Spider):
                             "parse": 0,
                             "playUrl": "",
                             "url": stream_url,
-                            player_headers = {
-                            "User-Agent": self.ua,
-                            "Referer": play_page,
-                            "Origin": self.host,
-                            "Cookie": self.full_cookie
-                        }
-                        return {
-                            "parse": 0,
-                            "playUrl": "",
-                            "url": stream_url,
                             "header": player_headers
-                        }
                         }
             except Exception:
                 continue
@@ -296,7 +280,7 @@ class Spider(Spider):
             "parse": 0,
             "playUrl": "",
             "url": "",
-            "header": "{}"
+            "header": {}
         }
 
     # 核心解析：抓取所有指向 /dramas/ 的短劇卡片
