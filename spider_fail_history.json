@@ -1,1 +1,14 @@
-{}
+{
+  "js/s/秀儿影视.json": {
+    "first_fail_date": "2026-11-17",
+    "last_fail_date": "2026-11-17"
+  },
+  "collect/360.json": {
+    "first_fail_date": "2026-11-17",
+    "last_fail_date": "2026-11-17"
+  },
+  "collect/爱奇艺資源.json": {
+    "first_fail_date": "2026-11-17",
+    "last_fail_date": "2026-11-17"
+  }
+}
