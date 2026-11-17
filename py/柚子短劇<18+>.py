@@ -97,7 +97,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與完整選集展開
+    # 3. 影片詳情與完整選集展開（附帶播放測試狀態診斷）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -126,11 +126,9 @@ class Spider(Spider):
             if og_desc and og_desc.get('content'):
                 desc = og_desc.get('content')
 
-            # 提取劇集主路徑，例如 /dramas/80s-rebirth-ex-wife-returns/
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
-            # 偵測最大集數
             max_ep = 0
             for n in re.findall(r'season-\d+-episode-(\d+)', html, re.I):
                 max_ep = max(max_ep, int(n))
@@ -148,7 +146,6 @@ class Spider(Spider):
 
             episodes = []
             if drama_prefix:
-                # 確認該站實際使用 /season-1-episode-1/ 還是 /season-1/
                 use_season_only = bool(re.search(rf'{re.escape(drama_prefix)}season-1/(?!episode)', html, re.I)) and not bool(re.search(r'season-1-episode-\d+', html, re.I))
                 if use_season_only:
                     episodes.append(f"第1集${drama_prefix}season-1/")
@@ -159,16 +156,20 @@ class Spider(Spider):
             else:
                 episodes.append(f"第1集${vid}")
 
+            # 診斷資訊：確認頁面抓到的 UUID 數量與 HTTP 狀態碼
+            uuids_found = re.findall(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', html, re.I)
+            diag = f"[HTTP:{resp.status_code} | UUID數:{len(set(uuids_found))}] "
+
             vod = {
                 "vod_id": vid,
                 "vod_name": title,
                 "vod_pic": pic,
-                "vod_content": desc,
+                "vod_content": diag + desc,
                 "vod_play_from": "柚子線路",
                 "vod_play_url": "#".join(episodes)
             }
             return {"list": [vod]}
-        except Exception:
+        except Exception as e:
             return {"list": []}
 
     # 4. 關鍵字搜尋
@@ -182,7 +183,7 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 核心播放解析：100% 還原瀏覽器 POST /api/playback/{uid}?mode=mse&startup=1 請求
+    # 5. 核心播放解析：回傳標準 dict 格式 header 並自動測試所有候選 UUID
     def playerContent(self, flag, id, vipFlags):
         play_page = id if id.startswith('http') else f"{self.host}{id}"
         if not play_page.endswith('/'):
@@ -194,7 +195,6 @@ class Spider(Spider):
             resp.encoding = 'utf-8'
             html = resp.text
 
-            # 1. 優先提取緊跟在 playback / episode / current / video 旁的 UUID
             priority_uuids = re.findall(
                 r'(?:playback|episode|currentEpisode|video|asset)[^0-9a-f]{0,40}([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
                 html,
@@ -204,7 +204,6 @@ class Spider(Spider):
                 if u not in candidate_uuids:
                     candidate_uuids.append(u)
 
-            # 2. 提取頁面內所有其他 UUID
             all_uuids = re.findall(
                 r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
                 html,
@@ -216,7 +215,6 @@ class Spider(Spider):
         except Exception:
             pass
 
-        # 100% 還原你提供的瀏覽器 Request Headers 與 content-length: 2 ("{}")
         api_headers = {
             "User-Agent": self.ua,
             "Accept": "*/*",
@@ -230,7 +228,7 @@ class Spider(Spider):
             "Sec-Fetch-Site": "same-origin"
         }
 
-        for uid in candidate_uuids[:25]:
+        for uid in candidate_uuids[:30]:
             api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
             try:
                 r = self.session.post(api_url, headers=api_headers, data="{}", timeout=6)
@@ -239,7 +237,7 @@ class Spider(Spider):
                     m3u8_path = data.get("url", "")
                     if m3u8_path:
                         stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
-                        # 將完整 Cookie、Referer、Origin 與 User-Agent 交給播放器核心直接請求 m3u8
+                        # 同時相容不同殼層：header 直接給 dict（大部分 Flutter/Dart 殼要求 dict）
                         player_headers = {
                             "User-Agent": self.ua,
                             "Referer": play_page,
@@ -250,7 +248,7 @@ class Spider(Spider):
                             "parse": 0,
                             "playUrl": "",
                             "url": stream_url,
-                            "header": json.dumps(player_headers)
+                            "header": player_headers
                         }
             except Exception:
                 continue
@@ -259,7 +257,7 @@ class Spider(Spider):
             "parse": 0,
             "playUrl": "",
             "url": "",
-            "header": json.dumps(api_headers)
+            "header": {}
         }
 
     # 核心解析：抓取所有指向 /dramas/ 的短劇卡片
