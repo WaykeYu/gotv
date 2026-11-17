@@ -87,7 +87,7 @@ class Spider(Spider):
             result['list'] = []
         return result
 
-    # 3. 影片詳情與選集（同時支援分集網頁連結與內嵌 UUID 列表）
+    # 3. 影片詳情與完整選集生成（依據 season-1-episode-N 路由規則）
     def detailContent(self, ids):
         vid = ids[0]
         url = vid if vid.startswith('http') else f"{self.host}{vid}"
@@ -116,40 +116,47 @@ class Spider(Spider):
             if og_desc and og_desc.get('content'):
                 desc = og_desc.get('content')
 
-            episodes = []
-            seen_ep = set()
-
-            # 方式 A：抓取同劇集下的分集子頁面連結（如 /dramas/xxx/season-1-episode-1/）
+            # 取得劇集主路徑，例如 /dramas/high-school-love-story/
             parts = [p for p in vid.split('/') if p]
             drama_prefix = f"/{parts[0]}/{parts[1]}/" if len(parts) >= 2 else ""
 
-            for a in soup.select('a[href]'):
-                href = a.get('href', '').strip()
-                ep_text = a.get_text(strip=True)
-                if drama_prefix and href.startswith(drama_prefix) and href != drama_prefix and href not in seen_ep:
-                    seen_ep.add(href)
-                    label = ep_text if ep_text else f"第{len(episodes)+1}集"
-                    episodes.append(f"{label}${href}")
+            # 偵測目前是第幾季（預設 season-1）
+            season_match = re.search(r'season-(\d+)', vid, re.I)
+            season_num = season_match.group(1) if season_match else "1"
 
-            # 方式 B：若分集連結未直接展開在 <a> 標籤中，從頁面腳本提取 /media/{drama_uuid}/{ep_uuid} 列表
-            if len(episodes) <= 1:
-                media_pairs = re.findall(
-                    r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
-                    html,
-                    re.I
-                )
-                unique_pairs = []
-                for pair in media_pairs:
-                    if pair not in unique_pairs:
-                        unique_pairs.append(pair)
+            # 尋找頁面中出現的最大集數編號
+            max_ep = 0
 
-                if len(unique_pairs) > 1:
-                    episodes = []
-                    for idx, (d_uuid, e_uuid) in enumerate(unique_pairs):
-                        # 優先將 e_uuid 與 d_uuid 傳給 playerContent 呼叫 /api/playback/
-                        episodes.append(f"第{idx+1}集$uuid:{e_uuid}|{d_uuid}")
+            # 1. 從原始碼中所有 season-X-episode-Y 路徑找出最大集數
+            ep_nums = re.findall(r'season-\d+-episode-(\d+)', html, re.I)
+            for n in ep_nums:
+                if int(n) > max_ep:
+                    max_ep = int(n)
 
-            if not episodes:
+            # 2. 從 JSON 欄位（如 "episodeCount": 60 或 "total_episodes": 60 或 "number": 60）找最大集數
+            json_nums = re.findall(r'"(?:episode_?count|total_?episodes|episodes_?count|episode_?number|number)"\s*:\s*(\d+)', html, re.I)
+            for n in json_nums:
+                val = int(n)
+                if 1 <= val <= 300 and val > max_ep:
+                    max_ep = val
+
+            # 3. 從中文文字（如「全60集」、「共80集」、「更新至45集」）提取總集數
+            text_nums = re.findall(r'(?:全|共|更新至|第)\s*(\d+)\s*集', soup.get_text())
+            for n in text_nums:
+                val = int(n)
+                if 1 <= val <= 300 and val > max_ep:
+                    max_ep = val
+
+            episodes = []
+            if drama_prefix and max_ep > 1:
+                for ep in range(1, max_ep + 1):
+                    ep_url = f"{drama_prefix}season-{season_num}-episode-{ep}/"
+                    episodes.append(f"第{ep}集${ep_url}")
+            elif drama_prefix:
+                # 若無法偵測到總集數，預設先生成第 1 集（或當前網址）
+                first_url = vid if "episode-" in vid else f"{drama_prefix}season-{season_num}-episode-1/"
+                episodes.append(f"第1集${first_url}")
+            else:
                 episodes.append(f"立即播放${vid}")
 
             vod = {
@@ -175,54 +182,46 @@ class Spider(Spider):
         except Exception:
             return {"list": []}
 
-    # 5. 核心播放解析：呼叫 POST /api/playback/{uuid}?mode=mse&startup=1 取得 .m3u8
+    # 5. 核心播放解析：訪問該集網址取得專屬 UUID，並呼叫 POST /api/playback/{uuid}?mode=mse&startup=1
     def playerContent(self, flag, id, vipFlags):
+        play_page = id if id.startswith('http') else f"{self.host}{id}"
         play_headers = {
             "User-Agent": self.headers["User-Agent"],
-            "Referer": self.host + "/",
+            "Referer": play_page,
             "Origin": self.host,
             "Accept": "application/json, text/plain, */*"
         }
 
         candidate_uuids = []
-        play_page = ""
+        try:
+            resp = requests.get(play_page, headers=play_headers, timeout=10)
+            resp.encoding = 'utf-8'
+            html = resp.text
 
-        if id.startswith("uuid:"):
-            # 格式為 uuid:{e_uuid}|{d_uuid}
-            raw = id.split(":", 1)[1]
-            candidate_uuids.extend([u for u in raw.split("|") if u])
-        else:
-            play_page = id if id.startswith('http') else f"{self.host}{id}"
-            play_headers["Referer"] = play_page
-            try:
-                resp = requests.get(play_page, headers=play_headers, timeout=10)
-                resp.encoding = 'utf-8'
-                html = resp.text
+            # 優先尋找 JSON 中與當前單集綁定的 episodeId / playbackId / id
+            ep_id_matches = re.findall(
+                r'"(?:episode_?id|playback_?id|video_?id|id)"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"',
+                html,
+                re.I
+            )
+            for u in ep_id_matches:
+                if u not in candidate_uuids:
+                    candidate_uuids.append(u)
 
-                # 若頁面內有 /media/{drama_uuid}/{episode_uuid}，優先提取兩個 UUID 依序嘗試 playback API
-                media_match = re.search(
-                    r'/media/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
-                    html,
-                    re.I
-                )
-                if media_match:
-                    candidate_uuids.append(media_match.group(2))
-                    candidate_uuids.append(media_match.group(1))
-
-                # 補充提取頁面內其他 UUID（例如劇集或單集 ID）
-                all_uuids = re.findall(
-                    r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                    html,
-                    re.I
-                )
-                for u in all_uuids:
-                    if u not in candidate_uuids:
-                        candidate_uuids.append(u)
-            except Exception:
-                pass
+            # 補充提取頁面內所有其他 UUID 作為備選
+            all_uuids = re.findall(
+                r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                html,
+                re.I
+            )
+            for u in all_uuids:
+                if u not in candidate_uuids:
+                    candidate_uuids.append(u)
+        except Exception:
+            pass
 
         # 依序向 /api/playback/{uuid}?mode=mse&startup=1 發送 POST 請求
-        for uid in candidate_uuids[:6]:
+        for uid in candidate_uuids[:8]:
             api_url = f"{self.host}/api/playback/{uid}?mode=mse&startup=1"
             try:
                 r = requests.post(api_url, headers=play_headers, timeout=8)
@@ -233,7 +232,7 @@ class Spider(Spider):
                         stream_url = m3u8_path if m3u8_path.startswith("http") else f"{self.host}{m3u8_path}"
                         stream_headers = {
                             "User-Agent": self.headers["User-Agent"],
-                            "Referer": play_page or (self.host + "/"),
+                            "Referer": play_page,
                             "Origin": self.host
                         }
                         return {
@@ -245,7 +244,6 @@ class Spider(Spider):
             except Exception:
                 continue
 
-        # 失敗時回傳 parse: 0 空連結，避免 langhuan/spider 殼觸發 MissingPluginException
         return {
             "parse": 0,
             "playUrl": "",
