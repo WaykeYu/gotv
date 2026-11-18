@@ -25,8 +25,23 @@ class Spider(Spider):
         }
         self.session = requests.Session()
         self.session.headers.update(self.headers)
-        # 預設帶入年齡確認 Cookie，避免部分資源請求被攔截
-        self.session.cookies.set("age_confirmed", "true", domain="youzidj.com")
+        self._verify_age()
+
+    def _verify_age(self):
+        """呼叫網站真實的 /api/age 接口取得伺服器簽發的年齡驗證 Cookie"""
+        try:
+            api_headers = {
+                "Accept": "application/json, text/plain, */*",
+                "Content-Type": "application/json",
+                "Origin": self.host,
+                "Referer": self.host + "/"
+            }
+            # 嘗試 POST 確認年齡（常見格式為空 JSON 或 confirmed: true）
+            res = self.session.post(f"{self.host}/api/age", json={"confirmed": True}, headers=api_headers, timeout=8)
+            if res.status_code not in (200, 204):
+                self.session.get(f"{self.host}/api/age", headers=api_headers, timeout=8)
+        except Exception:
+            pass
 
     def isVideoFormat(self, url):
         pass
@@ -88,7 +103,6 @@ class Spider(Spider):
             content = ""
             episodes = []
 
-            # 1. 從 JSON-LD 提取劇集資訊與完整分集清單 (TVSeason)
             ld_matches = re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.S | re.I)
             for ld_raw in ld_matches:
                 try:
@@ -113,7 +127,6 @@ class Spider(Spider):
                 except Exception:
                     continue
 
-            # 2. 若無 JSON-LD 標題，回退解析 HTML 標籤
             if not title:
                 h1_m = re.search(r'<h1[^>]*>(.*?)</h1>', text, re.S | re.I)
                 title = re.sub(r'<[^>]+>', '', h1_m.group(1)).strip() if h1_m else "未知影片"
@@ -159,7 +172,10 @@ class Spider(Spider):
     def playerContent(self, flag, id, vipFlags):
         play_page_url = id if id.startswith("http") else f"{self.host}{id}"
 
-        # 若使用者切換到「柚子嗅探」備援線路，直接交由內建瀏覽器核心自動執行 JS 並嗅探串流
+        # 每次播放前確保已取得有效的年齡授權 Cookie
+        if not self.session.cookies:
+            self._verify_age()
+
         if flag == "柚子嗅探":
             return {
                 "parse": 1,
@@ -176,7 +192,7 @@ class Spider(Spider):
             res.encoding = "utf-8"
             text = res.text
 
-            # 組合完整防盜鏈請求標頭（含 Origin 與動態取得的 Session Cookie）
+            # 帶入由 /api/age 取得的所有 Session Cookies 與完整來源標頭
             play_headers = {
                 "User-Agent": self.headers["User-Agent"],
                 "Referer": play_page_url,
@@ -186,7 +202,6 @@ class Spider(Spider):
             if cookie_str:
                 play_headers["Cookie"] = cookie_str
 
-            # 方法 A：從 VideoObject JSON-LD 提取 contentUrl (.m3u8)
             ld_matches = re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.S | re.I)
             for ld_raw in ld_matches:
                 try:
@@ -202,7 +217,6 @@ class Spider(Spider):
                 except Exception:
                     continue
 
-            # 方法 B：從播放器標籤屬性組合 master.m3u8
             vid_m = re.search(r'id=["\']player["\'][^>]*data-video=["\']([^"\']+)["\'][^>]*data-version=["\']([^"\']+)["\']', text, re.I)
             if vid_m:
                 m3u8_url = f"{self.host}/media/{vid_m.group(1)}/{vid_m.group(2)}/master.m3u8"
@@ -212,20 +226,9 @@ class Spider(Spider):
                     "url": m3u8_url,
                     "header": json.dumps(play_headers)
                 }
-
-            # 方法 C：通用正則匹配任意 .m3u8 網址
-            m3u8_m = re.search(r'(https?://[^"\'\s<>]+?\.m3u8[^"\'\s<>]*)', text)
-            if m3u8_m:
-                return {
-                    "parse": 0,
-                    "playUrl": "",
-                    "url": html.unescape(m3u8_m.group(1)),
-                    "header": json.dumps(play_headers)
-                }
         except Exception:
             pass
 
-        # 降級交由 OK影視 內建 WebView 嗅探
         return {
             "parse": 1,
             "playUrl": "",
