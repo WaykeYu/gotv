@@ -109,19 +109,23 @@ class Spider(Spider):
 
     def _parse_videos(self, html, status_code=200):
         videos = []
-        seen_urls = set()
+        seen_ids = set()
         soup = BeautifulSoup(html, "html.parser")
 
         for a in soup.find_all("a", href=True):
             href = a.get("href", "").strip()
-            if not re.search(r"(?:^|/)\d{3,10}(?:/|$|\?)", href):
-                continue
             if any(x in href for x in ["page=", "login", "register", "novels", "comics"]):
                 continue
 
-            full_url = self._normalize_url(href)
-            if full_url in seen_urls:
+            m = re.search(r"/(?:library|drama|video|v)/(\d{3,10})/?(?:\?.*)?$", href)
+            if not m:
                 continue
+
+            vid_num = m.group(1)
+            if vid_num in seen_ids:
+                continue
+
+            full_url = f"{self.host}/zh-hant/library/{vid_num}/"
 
             card = a
             curr = a.parent
@@ -172,7 +176,7 @@ class Spider(Spider):
             if ep_match:
                 remarks = ep_match.group(1)
 
-            seen_urls.add(full_url)
+            seen_ids.add(vid_num)
             videos.append({
                 "vod_id": full_url,
                 "vod_name": title,
@@ -184,11 +188,10 @@ class Spider(Spider):
             unescaped = html.replace('\\"', '"').replace('\\\\/', '/')
             for m in re.finditer(r'"id"\s*:\s*"?(\d{3,10})"?[^{}]{0,300}?"title"\s*:\s*"([^"\\]{2,60})"', unescaped):
                 vid_num, title = m.group(1), m.group(2)
-                full_url = f"{self.host}/zh-hant/library/{vid_num}/"
-                if full_url not in seen_urls and not any(k in title for k in ["黃果", "片庫", "首頁"]):
-                    seen_urls.add(full_url)
+                if vid_num not in seen_ids and not any(k in title for k in ["黃果", "片庫", "首頁"]):
+                    seen_ids.add(vid_num)
                     videos.append({
-                        "vod_id": full_url,
+                        "vod_id": f"{self.host}/zh-hant/library/{vid_num}/",
                         "vod_name": title,
                         "vod_pic": "",
                         "vod_remarks": "短劇"
