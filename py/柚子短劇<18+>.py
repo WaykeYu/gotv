@@ -28,7 +28,6 @@ class Spider(Spider):
         self._verify_age()
 
     def _verify_age(self):
-        """呼叫網站真實的 /api/age 接口取得伺服器簽發的年齡驗證 Cookie"""
         try:
             api_headers = {
                 "Accept": "application/json, text/plain, */*",
@@ -36,7 +35,6 @@ class Spider(Spider):
                 "Origin": self.host,
                 "Referer": self.host + "/"
             }
-            # 嘗試 POST 確認年齡（常見格式為空 JSON 或 confirmed: true）
             res = self.session.post(f"{self.host}/api/age", json={"confirmed": True}, headers=api_headers, timeout=8)
             if res.status_code not in (200, 204):
                 self.session.get(f"{self.host}/api/age", headers=api_headers, timeout=8)
@@ -147,8 +145,8 @@ class Spider(Spider):
                 "vod_name": html.unescape(title),
                 "vod_pic": pic,
                 "vod_content": html.unescape(content),
-                "vod_play_from": "柚子直連$$$柚子嗅探",
-                "vod_play_url": f"{'#'.join(episodes)}$$${'#'.join(episodes)}"
+                "vod_play_from": "柚子專線",
+                "vod_play_url": "#".join(episodes)
             }
             return {"list": [vod]}
         except Exception:
@@ -172,54 +170,67 @@ class Spider(Spider):
     def playerContent(self, flag, id, vipFlags):
         play_page_url = id if id.startswith("http") else f"{self.host}{id}"
 
-        # 每次播放前確保已取得有效的年齡授權 Cookie
         if not self.session.cookies:
             self._verify_age()
 
-        if flag == "柚子嗅探":
-            return {
-                "parse": 1,
-                "playUrl": "",
-                "url": play_page_url,
-                "header": json.dumps({
-                    "User-Agent": self.headers["User-Agent"],
-                    "Referer": self.host + "/"
-                })
-            }
-
         try:
+            # 1. 訪問單集頁面，取得 data-video UUID 與網頁會話 Cookie
             res = self.session.get(play_page_url, timeout=10)
             res.encoding = "utf-8"
             text = res.text
 
-            # 帶入由 /api/age 取得的所有 Session Cookies 與完整來源標頭
-            play_headers = {
-                "User-Agent": self.headers["User-Agent"],
-                "Referer": play_page_url,
-                "Origin": self.host
-            }
-            cookie_str = "; ".join([f"{k}={v}" for k, v in self.session.cookies.items()])
-            if cookie_str:
-                play_headers["Cookie"] = cookie_str
-
-            ld_matches = re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.S | re.I)
-            for ld_raw in ld_matches:
-                try:
-                    data = json.loads(ld_raw.strip())
-                    if data.get("@type") == "VideoObject" and data.get("contentUrl"):
-                        m3u8_url = html.unescape(data["contentUrl"].strip())
-                        return {
-                            "parse": 0,
-                            "playUrl": "",
-                            "url": m3u8_url,
-                            "header": json.dumps(play_headers)
-                        }
-                except Exception:
-                    continue
-
-            vid_m = re.search(r'id=["\']player["\'][^>]*data-video=["\']([^"\']+)["\'][^>]*data-version=["\']([^"\']+)["\']', text, re.I)
+            video_id = ""
+            vid_m = re.search(r'id=["\']player["\'][^>]*data-video=["\']([^"\']+)["\']', text, re.I)
             if vid_m:
-                m3u8_url = f"{self.host}/media/{vid_m.group(1)}/{vid_m.group(2)}/master.m3u8"
+                video_id = vid_m.group(1)
+
+            m3u8_url = ""
+
+            # 2. 關鍵步驟：呼叫 /api/playback/{video_id}?mode=mse&startup=1 解鎖串流授權
+            if video_id:
+                pb_url = f"{self.host}/api/playback/{video_id}?mode=mse&startup=1"
+                pb_headers = {
+                    "Accept": "application/json, text/plain, */*",
+                    "Referer": play_page_url,
+                    "Origin": self.host
+                }
+                pb_res = self.session.get(pb_url, headers=pb_headers, timeout=10)
+                if pb_res.status_code == 200:
+                    pb_data = pb_res.json()
+                    # 從 startup 列表中優先提取具體清晰度的 playlist.m3u8 或 master.m3u8
+                    startup_list = pb_data.get("startup", [])
+                    for item in startup_list:
+                        u = item.get("url", "")
+                        if "playlist.m3u8" in u:
+                            m3u8_url = u if u.startswith("http") else f"{self.host}{u}"
+                            break
+                    if not m3u8_url and startup_list:
+                        u = startup_list[0].get("url", "")
+                        if u:
+                            m3u8_url = u if u.startswith("http") else f"{self.host}{u}"
+
+            # 3. 若 /api/playback 未回傳網址，備援從 JSON-LD 提取
+            if not m3u8_url:
+                ld_matches = re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.S | re.I)
+                for ld_raw in ld_matches:
+                    try:
+                        data = json.loads(ld_raw.strip())
+                        if data.get("@type") == "VideoObject" and data.get("contentUrl"):
+                            m3u8_url = html.unescape(data["contentUrl"].strip())
+                            break
+                    except Exception:
+                        continue
+
+            if m3u8_url:
+                play_headers = {
+                    "User-Agent": self.headers["User-Agent"],
+                    "Referer": play_page_url,
+                    "Origin": self.host
+                }
+                cookie_str = "; ".join([f"{k}={v}" for k, v in self.session.cookies.items()])
+                if cookie_str:
+                    play_headers["Cookie"] = cookie_str
+
                 return {
                     "parse": 0,
                     "playUrl": "",
