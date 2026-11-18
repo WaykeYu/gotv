@@ -1,1 +1,18 @@
-{}
+{
+  "js/xiaosa/XBPQ/雪糕影视.json": {
+    "first_fail_date": "2026-11-18",
+    "last_fail_date": "2026-11-18"
+  },
+  "js/s/雪糕影视.json": {
+    "first_fail_date": "2026-11-18",
+    "last_fail_date": "2026-11-18"
+  },
+  "py/麦田影院.py": {
+    "first_fail_date": "2026-11-18",
+    "last_fail_date": "2026-11-18"
+  },
+  "collect/奶香香資源<18+>.json": {
+    "first_fail_date": "2026-11-18",
+    "last_fail_date": "2026-11-18"
+  }
+}
