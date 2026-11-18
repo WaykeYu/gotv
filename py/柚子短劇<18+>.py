@@ -2,10 +2,11 @@
 """
 柚子短剧 (youzidj / https://youzidj.com) —— TVBox/FongMi Python Spider
 特性：
-  1. 全站 SSR HTML + Catalogue JSON API 双重兼容解析
-  2. 详请页直接提取全季所有分集（a.series-episode-link）
-  3. 播放页直接从 Schema.org JSON-LD 提取 master.m3u8（parse=0 免嗅探硬解秒播）
-  4. 针对弱网/DNS 抖动内置指数退避重试与 Session/直连自动降级
+  1. 适配站内 SSR HTML + /api/catalogue/search（HTML片段）双重解析
+  2. 搜索支持首页直出（/search/?q=）与多类型（dramas/videos）无限翻页加载
+  3. 详情页直接提取全季所有分集（a.series-episode-link）
+  4. 播放页直接从 Schema.org JSON-LD 提取 master.m3u8（parse=0 免嗅探硬解秒播）
+  5. 针对弱网/DNS 抖动内置指数退避重试与 Session/直连自动降级
 """
 import re
 import sys
@@ -54,12 +55,6 @@ class Spider(BaseSpider):
             "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
             "Referer": self.host + "/",
         }
-        self._json_headers = {
-            "User-Agent": self.ua,
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
-            "Referer": self.host + "/",
-        }
         self._sess = requests.Session()
         try:
             self._sess.headers.update(self.headers)
@@ -101,7 +96,7 @@ class Spider(BaseSpider):
         return ("Just a moment" in head or "challenges.cloudflare.com" in head
                 or "cf-browser-verification" in head)
 
-    def _fetch(self, url, timeout=15, headers=None, retries=3):
+    def _fetch(self, url, timeout=15, headers=None, retries=3, min_len=1500):
         last = ""
         req_headers = headers or self.headers
         for i in range(max(1, int(retries or 1))):
@@ -110,7 +105,7 @@ class Spider(BaseSpider):
                                    verify=False, allow_redirects=True)
                 r.encoding = "utf-8"
                 last = r.text or ""
-                if last and (len(last) > 1500 or self._is_cf(last) or r.status_code == 404):
+                if last and (len(last) >= min_len or self._is_cf(last) or r.status_code == 404):
                     return last
             except Exception:
                 last = last or ""
@@ -119,7 +114,7 @@ class Spider(BaseSpider):
                     time.sleep(0.6 * (i + 1))
                 except Exception:
                     pass
-        if last and len(last) > 1500:
+        if last and len(last) >= min_len:
             return last
         try:
             r = requests.get(url, headers=req_headers, timeout=timeout,
@@ -129,51 +124,24 @@ class Spider(BaseSpider):
         except Exception:
             return last
 
-    def _fetch_json(self, url, timeout=12, retries=3):
-        for i in range(max(1, int(retries or 1))):
-            try:
-                r = self._sess.get(url, headers=self._json_headers, timeout=timeout,
-                                   verify=False, allow_redirects=True)
-                if r.status_code != 200:
-                    return {}
-                j = r.json()
-                if isinstance(j, (dict, list)):
-                    return j
-                return {}
-            except Exception:
-                if i < int(retries or 1) - 1:
-                    try:
-                        time.sleep(0.7 * (i + 1))
-                    except Exception:
-                        pass
-        try:
-            r = requests.get(url, headers=self._json_headers, timeout=timeout,
-                             verify=False, allow_redirects=True)
-            if r.status_code == 200:
-                return r.json()
-        except Exception:
-            pass
-        return {}
-
-    def _get(self, url):
-        html = self._fetch(url)
-        if html and len(html) > 1500 and not self._is_cf(html):
+    def _get(self, url, min_len=1500):
+        html = self._fetch(url, min_len=min_len)
+        if html and len(html) >= min_len and not self._is_cf(html):
             return html
         for h in self.hosts:
             if h == self.host:
                 continue
             try:
-                t = self._fetch(url.replace(self.host, h, 1), timeout=8)
-                if t and len(t) > 1500 and not self._is_cf(t) and "404 Not Found" not in t[:600]:
+                t = self._fetch(url.replace(self.host, h, 1), timeout=8, min_len=min_len)
+                if t and len(t) >= min_len and not self._is_cf(t) and "404 Not Found" not in t[:600]:
                     self.host = h
                     self.headers["Referer"] = h + "/"
-                    self._json_headers["Referer"] = h + "/"
                     return t
             except Exception:
                 continue
         return html
 
-    # ---------- 卡片解析（适配 article.drama-card 结构） ----------
+    # ---------- 卡片解析（适配 article.drama-card 结构与 API HTML 片段） ----------
     def _cards(self, html):
         out, seen = [], set()
         if not html or self._is_cf(html):
@@ -184,7 +152,7 @@ class Spider(BaseSpider):
             tree = None
 
         if tree is not None:
-            # 1. 优先匹配标准剧集卡片 article.drama-card
+            # 1. 标准剧集卡片 article.drama-card
             cards = tree.xpath('//article[contains(@class,"drama-card")]')
             for card in cards:
                 try:
@@ -197,7 +165,6 @@ class Spider(BaseSpider):
                     if not vid or vid == "/" or vid in seen:
                         continue
 
-                    # 剧名
                     name = "".join(card.xpath('.//*[contains(@class,"drama-card-title")]//text()')).strip()
                     if not name:
                         name = (a.get("aria-label", "") or "").replace("查看详情：", "").strip()
@@ -208,7 +175,6 @@ class Spider(BaseSpider):
                     if not name:
                         continue
 
-                    # 封面图（注意跳过 data:image/svg 占位图，优先取真实 src 或 data-image-src）
                     pic = ""
                     for xp in ['.//img/@data-image-src', './/img/@src', './/img/@data-src', './/img/@data-original']:
                         vals = card.xpath(xp)
@@ -220,7 +186,6 @@ class Spider(BaseSpider):
                         if pic:
                             break
 
-                    # 更新集数备注（如 "更新至5集" / "至5集"）
                     rm = "".join(card.xpath('.//*[contains(@class,"home-card-episodes-long")]//text()')).strip()
                     if not rm:
                         rm = "".join(card.xpath('.//*[contains(@class,"home-card-episodes")]//text()')).strip()
@@ -236,13 +201,12 @@ class Spider(BaseSpider):
                 except Exception:
                     continue
 
-            # 2. 兜底匹配任意指向 /dramas/ 或 /ai-face-swap/ 或 /ai-adult/ 的卡片链接
+            # 2. 兜底匹配任意指向作品页的链接
             if not out:
                 for a in tree.xpath('//a[contains(@href,"/dramas/") or contains(@href,"/ai-face-swap/") or contains(@href,"/ai-adult/")]'):
                     try:
                         href = a.get("href", "") or ""
                         vid = self._path(href)
-                        # 排除纯目录页，保留具体作品页
                         if vid.rstrip("/") in ("/dramas", "/ai-face-swap", "/ai-adult") or vid in seen:
                             continue
                         name = (a.get("title", "") or a.get("aria-label", "") or "").replace("查看详情：", "").strip()
@@ -262,44 +226,9 @@ class Spider(BaseSpider):
                         continue
         return out
 
-    def _parse_json_items(self, data):
-        """解析 /api/catalogue/... 返回的 JSON 列表（兼容多种常见字段命名）"""
-        items = []
-        raw_list = []
-        if isinstance(data, list):
-            raw_list = data
-        elif isinstance(data, dict):
-            for k in ("items", "list", "results", "data", "works", "dramas"):
-                if isinstance(data.get(k), list):
-                    raw_list = data[k]
-                    break
-        for it in raw_list:
-            if not isinstance(it, dict):
-                continue
-            try:
-                slug = it.get("url") or it.get("path") or it.get("href") or ""
-                if not slug and it.get("slug"):
-                    section = it.get("section") or it.get("category") or "dramas"
-                    slug = f"/{section}/{it['slug']}/season-1/"
-                vid = self._path(slug)
-                name = str(it.get("title") or it.get("name") or it.get("vod_name") or "").strip()
-                if not vid or vid == "/" or not name:
-                    continue
-                pic = self._fix(it.get("cover") or it.get("poster") or it.get("image") or it.get("pic") or "")
-                ep_cnt = it.get("episodeCount") or it.get("episodes_count") or it.get("episodes")
-                rm = str(it.get("remarks") or (f"更新至{ep_cnt}集" if ep_cnt else "")).strip()
-                item = {"vod_id": vid, "vod_name": name, "vod_pic": pic}
-                if rm:
-                    item["vod_remarks"] = rm
-                items.append(item)
-            except Exception:
-                continue
-        return items
-
     # ---------- TVBox 主接口 ----------
     def homeContent(self, filter):
         html = self._get(self.host + "/")
-        # 站点主导航分类
         cls = [
             {"type_id": "/dramas/", "type_name": "AI短剧"},
             {"type_id": "/ai-face-swap/", "type_name": "AI换脸"},
@@ -311,7 +240,6 @@ class Spider(BaseSpider):
             {"type_id": "/tags/yu-jie/", "type_name": "御姐"},
             {"type_id": "/tags/ming-xing/", "type_name": "明星"},
         ]
-        # 动态补充首页出现的其他热门标签
         try:
             tree = etree.HTML(html or "")
             if tree is not None:
@@ -336,17 +264,20 @@ class Spider(BaseSpider):
         if not tid_path.endswith("/"):
             tid_path += "/"
 
-        # 1. 尝试直接访问 SSR 分类页（支持 ?page=N 翻页）
+        # 1. 第 1 页直接取 SSR 页面；第 2 页起优先尝试 ?page=N
         url = self.host + tid_path + (f"?page={pg}" if pg > 1 else "")
         html = self._get(url)
         items = self._cards(html)
 
-        # 2. 若第 2 页起 HTML 未返回新数据，尝试调用前端 catalogue browse API
+        # 2. 若 ?page=N 未翻页成功，调用 /api/catalogue/browse（返回 HTML 片段）
         if not items and pg > 1:
-            section = tid_path.strip("/").split("/")[-1]
-            api_url = f"{self.host}/api/catalogue/browse?section={quote(section)}&page={pg}&limit=24"
-            j = self._fetch_json(api_url)
-            items = self._parse_json_items(j)
+            parts = [p for p in tid_path.strip("/").split("/") if p]
+            if len(parts) == 1:
+                api_url = f"{self.host}/api/catalogue/browse?section={quote(parts[0])}&page={pg}"
+            else:
+                api_url = f"{self.host}/api/catalogue/browse?tag={quote(parts[-1])}&page={pg}"
+            frag = self._get(api_url, min_len=200)
+            items = self._cards(frag)
 
         pagecount = pg + 1 if len(items) >= 12 else pg
         return {
@@ -375,7 +306,6 @@ class Spider(BaseSpider):
         if tree is None:
             return result
 
-        # 提取剧名（去除 " · 第1季 · 第1集" 后缀）
         name = "".join(tree.xpath('//h1[contains(@class,"p-watch-heading")]//text()')).strip()
         if not name:
             name = "".join(tree.xpath('//h1//text()')).strip()
@@ -387,7 +317,6 @@ class Spider(BaseSpider):
         if not name:
             return result
 
-        # 提取海报
         pic = ""
         for xp in [
             '//a[contains(@class,"watch-title-cover")]//img/@data-image-src',
@@ -404,18 +333,15 @@ class Spider(BaseSpider):
             if pic:
                 break
 
-        # 提取标签作为类型/演员展示
         tags = [t.strip() for t in tree.xpath('//*[contains(@class,"p-watch-tags")]//a/text()') if t.strip()]
         vtype = " / ".join(tags) if tags else "AI短剧"
 
-        # 提取简介
         des = "".join(tree.xpath('//*[contains(@class,"watch-episode-synopsis")]//p//text()')).strip()
         if not des:
             m = re.search(r'<meta name="description" content="([^"]+)"', html)
             if m:
                 des = m.group(1).strip()
 
-        # 提取全部分集列表（a.series-episode-link）
         eps = []
         seen_ep = set()
         for a in tree.xpath('//a[contains(@class,"series-episode-link")]'):
@@ -433,7 +359,6 @@ class Spider(BaseSpider):
             except Exception:
                 continue
 
-        # 若当前是单集/单部视频无分集列表，则将当前页面本身作为播放项
         if not eps:
             eps.append(f"正片${page_url}")
 
@@ -451,7 +376,7 @@ class Spider(BaseSpider):
         result["list"].append(vod)
         return result
 
-    # ---------- 搜索接口 ----------
+    # ---------- 搜索接口（适配 /search/?q= 与 /api/catalogue/search?q=&kind=&page=） ----------
     def searchContent(self, key, quick, pg="1"):
         pg = int(pg or 1)
         kw = str(key or "").strip()
@@ -461,28 +386,26 @@ class Spider(BaseSpider):
         q = quote(kw)
         items = []
 
-        # 1. 优先尝试站内 JSON 搜索接口 /api/catalogue/search
-        for param in ("q", "wd", "query"):
-            j = self._fetch_json(f"{self.host}/api/catalogue/search?{param}={q}&page={pg}&limit=24")
-            items = self._parse_json_items(j)
-            if items:
-                break
+        if pg == 1:
+            # 第 1 页直接请求 SSR 搜索结果页，同时包含短剧与视频结果
+            html = self._get(f"{self.host}/search/?q={q}")
+            items = self._cards(html)
 
-        # 2. 兜底请求 SSR 搜索页面 /search/?q=
-        if not items:
-            for u in [
-                f"{self.host}/search/?q={q}" + (f"&page={pg}" if pg > 1 else ""),
-                f"{self.host}/search/?wd={q}" + (f"&page={pg}" if pg > 1 else ""),
-            ]:
-                html = self._get(u)
-                items = self._cards(html)
-                if items:
-                    break
+        # 第 2 页起（或第 1 页未命中时）调用前端同款 /api/catalogue/search 接口（返回 HTML 片段）
+        if not items or pg > 1:
+            seen = {it["vod_id"] for it in items}
+            for kind in ("dramas", "videos"):
+                api_url = f"{self.host}/api/catalogue/search?q={q}&kind={kind}&page={pg}"
+                frag = self._get(api_url, min_len=150)
+                for it in self._cards(frag):
+                    if it["vod_id"] not in seen:
+                        seen.add(it["vod_id"])
+                        items.append(it)
 
         return {
             "list": items,
             "page": pg,
-            "pagecount": pg + 1 if len(items) >= 12 else pg,
+            "pagecount": pg + 1 if len(items) >= 10 else pg,
             "limit": 24,
             "total": len(items),
         }
@@ -494,7 +417,6 @@ class Spider(BaseSpider):
     def _extract_m3u8(self, html):
         if not html:
             return ""
-        # 1. 优先从 <script type="application/ld+json"> 的 VideoObject 提取 contentUrl
         for m in re.finditer(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html, re.S | re.I):
             try:
                 data = json.loads(m.group(1).strip())
@@ -505,7 +427,6 @@ class Spider(BaseSpider):
             except Exception:
                 continue
 
-        # 2. 正则兜底提取页面内嵌的 master.m3u8 或 mp4 链接
         for pat in [
             r'"contentUrl"\s*:\s*"([^"]+\.m3u8[^"]*)"',
             r'(https?://[^"\'\s<>]+\.m3u8[^"\'\s<>]*)',
@@ -523,7 +444,6 @@ class Spider(BaseSpider):
         if not page_url:
             return {"parse": 1, "url": ""}
 
-        # 如果传入的已经是直链，直接返回
         if self.isVideoFormat(page_url):
             return {
                 "parse": 0,
