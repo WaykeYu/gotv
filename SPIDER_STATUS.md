@@ -1,12 +1,12 @@
 # 🕷️ 影音網站爬蟲有效性檢測與配置生成報告
 
-> **檢測時間**：`2026-11-18 01:18:26`  
+> **檢測時間**：`2026-11-18 01:31:51`  
 
-> **總檢測項目**：331 ｜ ✅ 有效可用：**331** ｜ ⏳ 首日觀察：**0** ｜ ❌ 連續兩天失效已隔離：**0**
+> **總檢測項目**：331 ｜ ✅ 有效可用：**330** ｜ ⏳ 首日觀察：**1** ｜ ❌ 連續兩天失效已隔離：**0**
 
 ### 📦 設定檔匯總
 
-- 📺 **Python 一般類**：[`box_py.json`](./box_py.json) (共 **96** 筆)
+- 📺 **Python 一般類**：[`box_py.json`](./box_py.json) (共 **94** 筆)
 - 🔞 **Python 成人類**：[`fun_py.json`](./fun_py.json) (共 **25** 筆)
 - 📺 **JS/JSON 一般類**：[`box_js.json`](./box_js.json) (共 **85** 筆)
 - 🔞 **JS/JSON 成人類**：[`fun_js.json`](./fun_js.json) (共 **9** 筆)
@@ -17,334 +17,334 @@
 
 | 類型 | 副檔 | 名稱 / 相對路徑 | 狀態 | 耗時 (ms) | 分類 | 檢測資訊 |
 | :---: | :---: | :--- | :---: | :---: | :---: | :--- |
-| Collect | `json` | `collect/百度云资源.json` | ⚠️ 站點存活(載入受限) | 113 | 🎬 一般 | https://api.apibdzy.com/api.php/provide/vod (HTTP 403 (WAF/受限)) |
-| Collect | `json` | `collect/濕乐园资源<18+>.json` | ⚠️ 站點存活(載入受限) | 248 | 🔞 成人 | https://xxavs.com/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
-| Collect | `json` | `collect/飄零资源.json` | ⚠️ 站點存活(載入受限) | 269 | 🎬 一般 | https://p2100.net/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
-| Collect | `json` | `collect/艾旦資源.json` | ⚠️ 站點存活(載入受限) | 333 | 🎬 一般 | https://www.lovedan.net/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
-| Collect | `json` | `collect/极速资源.json` | ✅ 正常 | 115 | 🎬 一般 | https://jszyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/金鹰資源.json` | ✅ 正常 | 128 | 🎬 一般 | https://jyzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/免费资源站<18+>.json` | ✅ 正常 | 167 | 🔞 成人 | https://yuanlib.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/红牛资源.json` | ✅ 正常 | 172 | 🎬 一般 | http://hongniuzy2.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/小雞資源.json` | ✅ 正常 | 210 | 🎬 一般 | https://api.xjzyapi.com/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/魔都资源.json` | ✅ 正常 | 224 | 🎬 一般 | https://www.mdzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/jkun資源<18+>.json` | ✅ 正常 | 242 | 🔞 成人 | https://jkunzyapi.com/api.php/provide/vod (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/索尼.json` | ✅ 正常 | 261 | 🎬 一般 | https://suoniapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/115資源<18+>.json` | ✅ 正常 | 264 | 🔞 成人 | https://155api.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/虎牙资源.json` | ✅ 正常 | 287 | 🎬 一般 | https://www.huyaapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/淫水機资源<18+>.json` | ✅ 正常 | 291 | 🔞 成人 | https://www.xrbsp.com/api/json.php (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/最大资源.json` | ✅ 正常 | 293 | 🎬 一般 | https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/色猫资源<18+>.json` | ✅ 正常 | 294 | 🔞 成人 | https://caiji.semaozy.net/inc/apijson_vod.php (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/看看资源<18+>.json` | ✅ 正常 | 299 | 🔞 成人 | https://f-1.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/老色P資源<18+>.json` | ✅ 正常 | 304 | 🔞 成人 | https://apilsbzy1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/美少女资源<18+>.json` | ✅ 正常 | 305 | 🔞 成人 | https://www.msnii.com/api/json.php (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/香x兒资源<18+>.json` | ✅ 正常 | 306 | 🔞 成人 | https://www.gdlsp.com/api/json.php (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/光速资源.json` | ✅ 正常 | 310 | 🎬 一般 | https://api.guangsuapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/暴風資源.json` | ✅ 正常 | 315 | 🎬 一般 | https://bfzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/芒果资源.json` | ✅ 正常 | 320 | 🎬 一般 | https://caiji.mgzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/新浪資源.json` | ✅ 正常 | 325 | 🎬 一般 | https://api.xinlangapi.com/xinlangapi.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/小鸡资源<18+>.json` | ✅ 正常 | 328 | 🔞 成人 | https://api.xiaojizy.live/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/奥斯卡资源<18+>.json` | ✅ 正常 | 331 | 🔞 成人 | https://aosikazy1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/红楼资源网<18+>.json` | ✅ 正常 | 337 | 🔞 成人 | https://www.hlzy.my/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/黃色倉庫<18+>.json` | ✅ 正常 | 341 | 🔞 成人 | https://hsckzy888.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/玉兔資源<18+>.json` | ✅ 正常 | 346 | 🔞 成人 | https://apiyutu.com/api.php/providedao/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/ck資源<18+>.json` | ✅ 正常 | 357 | 🔞 成人 | https://ckzy.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/无尽資源.json` | ✅ 正常 | 358 | 🎬 一般 | https://api.wujinapi.net/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/快车资源.json` | ✅ 正常 | 360 | 🎬 一般 | https://caiji.kuaichezy.org/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/ok资源.json` | ✅ 正常 | 362 | 🎬 一般 | https://api.okzyw.net/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/火速资源站<18+>.json` | ✅ 正常 | 383 | 🔞 成人 | https://api.huosuapi.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/ikun.json` | ✅ 正常 | 385 | 🎬 一般 | https://ikunzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/奶香香資源<18+>.json` | ✅ 正常 | 407 | 🔞 成人 | https://naixxzy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/牛牛資源.json` | ✅ 正常 | 411 | 🎬 一般 | https://api.niuniuzy.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/天涯资源.json` | ✅ 正常 | 422 | 🎬 一般 | https://tyyszyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/速播資源.json` | ✅ 正常 | 423 | 🎬 一般 | https://subocaiji.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/森林資源<18+>.json` | ✅ 正常 | 479 | 🔞 成人 | https://slapibf.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/越南资源<18+>.json` | ✅ 正常 | 528 | 🔞 成人 | https://api.vnzyz.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/杏吧资源站<18+>.json` | ✅ 正常 | 561 | 🔞 成人 | https://sex8zy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/豪华资源.json` | ✅ 正常 | 563 | 🎬 一般 | https://hhzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/樱花資源.json` | ✅ 正常 | 577 | 🎬 一般 | https://m3u8.apiyhzy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/猫眼资源.json` | ✅ 正常 | 581 | 🎬 一般 | https://api.maoyanapi.top/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/优质資源.json` | ✅ 正常 | 585 | 🎬 一般 | https://api.yyzy-tv.vip/inc/apijson.php (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/嘿嘿资源<18+>.json` | ✅ 正常 | 601 | 🔞 成人 | https://api.heiapi.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/黃色AV资源<18+>.json` | ✅ 正常 | 626 | 🔞 成人 | https://www.pgxdy.com/api/json.php (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/百花资源<18+>.json` | ✅ 正常 | 627 | 🔞 成人 | https://bhziyuan.com/api.php/provide/vod (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/新极品资源<18+>.json` | ✅ 正常 | 633 | 🔞 成人 | https://jipinvip1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/新极品资源.json` | ✅ 正常 | 640 | 🎬 一般 | https://jipinvip1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/黑料资源站<18+>.json` | ✅ 正常 | 643 | 🔞 成人 | https://www.heiliaozyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/厂长資源.json` | ✅ 正常 | 644 | 🎬 一般 | https://api.changzhang.tv/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/番号<18+>.json` | ✅ 正常 | 658 | 🔞 成人 | https://fhapi9.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/星夜资源<18+>.json` | ✅ 正常 | 671 | 🔞 成人 | https://xyezy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/大奶子資源<18+>.json` | ✅ 正常 | 672 | 🔞 成人 | https://apidanaizi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/鸭鸭资源.json` | ✅ 正常 | 707 | 🎬 一般 | https://cj.yayazy.net/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/辣椒資源<18+>.json` | ✅ 正常 | 728 | 🔞 成人 | https://apilj.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/母鸡资源.json` | ✅ 正常 | 763 | 🎬 一般 | https://mujiziyuan00.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/豆豆资源站<18+>.json` | ✅ 正常 | 767 | 🔞 成人 | https://api.douapi.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/精品98<18+>.json` | ✅ 正常 | 798 | 🔞 成人 | https://jp98.vip/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/大地资源<18+>.json` | ✅ 正常 | 850 | 🔞 成人 | https://dadiapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/鲨鱼资源<18+>.json` | ✅ 正常 | 863 | 🔞 成人 | https://shayuapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/乐播<18+>.json` | ✅ 正常 | 909 | 🔞 成人 | https://lbapi9.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/量子資源.json` | ✅ 正常 | 968 | 🎬 一般 | https://cj.lziapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/souav<18+>.json` | ✅ 正常 | 1048 | 🔞 成人 | https://www.jingpinx.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/巨量资源.json` | ✅ 正常 | 1055 | 🎬 一般 | https://api.juliang.live/api/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/精品资源站<18+>.json` | ✅ 正常 | 1074 | 🔞 成人 | https://www.jingpinx.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/番茄資源<18+>.json` | ✅ 正常 | 1114 | 🔞 成人 | https://fqzy.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/桃花資源<18+>.json` | ✅ 正常 | 1180 | 🔞 成人 | https://thzy1.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/非凡資源.json` | ✅ 正常 | 1731 | 🎬 一般 | https://liuyan.ffzy3.tv/api.php/provide/vod/ (HTTP 200 (code:1)) |
-| Collect | `json` | `collect/创享資源.json` | ✅ 正常 | 4924 | 🎬 一般 | https://ys.cxkjg.cn/api/provide/vod/ (HTTP 200 (code:1)) |
-| JS | `js` | `js/注视影视.js` | ⚠️ 站點存活(載入受限) | 85 | 🔞 成人 | https://gaze.run (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/wogg.json` | ⚠️ 站點存活(載入受限) | 134 | 🎬 一般 | http://www.wogg.lol (HTTP 403) |
-| JS | `js` | `js/欧乐影院.js` | ⚠️ 站點存活(載入受限) | 137 | 🔞 成人 | https://www.oleol.com (HTTP 403) |
-| JS | `js` | `js/imaple.js` | ⚠️ 站點存活(載入受限) | 167 | 🎬 一般 | https://imaple.tv (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/og.json` | ⚠️ 站點存活(載入受限) | 192 | 🎬 一般 | https://woog.nxog.eu.org (HTTP 403) |
-| JS | `js` | `js/楓林追劇.js` | ⚠️ 站點存活(載入受限) | 195 | 🎬 一般 | https://imaple.tv (HTTP 403) |
-| JS | `js` | `js/xiaosa/js/人人电影网.js` | ⚠️ 站點存活(載入受限) | 200 | 🎬 一般 | https://www.rrdynb.com (HTTP 403) |
-| JS | `json` | `js/xiaosa/XBPQ/面包影视.json` | ⚠️ 站點存活(載入受限) | 207 | 🎬 一般 | https://v.aiwule.com/vodshow/{cateId}-{area}-{by}-{class}-{lang}-{letter}---{catePg}---{year}.html (HTTP 403) |
-| JS | `json` | `js/ss/pronlulu.json` | ⚠️ 站點存活(載入受限) | 220 | 🔞 成人 | https://www.pornlulu.com (HTTP 403) |
-| JS | `js` | `js/海龟.js` | ⚠️ 站點存活(載入受限) | 233 | 🎬 一般 | https://www.haigui.tv (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/蜡笔.json` | ⚠️ 站點存活(載入受限) | 251 | 🎬 一般 | https://www.labi88.sbs (HTTP 403) |
-| JS | `json` | `js/s/可可影视1.json` | ⚠️ 站點存活(載入受限) | 253 | 🎬 一般 | https://www.kmxibanyayu.com/vs/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 403) |
-| JS | `json` | `js/s/面包.json` | ⚠️ 站點存活(載入受限) | 259 | 🎬 一般 | https://v.aiwule.com (HTTP 403) |
-| JS | `js` | `js/rrdyw.js` | ⚠️ 站點存活(載入受限) | 265 | 🎬 一般 | https://www.rrdynb.com (HTTP 403) |
-| JS | `json` | `js/s/尼玛影视.json` | ⚠️ 站點存活(載入受限) | 295 | 🎬 一般 | http://nm.xxxc137.top/vodshow/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 403) |
-| JS | `js` | `js/嘀嗒影视.js` | ⚠️ 站點存活(載入受限) | 298 | 🔞 成人 | https://www.didahd.pro (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/lb.json` | ⚠️ 站點存活(載入受限) | 333 | 🎬 一般 | http://www.labi88.sbs (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/欧歌.json` | ⚠️ 站點存活(載入受限) | 336 | 🎬 一般 | https://woog.nxog.eu.org (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/多多.json` | ⚠️ 站點存活(載入受限) | 349 | 🎬 一般 | https://tv.yydsys.top (HTTP 403) |
-| JS | `js` | `js/555影视.js` | ⚠️ 站點存活(載入受限) | 377 | 🎬 一般 | https://www.55i5m2t9p6.shop (HTTP 403) |
-| JS | `json` | `js/s/泥巴影视.json` | ⚠️ 站點存活(載入受限) | 383 | 🎬 一般 | https://www.niuxiongdi.com/nivodshow/{cateId}--{by}------{catePg}---.html (HTTP 403) |
-| JS | `js` | `js/aipanso.js` | ⚠️ 站點存活(載入受限) | 400 | 🎬 一般 | https://aipanso.com (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/玩偶.json` | ⚠️ 站點存活(載入受限) | 427 | 🎬 一般 | https://www.wogg.lol (HTTP 403) |
-| JS | `json` | `js/xiaosa/XBPQ/海纳影视.json` | ⚠️ 站點存活(載入受限) | 471 | 🎬 一般 | https://www.hainatv.net/index.php/vod/show/area/{area}/id/{cateId}/lang/{lang}/page/{catePg}/year/{year}.html (HTTP 403) |
-| JS | `json` | `js/s/海纳影视.json` | ⚠️ 站點存活(載入受限) | 495 | 🎬 一般 | https://www.hainatv.net/index.php/vod/show/area/{area}/id/{cateId}/lang/{lang}/page/{catePg}/year/{year}.html (HTTP 403) |
-| JS | `js` | `js/xzys.js` | ⚠️ 站點存活(載入受限) | 570 | 🎬 一般 | https://xzys.fun (HTTP 403) |
-| JS | `js` | `js/ddys.js` | ⚠️ 站點存活(載入受限) | 590 | 🎬 一般 | https://ddys.wiki (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/yyds.json` | ⚠️ 站點存活(載入受限) | 654 | 🎬 一般 | https://tv.yydsys.top (HTTP 403) |
-| JS | `js` | `js/index.config.js` | ⚠️ 站點存活(載入受限) | 762 | 🎬 一般 | https://sub.ottiptv.cc/bililive.m3u (HTTP 403) |
-| JS | `json` | `js/xiaosa/XBPQ/养生堂.json` | ⚠️ 站點存活(載入受限) | 963 | 🎬 一般 | https://pc.api.btime.com/btimeweb/infoFlow (HTTP 403) |
-| JS | `json` | `js/xiaosa/json/zz.json` | ⚠️ 站點存活(載入受限) | 1012 | 🎬 一般 | https://www.mihdr.top (WAF 阻斷 (站點存活)) |
-| JS | `json` | `js/s/玩偶哥哥.json` | ⚠️ 站點存活(載入受限) | 1051 | 🎬 一般 | https://www.wogg.net (HTTP 403) |
-| JS | `js` | `js/ss/xp天堂.js` | ⚠️ 站點存活(載入受限) | 1086 | 🔞 成人 | https://attack.bjidvlyog.com (HTTP 403) |
-| JS | `json` | `js/xiaosa/XBPQ/番茄短剧.json` | ⚠️ 站點存活(載入受限) | 1196 | 🎬 一般 | https://www.dzwhs.com/zwhstp/5.html (HTTP 403) |
-| JS | `json` | `js/s/养生堂.json` | ⚠️ 站點存活(載入受限) | 1552 | 🎬 一般 | https://pc.api.btime.com/btimeweb/infoFlow (HTTP 403) |
-| JS | `json` | `js/s/全网看.json` | ⚠️ 站點存活(載入受限) | 1920 | 🎬 一般 | https://www.qkw1.com/qkwshow/{cateId}-{area}--{class}-----{catePg}---{year}.html (WAF 阻斷 (站點存活)) |
-| JS | `json` | `js/s/爱你短剧.json` | ⚠️ 站點存活(載入受限) | 2011 | 🎬 一般 | https://ainidj.com (HTTP 403) |
-| JS | `json` | `js/xiaosa/api.json` | ⚠️ 站點存活(載入受限) | 2476 | 🎬 一般 | http://v.rbotv.cn (WAF 阻斷 (站點存活)) |
-| JS | `json` | `js/s/巴蜀影视.json` | ⚠️ 站點存活(載入受限) | 2618 | 🎬 一般 | http://www.jsjiyuan.com/t/{cateId}-{catePg}.html (WAF 阻斷 (站點存活)) |
-| JS | `json` | `js/xiaosa/json/至臻.json` | ⚠️ 站點存活(載入受限) | 85753 | 🎬 一般 | https://www.mihdr.top (WAF 阻斷 (站點存活)) |
-| JS | `js` | `js/cilixiong.js` | ✅ 正常 | 65 | 🔞 成人 | https://www.cilixiong.com (HTTP 200) |
-| JS | `json` | `js/s/小镇.json` | ✅ 正常 | 96 | 🎬 一般 | http://dyxz.tv/list/{cateId}_{catePg}.html (HTTP 200) |
-| JS | `js` | `js/dygang.js` | ✅ 正常 | 98 | 🎬 一般 | https://www.dygang.tv (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/Anime1.js` | ✅ 正常 | 99 | 🎬 一般 | https://anime1.me (HTTP 200) |
+| Collect | `json` | `collect/濕乐园资源<18+>.json` | ⚠️ 站點存活(載入受限) | 93 | 🔞 成人 | https://xxavs.com/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
+| Collect | `json` | `collect/百度云资源.json` | ⚠️ 站點存活(載入受限) | 144 | 🎬 一般 | https://api.apibdzy.com/api.php/provide/vod (HTTP 403 (WAF/受限)) |
+| Collect | `json` | `collect/艾旦資源.json` | ⚠️ 站點存活(載入受限) | 159 | 🎬 一般 | https://www.lovedan.net/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
+| Collect | `json` | `collect/飄零资源.json` | ⚠️ 站點存活(載入受限) | 182 | 🎬 一般 | https://p2100.net/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
+| Collect | `json` | `collect/非凡資源.json` | ⚠️ 站點存活(載入受限) | 1423 | 🎬 一般 | https://liuyan.ffzy3.tv/api.php/provide/vod/ (HTTP 403 (WAF/受限)) |
+| Collect | `json` | `collect/索尼.json` | ✅ 正常 | 106 | 🎬 一般 | https://suoniapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/极速资源.json` | ✅ 正常 | 113 | 🎬 一般 | https://jszyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/光速资源.json` | ✅ 正常 | 169 | 🎬 一般 | https://api.guangsuapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/红牛资源.json` | ✅ 正常 | 189 | 🎬 一般 | http://hongniuzy2.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/ck資源<18+>.json` | ✅ 正常 | 199 | 🔞 成人 | https://ckzy.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/黃色倉庫<18+>.json` | ✅ 正常 | 213 | 🔞 成人 | https://hsckzy888.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/火速资源站<18+>.json` | ✅ 正常 | 216 | 🔞 成人 | https://api.huosuapi.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/天涯资源.json` | ✅ 正常 | 253 | 🎬 一般 | https://tyyszyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/虎牙资源.json` | ✅ 正常 | 254 | 🎬 一般 | https://www.huyaapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/豆豆资源站<18+>.json` | ✅ 正常 | 259 | 🔞 成人 | https://api.douapi.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/芒果资源.json` | ✅ 正常 | 268 | 🎬 一般 | https://caiji.mgzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/红楼资源网<18+>.json` | ✅ 正常 | 272 | 🔞 成人 | https://www.hlzy.my/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/新浪資源.json` | ✅ 正常 | 281 | 🎬 一般 | https://api.xinlangapi.com/xinlangapi.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/玉兔資源<18+>.json` | ✅ 正常 | 283 | 🔞 成人 | https://apiyutu.com/api.php/providedao/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/牛牛資源.json` | ✅ 正常 | 292 | 🎬 一般 | https://api.niuniuzy.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/快车资源.json` | ✅ 正常 | 294 | 🎬 一般 | https://caiji.kuaichezy.org/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/ok资源.json` | ✅ 正常 | 304 | 🎬 一般 | https://api.okzyw.net/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/ikun.json` | ✅ 正常 | 322 | 🎬 一般 | https://ikunzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/老色P資源<18+>.json` | ✅ 正常 | 325 | 🔞 成人 | https://apilsbzy1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/金鹰資源.json` | ✅ 正常 | 335 | 🎬 一般 | https://jyzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/无尽資源.json` | ✅ 正常 | 352 | 🎬 一般 | https://api.wujinapi.net/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/黃色AV资源<18+>.json` | ✅ 正常 | 353 | 🔞 成人 | https://www.pgxdy.com/api/json.php (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/看看资源<18+>.json` | ✅ 正常 | 367 | 🔞 成人 | https://f-1.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/豪华资源.json` | ✅ 正常 | 369 | 🎬 一般 | https://hhzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/樱花資源.json` | ✅ 正常 | 387 | 🎬 一般 | https://m3u8.apiyhzy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/小雞資源.json` | ✅ 正常 | 410 | 🎬 一般 | https://api.xjzyapi.com/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/鸭鸭资源.json` | ✅ 正常 | 414 | 🎬 一般 | https://cj.yayazy.net/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/色猫资源<18+>.json` | ✅ 正常 | 415 | 🔞 成人 | https://caiji.semaozy.net/inc/apijson_vod.php (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/美少女资源<18+>.json` | ✅ 正常 | 429 | 🔞 成人 | https://www.msnii.com/api/json.php (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/嘿嘿资源<18+>.json` | ✅ 正常 | 438 | 🔞 成人 | https://api.heiapi.cc/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/115資源<18+>.json` | ✅ 正常 | 449 | 🔞 成人 | https://155api.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/杏吧资源站<18+>.json` | ✅ 正常 | 458 | 🔞 成人 | https://sex8zy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/新极品资源.json` | ✅ 正常 | 462 | 🎬 一般 | https://jipinvip1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/森林資源<18+>.json` | ✅ 正常 | 467 | 🔞 成人 | https://slapibf.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/奥斯卡资源<18+>.json` | ✅ 正常 | 473 | 🔞 成人 | https://aosikazy1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/精品98<18+>.json` | ✅ 正常 | 493 | 🔞 成人 | https://jp98.vip/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/淫水機资源<18+>.json` | ✅ 正常 | 499 | 🔞 成人 | https://www.xrbsp.com/api/json.php (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/魔都资源.json` | ✅ 正常 | 533 | 🎬 一般 | https://www.mdzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/奶香香資源<18+>.json` | ✅ 正常 | 533 | 🔞 成人 | https://naixxzy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/暴風資源.json` | ✅ 正常 | 581 | 🎬 一般 | https://bfzyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/大奶子資源<18+>.json` | ✅ 正常 | 586 | 🔞 成人 | https://apidanaizi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/香x兒资源<18+>.json` | ✅ 正常 | 586 | 🔞 成人 | https://www.gdlsp.com/api/json.php (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/小鸡资源<18+>.json` | ✅ 正常 | 594 | 🔞 成人 | https://api.xiaojizy.live/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/星夜资源<18+>.json` | ✅ 正常 | 600 | 🔞 成人 | https://xyezy.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/优质資源.json` | ✅ 正常 | 611 | 🎬 一般 | https://api.yyzy-tv.vip/inc/apijson.php (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/免费资源站<18+>.json` | ✅ 正常 | 691 | 🔞 成人 | https://yuanlib.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/越南资源<18+>.json` | ✅ 正常 | 704 | 🔞 成人 | https://api.vnzyz.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/厂长資源.json` | ✅ 正常 | 707 | 🎬 一般 | https://api.changzhang.tv/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/速播資源.json` | ✅ 正常 | 708 | 🎬 一般 | https://subocaiji.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/新极品资源<18+>.json` | ✅ 正常 | 726 | 🔞 成人 | https://jipinvip1.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/猫眼资源.json` | ✅ 正常 | 731 | 🎬 一般 | https://api.maoyanapi.top/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/百花资源<18+>.json` | ✅ 正常 | 802 | 🔞 成人 | https://bhziyuan.com/api.php/provide/vod (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/番号<18+>.json` | ✅ 正常 | 811 | 🔞 成人 | https://fhapi9.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/souav<18+>.json` | ✅ 正常 | 814 | 🔞 成人 | https://www.jingpinx.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/精品资源站<18+>.json` | ✅ 正常 | 834 | 🔞 成人 | https://www.jingpinx.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/番茄資源<18+>.json` | ✅ 正常 | 835 | 🔞 成人 | https://fqzy.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/最大资源.json` | ✅ 正常 | 850 | 🎬 一般 | https://api.zuidapi.com/api.php/provide/vod/from/zuidam3u8/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/jkun資源<18+>.json` | ✅ 正常 | 858 | 🔞 成人 | https://jkunzyapi.com/api.php/provide/vod (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/黑料资源站<18+>.json` | ✅ 正常 | 882 | 🔞 成人 | https://www.heiliaozyapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/桃花資源<18+>.json` | ✅ 正常 | 898 | 🔞 成人 | https://thzy1.me/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/辣椒資源<18+>.json` | ✅ 正常 | 973 | 🔞 成人 | https://apilj.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/大地资源<18+>.json` | ✅ 正常 | 1034 | 🔞 成人 | https://dadiapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/鲨鱼资源<18+>.json` | ✅ 正常 | 1068 | 🔞 成人 | https://shayuapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/乐播<18+>.json` | ✅ 正常 | 1096 | 🔞 成人 | https://lbapi9.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/母鸡资源.json` | ✅ 正常 | 1109 | 🎬 一般 | https://mujiziyuan00.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/量子資源.json` | ✅ 正常 | 1271 | 🎬 一般 | https://cj.lziapi.com/api.php/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/巨量资源.json` | ✅ 正常 | 1483 | 🎬 一般 | https://api.juliang.live/api/provide/vod/ (HTTP 200 (code:1)) |
+| Collect | `json` | `collect/创享資源.json` | ✅ 正常 | 1776 | 🎬 一般 | https://ys.cxkjg.cn/api/provide/vod/ (HTTP 200 (code:1)) |
+| JS | `js` | `js/imaple.js` | ⚠️ 站點存活(載入受限) | 53 | 🎬 一般 | https://imaple.tv (HTTP 403) |
+| JS | `js` | `js/楓林追劇.js` | ⚠️ 站點存活(載入受限) | 63 | 🎬 一般 | https://imaple.tv (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/多多.json` | ⚠️ 站點存活(載入受限) | 63 | 🎬 一般 | https://tv.yydsys.top (HTTP 403) |
+| JS | `json` | `js/xiaosa/XBPQ/面包影视.json` | ⚠️ 站點存活(載入受限) | 69 | 🎬 一般 | https://v.aiwule.com/vodshow/{cateId}-{area}-{by}-{class}-{lang}-{letter}---{catePg}---{year}.html (HTTP 403) |
+| JS | `js` | `js/xiaosa/js/人人电影网.js` | ⚠️ 站點存活(載入受限) | 92 | 🎬 一般 | https://www.rrdynb.com (HTTP 403) |
+| JS | `json` | `js/s/可可影视1.json` | ⚠️ 站點存活(載入受限) | 96 | 🎬 一般 | https://www.kmxibanyayu.com/vs/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/玩偶.json` | ⚠️ 站點存活(載入受限) | 114 | 🎬 一般 | https://www.wogg.lol (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/og.json` | ⚠️ 站點存活(載入受限) | 120 | 🎬 一般 | https://woog.nxog.eu.org (HTTP 403) |
+| JS | `js` | `js/欧乐影院.js` | ⚠️ 站點存活(載入受限) | 126 | 🔞 成人 | https://www.oleol.com (HTTP 403) |
+| JS | `js` | `js/海龟.js` | ⚠️ 站點存活(載入受限) | 131 | 🎬 一般 | https://www.haigui.tv (HTTP 403) |
+| JS | `js` | `js/注视影视.js` | ⚠️ 站點存活(載入受限) | 135 | 🔞 成人 | https://gaze.run (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/lb.json` | ⚠️ 站點存活(載入受限) | 138 | 🎬 一般 | http://www.labi88.sbs (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/蜡笔.json` | ⚠️ 站點存活(載入受限) | 139 | 🎬 一般 | https://www.labi88.sbs (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/wogg.json` | ⚠️ 站點存活(載入受限) | 139 | 🎬 一般 | http://www.wogg.lol (HTTP 403) |
+| JS | `js` | `js/555影视.js` | ⚠️ 站點存活(載入受限) | 147 | 🎬 一般 | https://www.55i5m2t9p6.shop (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/欧歌.json` | ⚠️ 站點存活(載入受限) | 156 | 🎬 一般 | https://woog.nxog.eu.org (HTTP 403) |
+| JS | `json` | `js/s/面包.json` | ⚠️ 站點存活(載入受限) | 160 | 🎬 一般 | https://v.aiwule.com (HTTP 403) |
+| JS | `js` | `js/rrdyw.js` | ⚠️ 站點存活(載入受限) | 165 | 🎬 一般 | https://www.rrdynb.com (HTTP 403) |
+| JS | `json` | `js/ss/pronlulu.json` | ⚠️ 站點存活(載入受限) | 166 | 🔞 成人 | https://www.pornlulu.com (HTTP 403) |
+| JS | `json` | `js/s/尼玛影视.json` | ⚠️ 站點存活(載入受限) | 201 | 🎬 一般 | http://nm.xxxc137.top/vodshow/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 403) |
+| JS | `js` | `js/xzys.js` | ⚠️ 站點存活(載入受限) | 264 | 🎬 一般 | https://xzys.fun (HTTP 403) |
+| JS | `js` | `js/index.config.js` | ⚠️ 站點存活(載入受限) | 268 | 🎬 一般 | https://sub.ottiptv.cc/bililive.m3u (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/yyds.json` | ⚠️ 站點存活(載入受限) | 370 | 🎬 一般 | https://tv.yydsys.top (HTTP 403) |
+| JS | `js` | `js/嘀嗒影视.js` | ⚠️ 站點存活(載入受限) | 447 | 🔞 成人 | https://www.didahd.pro (HTTP 403) |
+| JS | `js` | `js/aipanso.js` | ⚠️ 站點存活(載入受限) | 451 | 🎬 一般 | https://aipanso.com (HTTP 403) |
+| JS | `json` | `js/s/泥巴影视.json` | ⚠️ 站點存活(載入受限) | 542 | 🎬 一般 | https://www.niuxiongdi.com/nivodshow/{cateId}--{by}------{catePg}---.html (HTTP 403) |
+| JS | `json` | `js/xiaosa/XBPQ/海纳影视.json` | ⚠️ 站點存活(載入受限) | 633 | 🎬 一般 | https://www.hainatv.net/index.php/vod/show/area/{area}/id/{cateId}/lang/{lang}/page/{catePg}/year/{year}.html (HTTP 403) |
+| JS | `js` | `js/ddys.js` | ⚠️ 站點存活(載入受限) | 646 | 🎬 一般 | https://ddys.wiki (HTTP 403) |
+| JS | `json` | `js/s/玩偶哥哥.json` | ⚠️ 站點存活(載入受限) | 646 | 🎬 一般 | https://www.wogg.net (HTTP 403) |
+| JS | `json` | `js/s/海纳影视.json` | ⚠️ 站點存活(載入受限) | 709 | 🎬 一般 | https://www.hainatv.net/index.php/vod/show/area/{area}/id/{cateId}/lang/{lang}/page/{catePg}/year/{year}.html (HTTP 403) |
+| JS | `json` | `js/xiaosa/XBPQ/番茄短剧.json` | ⚠️ 站點存活(載入受限) | 1116 | 🎬 一般 | https://www.dzwhs.com/zwhstp/5.html (HTTP 403) |
+| JS | `json` | `js/s/秀儿.json` | ⚠️ 站點存活(載入受限) | 1277 | 🎬 一般 | https://www.ima-pearl.com/vod/search (HTTP 403) |
+| JS | `js` | `js/ss/xp天堂.js` | ⚠️ 站點存活(載入受限) | 1315 | 🔞 成人 | https://attack.bjidvlyog.com (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/zz.json` | ⚠️ 站點存活(載入受限) | 1591 | 🎬 一般 | https://www.mihdr.top (WAF 阻斷 (站點存活)) |
+| JS | `json` | `js/s/养生堂.json` | ⚠️ 站點存活(載入受限) | 1648 | 🎬 一般 | https://pc.api.btime.com/btimeweb/infoFlow (HTTP 403) |
+| JS | `json` | `js/xiaosa/XBPQ/养生堂.json` | ⚠️ 站點存活(載入受限) | 2165 | 🎬 一般 | https://pc.api.btime.com/btimeweb/infoFlow (HTTP 403) |
+| JS | `json` | `js/s/桃子影视.json` | ⚠️ 站點存活(載入受限) | 2301 | 🎬 一般 | http://www.mpfpj.com/vodshow/{cateId}-{area}--{class}-----{catePg}---{year}.html (WAF 阻斷 (站點存活)) |
+| JS | `json` | `js/s/全网看.json` | ⚠️ 站點存活(載入受限) | 2720 | 🎬 一般 | https://www.qkw1.com/qkwshow/{cateId}-{area}--{class}-----{catePg}---{year}.html (WAF 阻斷 (站點存活)) |
+| JS | `json` | `js/xiaosa/api.json` | ⚠️ 站點存活(載入受限) | 3181 | 🎬 一般 | http://v.rbotv.cn (WAF 阻斷 (站點存活)) |
+| JS | `json` | `js/s/巴蜀影视.json` | ⚠️ 站點存活(載入受限) | 3200 | 🎬 一般 | http://www.jsjiyuan.com/t/{cateId}-{catePg}.html (WAF 阻斷 (站點存活)) |
+| JS | `json` | `js/s/爱你短剧.json` | ⚠️ 站點存活(載入受限) | 3705 | 🎬 一般 | https://ainidj.com (HTTP 403) |
+| JS | `json` | `js/xiaosa/json/至臻.json` | ⚠️ 站點存活(載入受限) | 42791 | 🎬 一般 | https://www.mihdr.top (WAF 阻斷 (站點存活)) |
+| JS | `js` | `js/huya.js` | ✅ 正常 | 65 | 🎬 一般 | https://www.huya.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/奇米动漫.js` | ✅ 正常 | 78 | 🎬 一般 | http://www.qimiqimi.net (HTTP 200) |
 | JS | `json` | `js/ss/花都.json` | ✅ 正常 | 100 | 🎬 一般 | 白名單強制保留 (https://hd.huaduys.cc/vodshow/{cateId}--------{catePg}---.html) |
-| JS | `json` | `js/s/电影港.json` | ✅ 正常 | 102 | 🎬 一般 | https://www.dygang.tv/{cateId}/index_{catePg}.htm[firstPage=https://www.dygang.cc/{cateId}/index.htm] (HTTP 200) |
-| JS | `json` | `js/xiaosa/XYQHiker/电影港.json` | ✅ 正常 | 121 | 🎬 一般 | https://www.dygang.tv/{cateId}/index_{catePg}.htm[firstPage=https://www.dygang.cc/{cateId}/index.htm] (HTTP 200) |
-| JS | `js` | `js/apple.js` | ✅ 正常 | 137 | 🎬 一般 | http://asp.xpgtv.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XYQHiker/来看影视.json` | ✅ 正常 | 138 | 🎬 一般 | https://lkvod.org (HTTP 200) |
-| JS | `json` | `js/s/爱看.json` | ✅ 正常 | 190 | 🎬 一般 | https://www1.aikanbot.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/三四影视.json` | ✅ 正常 | 196 | 🎬 一般 | https://ikan234.com/show/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 200) |
-| JS | `js` | `js/huya.js` | ✅ 正常 | 214 | 🎬 一般 | https://www.huya.com (HTTP 200) |
-| JS | `js` | `js/tzfile.js` | ✅ 正常 | 215 | 🎬 一般 | https://t-rex.tzfile.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/农民影视.json` | ✅ 正常 | 219 | 🔞 成人 | https://vip.wwgz.cn:5200/vod-list-id-{cateId}-pg-{catePg}-order--by-time-class-0-year-{year}-letter--area-{area}-lang-.html (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/哆啦新番社.json` | ✅ 正常 | 235 | 🎬 一般 | https://dora.xiaoxinbk.com (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/奇米动漫.js` | ✅ 正常 | 239 | 🎬 一般 | http://www.qimiqimi.net (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/骚火影视.json` | ✅ 正常 | 259 | 🎬 一般 | https://shdy2.com/list/{cateId}-{catePg}.html (HTTP 200) |
-| JS | `json` | `js/s/秀儿.json` | ✅ 正常 | 265 | 🎬 一般 | https://www.ima-pearl.com/vod/search (HTTP 200) |
-| JS | `json` | `js/s/七新影视.json` | ✅ 正常 | 299 | 🎬 一般 | http://www.7xdy.com (HTTP 200) |
-| JS | `js` | `js/cilixiongp.js` | ✅ 正常 | 313 | 🔞 成人 | https://www.cilixiong.com (HTTP 200) |
-| JS | `json` | `js/s/骚火.json` | ✅ 正常 | 316 | 🎬 一般 | https://shdy2.com/list/{cateId}-{catePg}.html (HTTP 200) |
-| JS | `json` | `js/s/短剧影视.json` | ✅ 正常 | 320 | 🎬 一般 | https://www.duanjuwang.cc/vodtype/{cateId}/page/{catePg}.html (HTTP 200) |
-| JS | `json` | `js/s/歪片影视.json` | ✅ 正常 | 321 | 🎬 一般 | https://www.waipian30.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/小镇影视.json` | ✅ 正常 | 323 | 🎬 一般 | http://dyxz.tv/list/{cateId}_{catePg}.html (HTTP 200) |
-| JS | `json` | `js/s/BT天堂.json` | ✅ 正常 | 328 | 🎬 一般 | https://www.bttt11.com (HTTP 200) |
-| JS | `json` | `js/s/短剧网.json` | ✅ 正常 | 334 | 🎬 一般 | https://www.duanjuwang.cc/vodtype/{cateId}/page/{catePg}.html (HTTP 200) |
-| JS | `json` | `js/s/桃子影视.json` | ✅ 正常 | 340 | 🎬 一般 | http://www.mpfpj.com/vodshow/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 200) |
-| JS | `json` | `js/s/哔嘀影视.json` | ✅ 正常 | 345 | 🎬 一般 | https://www.yjys02.com (HTTP 200) |
-| JS | `json` | `js/s/哆啦新番社.json` | ✅ 正常 | 351 | 🎬 一般 | https://dora.xiaoxinbk.com (HTTP 200) |
-| JS | `json` | `js/s/三四影视.json` | ✅ 正常 | 362 | 🎬 一般 | https://ikan234.com/show/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/雪糕影视.json` | ✅ 正常 | 379 | 🎬 一般 | https://www.xgitv.com/vshow/{cateId}-----------.html (HTTP 200) |
-| JS | `js` | `js/meow.js` | ✅ 正常 | 460 | 🎬 一般 | https://meow.tg (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/异世界.js` | ✅ 正常 | 470 | 🎬 一般 | https://www.dmmiku.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/莫小影视.json` | ✅ 正常 | 482 | 🎬 一般 | https://www.moxy.top (HTTP 200) |
-| JS | `js` | `js/meijumi.js` | ✅ 正常 | 498 | 🎬 一般 | https://www.meijumi.net (HTTP 200) |
-| JS | `json` | `js/s/奇迹.json` | ✅ 正常 | 514 | 🎬 一般 | https://qiji.91by.top/index.php/vod/show/area/{area}/by/{by}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
-| JS | `json` | `js/s/奇迹影视.json` | ✅ 正常 | 551 | 🎬 一般 | https://qiji.91by.top/index.php/vod/show/area/{area}/by/{by}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
-| JS | `json` | `js/xiaosa/json/采集静态.json` | ✅ 正常 | 604 | 🎬 一般 | https://caiji.moduapi.cc (HTTP 200) |
-| JS | `json` | `js/xiaosa/json/aliyunpansearch.json` | ✅ 正常 | 644 | 🎬 一般 | https://ys1api.yingso.fun/v7/ali/all (HTTP 200) |
-| JS | `js` | `js/funletu.js` | ✅ 正常 | 653 | 🎬 一般 | https://v.funletu.com (HTTP 200) |
-| JS | `json` | `js/s/影搜.json` | ✅ 正常 | 674 | 🎬 一般 | https://yingso.fun (HTTP 200) |
-| JS | `js` | `js/lx-music.js` | ✅ 正常 | 691 | 🎬 一般 | https://88.lxmusic.xn--fiqs8s (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/全盘.js` | ✅ 正常 | 693 | 🎬 一般 | https://so.yuneu.com (HTTP 200) |
-| JS | `json` | `js/aa.json` | ✅ 正常 | 697 | 🎬 一般 | http://zhangqun19.serv00.net/cctv.php (HTTP 200) |
-| JS | `json` | `js/xiaosa/XBPQ/三九影视.json` | ✅ 正常 | 706 | 🎬 一般 | https://www.539539.xyz/index.php/vod/show/area/{area}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
-| JS | `json` | `js/s/兔小贝.json` | ✅ 正常 | 709 | 🎬 一般 | https://www.tuxiaobei.com/list/mip-data (HTTP 200) |
-| JS | `js` | `js/tuxiaobei.js` | ✅ 正常 | 710 | 🎬 一般 | https://www.tuxiaobei.com (HTTP 200) |
-| JS | `json` | `js/s/河马短剧.json` | ✅ 正常 | 717 | 🎬 一般 | https://www.kuaikaw.cn (HTTP 200) |
-| JS | `json` | `js/s/小枫影视.json` | ✅ 正常 | 762 | 🎬 一般 | https://kekedy.icu/vodshow/{cateId}-{area}-{by}-{class}-{lang}----{catePg}---{year}.html (HTTP 200) |
-| JS | `js` | `js/kkpans.js` | ✅ 正常 | 765 | 🎬 一般 | https://www.kkpans.com (HTTP 200) |
-| JS | `json` | `js/s/八号影视.json` | ✅ 正常 | 777 | 🎬 一般 | http://www.bahaotv.com (HTTP 200) |
-| JS | `json` | `js/s/斗鱼直播.json` | ✅ 正常 | 806 | 🎬 一般 | https://m.douyu.com/api/room/list (HTTP 200) |
-| JS | `json` | `js/s/巴士动漫.json` | ✅ 正常 | 838 | 🎬 一般 | https://dm84.net (HTTP 200) |
-| JS | `js` | `js/新韩剧网.js` | ✅ 正常 | 854 | 🎬 一般 | https://www.hanju7.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XYQHiker/巴士动漫.json` | ✅ 正常 | 856 | 🎬 一般 | https://dm84.net (HTTP 200) |
-| JS | `json` | `js/s/兔小贝2.json` | ✅ 正常 | 882 | 🎬 一般 | https://www.tuxiaobei.com/subject/{cateId} (HTTP 200) |
-| JS | `js` | `js/B站.js` | ✅ 正常 | 906 | 🔞 成人 | https://www.bilibili.com (HTTP 200) |
-| JS | `json` | `js/xiaosa/XYQHiker/农民影视.json` | ✅ 正常 | 1028 | 🎬 一般 | https://vip.wwgz.cn:5200 (HTTP 200) |
-| JS | `js` | `js/xb6v.js` | ✅ 正常 | 1044 | 🎬 一般 | http://www.xb6v.com (HTTP 200) |
-| JS | `js` | `js/低端影视.js` | ✅ 正常 | 1045 | 🎬 一般 | https://www.ddys.run (HTTP 200) |
-| JS | `json` | `js/xiaosa/json/alist.json` | ✅ 正常 | 1096 | 🎬 一般 | https://rogsoft.ddnsto.com/softcenter/softcenter/res/icon-alist.png (HTTP 200) |
-| JS | `json` | `js/s/小红.json` | ✅ 正常 | 1109 | 🎬 一般 | https://xiaohys.com (HTTP 200) |
-| JS | `js` | `js/荐片.js` | ✅ 正常 | 1138 | 🎬 一般 | https://api.ztcgi.com (HTTP 200) |
-| JS | `json` | `js/s/雪糕影视.json` | ✅ 正常 | 1176 | 🎬 一般 | https://www.xgitv.com/vshow/{cateId}-----------.html (HTTP 200) |
-| JS | `json` | `js/s/人人.json` | ✅ 正常 | 1226 | 🎬 一般 | https://svip1.fun/index.php/vod/show/area/{area}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
-| JS | `json` | `js/s/三九影视.json` | ✅ 正常 | 1282 | 🎬 一般 | https://www.539539.xyz/index.php/vod/show/area/{area}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
-| JS | `js` | `js/央视频.js` | ✅ 正常 | 1303 | 🔞 成人 | https://m.yangshipin.cn (HTTP 200) |
-| JS | `json` | `js/s/飞快.json` | ✅ 正常 | 1635 | 🎬 一般 | https://feikuai.in (HTTP 200) |
-| JS | `js` | `js/金牌影视-DS.js` | ✅ 正常 | 2415 | 🎬 一般 | https://www.sizhengxt.com (HTTP 200) |
-| JS | `json` | `js/s/星辰影视.json` | ✅ 正常 | 3059 | 🎬 一般 | http://ljmovie.com/list/{cateId}-{catePg}.html (HTTP 200) |
-| JS | `js` | `js/xiaosa/js/88看球.js` | ✅ 正常 | 15368 | 🎬 一般 | http://www.88kanqiu.bar (HTTP 200) |
-| JS | `js` | `js/88ball.js` | ✅ 正常 | 18240 | 🎬 一般 | http://www.88kanqiu.bar (HTTP 200) |
-| JS | `json` | `js/s/虎牙直播.json` | ✅ 正常 | 82789 | 🎬 一般 | https://search.cdn.huya.com (HTTP 200) |
-| Python | `py` | `py/stripchat<18+>.py` | ⚠️ 站點存活(載入受限) | 85 | 🔞 成人 | https://zh.stripchat.com (HTTP 403) |
-| Python | `py` | `py/py_imaple.py` | ⚠️ 站點存活(載入受限) | 206 | 🎬 一般 | https://imaple.tv (HTTP 403) |
-| Python | `py` | `py/粤漫.py` | ⚠️ 站點存活(載入受限) | 209 | 🎬 一般 | https://www.ymvid.com (HTTP 403) |
-| Python | `py` | `py/pianku4k.py` | ⚠️ 站點存活(載入受限) | 215 | 🎬 一般 | https://4k01.pianku.online (HTTP 403) |
-| Python | `py` | `py/红果网页.py` | ⚠️ 站點存活(載入受限) | 251 | 🎬 一般 | https://www.hongguodj.cc (HTTP 403) |
-| Python | `py` | `py/嘀嗒影视.py` | ⚠️ 站點存活(載入受限) | 266 | 🎬 一般 | https://www.didahd.xyz (HTTP 403) |
-| Python | `py` | `py/ddmf.py` | ⚠️ 站點存活(載入受限) | 277 | 🔞 成人 | https://www.ddmf.net (HTTP 403) |
-| Python | `py` | `py/hongguo_fixed.py` | ⚠️ 站點存活(載入受限) | 278 | 🎬 一般 | https://www.hongguoapp.cn (HTTP 403) |
-| Python | `py` | `py/七七影視.py` | ⚠️ 站點存活(載入受限) | 300 | 🎬 一般 | https://www.7749tv.cc (HTTP 403) |
-| Python | `py` | `py/yangshipin.py` | ⚠️ 站點存活(載入受限) | 304 | 🎬 一般 | https://epg.112114.xyz/pp.xml (HTTP 201) |
-| Python | `py` | `py/小红薯APP.py` | ⚠️ 站點存活(載入受限) | 309 | 🎬 一般 | https://jhfkdnov21vfd.dyfcbkggxn.work (HTTP 403) |
-| Python | `py` | `py/juzong.py` | ⚠️ 站點存活(載入受限) | 315 | 🎬 一般 | https://www.juzong01.me (HTTP 403) |
-| Python | `py` | `py/ruyishipin.py` | ⚠️ 站點存活(載入受限) | 316 | 🎬 一般 | https://rysp.tv (HTTP 403) |
-| Python | `py` | `py/Hanime<18+>.py` | ⚠️ 站點存活(載入受限) | 330 | 🔞 成人 | https://hanime1.best (HTTP 403) |
-| Python | `py` | `py/咖啡体育.py` | ⚠️ 站點存活(載入受限) | 353 | 🎬 一般 | https://kafeizhibo.com (HTTP 403) |
-| Python | `py` | `py/禁片天堂<18+>.py` | ⚠️ 站點存活(載入受限) | 379 | 🔞 成人 | https://jptt.tv/tag_list (HTTP 403) |
-| Python | `py` | `py/咖啡直播.py` | ⚠️ 站點存活(載入受限) | 392 | 🎬 一般 | https://kafeizhibo.com (HTTP 403) |
-| Python | `py` | `py/久久視頻_18+_.py` | ⚠️ 站點存活(載入受限) | 422 | 🔞 成人 | https://ww.jiujiu.one (HTTP 403) |
-| Python | `py` | `py/yysub.py` | ⚠️ 站點存活(載入受限) | 440 | 🎬 一般 | https://m.yysub.cc (HTTP 403) |
-| Python | `py` | `py/ptt_red.py` | ⚠️ 站點存活(載入受限) | 443 | 🔞 成人 | https://ptt.red (HTTP 403) |
-| Python | `py` | `py/共青春影院.py` | ⚠️ 站點存活(載入受限) | 453 | 🎬 一般 | https://gqc.ink (HTTP 403) |
-| Python | `py` | `py/心跳盘搜.py` | ⚠️ 站點存活(載入受限) | 456 | 🎬 一般 | https://ppan.dyuzi.com (HTTP 403) |
-| Python | `py` | `py/心跳.py` | ⚠️ 站點存活(載入受限) | 675 | 🎬 一般 | https://ppan.dyuzi.com (HTTP 403) |
-| Python | `py` | `py/AV大平台<18+>.py` | ⚠️ 站點存活(載入受限) | 702 | 🔞 成人 | https://porndav.com (HTTP 403) |
-| Python | `py` | `py/零度影视.py` | ⚠️ 站點存活(載入受限) | 797 | 🎬 一般 | http://ldys.sq1005.top (HTTP 403) |
-| Python | `py` | `py/心跳不跳.py` | ⚠️ 站點存活(載入受限) | 854 | 🎬 一般 | https://ppan.dyuzi.com (HTTP 403) |
-| Python | `py` | `py/歪比巴卜.py` | ⚠️ 站點存活(載入受限) | 941 | 🎬 一般 | https://wbbb1.com (HTTP 403) |
-| Python | `py` | `py/黄豆短剧<18+>.py` | ⚠️ 站點存活(載入受限) | 1190 | 🔞 成人 | https://vjs.zencdn.net/v/oceans.mp4 (HTTP 403) |
-| Python | `py` | `py/py_电影猎手.py` | ⚠️ 站點存活(載入受限) | 1744 | 🎬 一般 | https://ls2026.madp8.cn (HTTP 403) |
-| Python | `py` | `py/蓝莓短剧.py` | ⚠️ 站點存活(載入受限) | 1932 | 🎬 一般 | http://qcapp.xingya.com.cn (HTTP 403) |
-| Python | `py` | `py/猎手影视.py` | ⚠️ 站點存活(載入受限) | 2057 | 🎬 一般 | https://ls2026.madp8.cn (HTTP 403) |
-| Python | `py` | `py/边缘影视.py` | ⚠️ 站點存活(載入受限) | 2418 | 🎬 一般 | https://bianyuan001.oss-cn-beijing.aliyuncs.com/huidu1.0.0.json (HTTP 403) |
-| Python | `py` | `py/木兮.py` | ⚠️ 站點存活(載入受限) | 21603 | 🎬 一般 | https://gcaptcha4.geetest.com (HTTP 403) |
-| Python | `py` | `py/爱看短剧.py` | ⚠️ 站點存活(載入受限) | 41082 | 🎬 一般 | https://dbtp.tgydy.com (SSL 握手異常 (站點存活)) |
-| Python | `py` | `py/可可影视.py` | ⚠️ 站點存活(載入受限) | 42404 | 🎬 一般 | https://vres.zyxpedu.com (SSL 握手異常 (站點存活)) |
-| Python | `py` | `py/芒果TV (1).py` | ✅ 正常 | 64 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
-| Python | `py` | `py/麻豆社<18+>.py` | ✅ 正常 | 97 | 🔞 成人 | https://madou.club (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/莫小影视.json` | ✅ 正常 | 100 | 🎬 一般 | https://www.moxy.top (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/哆啦新番社.json` | ✅ 正常 | 116 | 🎬 一般 | https://dora.xiaoxinbk.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/Anime1.js` | ✅ 正常 | 122 | 🎬 一般 | https://anime1.me (HTTP 200) |
+| JS | `json` | `js/s/哔嘀影视.json` | ✅ 正常 | 134 | 🎬 一般 | https://www.yjys02.com (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/小镇影视.json` | ✅ 正常 | 138 | 🎬 一般 | http://dyxz.tv/list/{cateId}_{catePg}.html (HTTP 200) |
+| JS | `json` | `js/s/小枫影视.json` | ✅ 正常 | 139 | 🎬 一般 | https://kekedy.icu/vodshow/{cateId}-{area}-{by}-{class}-{lang}----{catePg}---{year}.html (HTTP 200) |
+| JS | `json` | `js/s/歪片影视.json` | ✅ 正常 | 141 | 🎬 一般 | https://www.waipian30.com (HTTP 200) |
+| JS | `json` | `js/s/短剧网.json` | ✅ 正常 | 143 | 🎬 一般 | https://www.duanjuwang.cc/vodtype/{cateId}/page/{catePg}.html (HTTP 200) |
+| JS | `json` | `js/s/小镇.json` | ✅ 正常 | 157 | 🎬 一般 | http://dyxz.tv/list/{cateId}_{catePg}.html (HTTP 200) |
+| JS | `js` | `js/cilixiong.js` | ✅ 正常 | 160 | 🔞 成人 | https://www.cilixiong.com (HTTP 200) |
+| JS | `json` | `js/s/短剧影视.json` | ✅ 正常 | 165 | 🎬 一般 | https://www.duanjuwang.cc/vodtype/{cateId}/page/{catePg}.html (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/异世界.js` | ✅ 正常 | 194 | 🎬 一般 | https://www.dmmiku.com (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/三九影视.json` | ✅ 正常 | 197 | 🎬 一般 | https://www.539539.xyz/index.php/vod/show/area/{area}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
+| JS | `js` | `js/dygang.js` | ✅ 正常 | 204 | 🎬 一般 | https://www.dygang.tv (HTTP 200) |
+| JS | `json` | `js/xiaosa/XYQHiker/电影港.json` | ✅ 正常 | 205 | 🎬 一般 | https://www.dygang.tv/{cateId}/index_{catePg}.htm[firstPage=https://www.dygang.cc/{cateId}/index.htm] (HTTP 200) |
+| JS | `json` | `js/s/电影港.json` | ✅ 正常 | 209 | 🎬 一般 | https://www.dygang.tv/{cateId}/index_{catePg}.htm[firstPage=https://www.dygang.cc/{cateId}/index.htm] (HTTP 200) |
+| JS | `json` | `js/s/BT天堂.json` | ✅ 正常 | 209 | 🎬 一般 | https://www.bttt11.com (HTTP 200) |
+| JS | `json` | `js/s/骚火.json` | ✅ 正常 | 211 | 🎬 一般 | https://shdy2.com/list/{cateId}-{catePg}.html (HTTP 200) |
+| JS | `js` | `js/apple.js` | ✅ 正常 | 224 | 🎬 一般 | http://asp.xpgtv.com (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/骚火影视.json` | ✅ 正常 | 277 | 🎬 一般 | https://shdy2.com/list/{cateId}-{catePg}.html (HTTP 200) |
+| JS | `json` | `js/s/爱看.json` | ✅ 正常 | 287 | 🎬 一般 | https://www1.aikanbot.com (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/三四影视.json` | ✅ 正常 | 290 | 🎬 一般 | https://ikan234.com/show/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 200) |
+| JS | `json` | `js/s/哆啦新番社.json` | ✅ 正常 | 302 | 🎬 一般 | https://dora.xiaoxinbk.com (HTTP 200) |
+| JS | `js` | `js/tzfile.js` | ✅ 正常 | 374 | 🎬 一般 | https://t-rex.tzfile.com (HTTP 200) |
+| JS | `json` | `js/s/三九影视.json` | ✅ 正常 | 437 | 🎬 一般 | https://www.539539.xyz/index.php/vod/show/area/{area}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
+| JS | `json` | `js/s/三四影视.json` | ✅ 正常 | 442 | 🎬 一般 | https://ikan234.com/show/{cateId}-{area}--{class}-----{catePg}---{year}.html (HTTP 200) |
+| JS | `json` | `js/aa.json` | ✅ 正常 | 504 | 🎬 一般 | http://zhangqun19.serv00.net/cctv.php (HTTP 200) |
+| JS | `js` | `js/meow.js` | ✅ 正常 | 560 | 🎬 一般 | https://meow.tg (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/雪糕影视.json` | ✅ 正常 | 562 | 🎬 一般 | https://www.xgitv.com/vshow/{cateId}-----------.html (HTTP 200) |
+| JS | `json` | `js/xiaosa/json/采集静态.json` | ✅ 正常 | 566 | 🎬 一般 | https://caiji.moduapi.cc (HTTP 200) |
+| JS | `json` | `js/xiaosa/XYQHiker/来看影视.json` | ✅ 正常 | 609 | 🎬 一般 | https://lkvod.org (HTTP 200) |
+| JS | `js` | `js/meijumi.js` | ✅ 正常 | 709 | 🎬 一般 | https://www.meijumi.net (HTTP 200) |
+| JS | `json` | `js/s/奇迹.json` | ✅ 正常 | 710 | 🎬 一般 | https://qiji.91by.top/index.php/vod/show/area/{area}/by/{by}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
+| JS | `json` | `js/s/人人.json` | ✅ 正常 | 756 | 🎬 一般 | https://svip1.fun/index.php/vod/show/area/{area}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
+| JS | `json` | `js/s/斗鱼直播.json` | ✅ 正常 | 795 | 🎬 一般 | https://m.douyu.com/api/room/list (HTTP 200) |
+| JS | `json` | `js/s/巴士动漫.json` | ✅ 正常 | 816 | 🎬 一般 | https://dm84.net (HTTP 200) |
+| JS | `json` | `js/xiaosa/XBPQ/农民影视.json` | ✅ 正常 | 830 | 🔞 成人 | https://vip.wwgz.cn:5200/vod-list-id-{cateId}-pg-{catePg}-order--by-time-class-0-year-{year}-letter--area-{area}-lang-.html (HTTP 200) |
+| JS | `js` | `js/低端影视.js` | ✅ 正常 | 836 | 🎬 一般 | https://www.ddys.run (HTTP 200) |
+| JS | `json` | `js/s/奇迹影视.json` | ✅ 正常 | 860 | 🎬 一般 | https://qiji.91by.top/index.php/vod/show/area/{area}/by/{by}/class/{class}/id/{cateId}/page/{catePg}/year/{year}.html (HTTP 200) |
+| JS | `js` | `js/B站.js` | ✅ 正常 | 861 | 🔞 成人 | https://www.bilibili.com (HTTP 200) |
+| JS | `js` | `js/kkpans.js` | ✅ 正常 | 888 | 🎬 一般 | https://www.kkpans.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/全盘.js` | ✅ 正常 | 938 | 🎬 一般 | https://so.yuneu.com (HTTP 200) |
+| JS | `js` | `js/funletu.js` | ✅ 正常 | 1021 | 🎬 一般 | https://v.funletu.com (HTTP 200) |
+| JS | `json` | `js/s/小红.json` | ✅ 正常 | 1035 | 🎬 一般 | https://xiaohys.com (HTTP 200) |
+| JS | `json` | `js/xiaosa/json/aliyunpansearch.json` | ✅ 正常 | 1047 | 🎬 一般 | https://ys1api.yingso.fun/v7/ali/all (HTTP 200) |
+| JS | `json` | `js/s/影搜.json` | ✅ 正常 | 1049 | 🎬 一般 | https://yingso.fun (HTTP 200) |
+| JS | `json` | `js/xiaosa/XYQHiker/巴士动漫.json` | ✅ 正常 | 1113 | 🎬 一般 | https://dm84.net (HTTP 200) |
+| JS | `json` | `js/s/河马短剧.json` | ✅ 正常 | 1114 | 🎬 一般 | https://www.kuaikaw.cn (HTTP 200) |
+| JS | `js` | `js/新韩剧网.js` | ✅ 正常 | 1171 | 🎬 一般 | https://www.hanju7.com (HTTP 200) |
+| JS | `js` | `js/lx-music.js` | ✅ 正常 | 1184 | 🎬 一般 | https://88.lxmusic.xn--fiqs8s (HTTP 200) |
+| JS | `js` | `js/xb6v.js` | ✅ 正常 | 1231 | 🎬 一般 | http://www.xb6v.com (HTTP 200) |
+| JS | `json` | `js/s/八号影视.json` | ✅ 正常 | 1235 | 🎬 一般 | http://www.bahaotv.com (HTTP 200) |
+| JS | `js` | `js/tuxiaobei.js` | ✅ 正常 | 1255 | 🎬 一般 | https://www.tuxiaobei.com (HTTP 200) |
+| JS | `json` | `js/s/兔小贝.json` | ✅ 正常 | 1255 | 🎬 一般 | https://www.tuxiaobei.com/list/mip-data (HTTP 200) |
+| JS | `json` | `js/s/雪糕影视.json` | ✅ 正常 | 1264 | 🎬 一般 | https://www.xgitv.com/vshow/{cateId}-----------.html (HTTP 200) |
+| JS | `json` | `js/s/兔小贝2.json` | ✅ 正常 | 1296 | 🎬 一般 | https://www.tuxiaobei.com/subject/{cateId} (HTTP 200) |
+| JS | `js` | `js/央视频.js` | ✅ 正常 | 1314 | 🔞 成人 | https://m.yangshipin.cn (HTTP 200) |
+| JS | `json` | `js/xiaosa/XYQHiker/农民影视.json` | ✅ 正常 | 1339 | 🎬 一般 | https://vip.wwgz.cn:5200 (HTTP 200) |
+| JS | `json` | `js/xiaosa/json/alist.json` | ✅ 正常 | 1424 | 🎬 一般 | https://rogsoft.ddnsto.com/softcenter/softcenter/res/icon-alist.png (HTTP 200) |
+| JS | `json` | `js/s/飞快.json` | ✅ 正常 | 1554 | 🎬 一般 | https://feikuai.in (HTTP 200) |
+| JS | `js` | `js/荐片.js` | ✅ 正常 | 1667 | 🎬 一般 | https://api.ztcgi.com (HTTP 200) |
+| JS | `json` | `js/s/星辰影视.json` | ✅ 正常 | 2428 | 🎬 一般 | http://ljmovie.com/list/{cateId}-{catePg}.html (HTTP 200) |
+| JS | `js` | `js/金牌影视-DS.js` | ✅ 正常 | 2589 | 🎬 一般 | https://www.sizhengxt.com (HTTP 200) |
+| JS | `js` | `js/cilixiongp.js` | ✅ 正常 | 5191 | 🔞 成人 | https://www.cilixiong.com (HTTP 200) |
+| JS | `js` | `js/xiaosa/js/88看球.js` | ✅ 正常 | 21363 | 🎬 一般 | http://www.88kanqiu.bar (HTTP 200) |
+| JS | `js` | `js/88ball.js` | ✅ 正常 | 22977 | 🎬 一般 | http://www.88kanqiu.bar (HTTP 200) |
+| JS | `json` | `js/s/七新影视.json` | ✅ 正常 | 23514 | 🎬 一般 | http://www.7xdy.com (HTTP 200) |
+| JS | `json` | `js/s/虎牙直播.json` | ✅ 正常 | 83187 | 🎬 一般 | https://search.cdn.huya.com (HTTP 200) |
+| Python | `py` | `py/猫咪TV.py` | ⏳ 觀察中(首日失效) | 29775 | 🎬 一般 | 無效或連線超時 (已測 1 個候選網址) ➔ 首次失效 (2026-11-18)，明日仍失效才移入 NG |
+| Python | `py` | `py/ptt_red.py` | ⚠️ 站點存活(載入受限) | 59 | 🔞 成人 | https://ptt.red (HTTP 403) |
+| Python | `py` | `py/禁片天堂<18+>.py` | ⚠️ 站點存活(載入受限) | 74 | 🔞 成人 | https://jptt.tv/tag_list (HTTP 403) |
+| Python | `py` | `py/stripchat<18+>.py` | ⚠️ 站點存活(載入受限) | 78 | 🔞 成人 | https://zh.stripchat.com (HTTP 403) |
+| Python | `py` | `py/py_imaple.py` | ⚠️ 站點存活(載入受限) | 87 | 🎬 一般 | https://imaple.tv (HTTP 403) |
+| Python | `py` | `py/ruyishipin.py` | ⚠️ 站點存活(載入受限) | 117 | 🎬 一般 | https://rysp.tv (HTTP 403) |
+| Python | `py` | `py/小红薯APP.py` | ⚠️ 站點存活(載入受限) | 140 | 🎬 一般 | https://jhfkdnov21vfd.dyfcbkggxn.work (HTTP 403) |
+| Python | `py` | `py/七七影視.py` | ⚠️ 站點存活(載入受限) | 155 | 🎬 一般 | https://www.7749tv.cc (HTTP 403) |
+| Python | `py` | `py/咖啡直播.py` | ⚠️ 站點存活(載入受限) | 158 | 🎬 一般 | https://kafeizhibo.com (HTTP 403) |
+| Python | `py` | `py/pianku4k.py` | ⚠️ 站點存活(載入受限) | 161 | 🎬 一般 | https://4k01.pianku.online (HTTP 403) |
+| Python | `py` | `py/ddmf.py` | ⚠️ 站點存活(載入受限) | 163 | 🔞 成人 | https://www.ddmf.net (HTTP 403) |
+| Python | `py` | `py/hongguo_fixed.py` | ⚠️ 站點存活(載入受限) | 180 | 🎬 一般 | https://www.hongguoapp.cn (HTTP 403) |
+| Python | `py` | `py/咖啡体育.py` | ⚠️ 站點存活(載入受限) | 193 | 🎬 一般 | https://kafeizhibo.com (HTTP 403) |
+| Python | `py` | `py/久久視頻_18+_.py` | ⚠️ 站點存活(載入受限) | 271 | 🔞 成人 | https://ww.jiujiu.one (HTTP 403) |
+| Python | `py` | `py/红果网页.py` | ⚠️ 站點存活(載入受限) | 310 | 🎬 一般 | https://www.hongguodj.cc (HTTP 403) |
+| Python | `py` | `py/Hanime<18+>.py` | ⚠️ 站點存活(載入受限) | 332 | 🔞 成人 | https://hanime1.best (HTTP 403) |
+| Python | `py` | `py/粤漫.py` | ⚠️ 站點存活(載入受限) | 333 | 🎬 一般 | https://www.ymvid.com (HTTP 403) |
+| Python | `py` | `py/yysub.py` | ⚠️ 站點存活(載入受限) | 334 | 🎬 一般 | https://m.yysub.cc (HTTP 403) |
+| Python | `py` | `py/yangshipin.py` | ⚠️ 站點存活(載入受限) | 392 | 🎬 一般 | https://epg.112114.xyz/pp.xml (HTTP 201) |
+| Python | `py` | `py/juzong.py` | ⚠️ 站點存活(載入受限) | 438 | 🎬 一般 | https://www.juzong01.me (HTTP 403) |
+| Python | `py` | `py/嘀嗒影视.py` | ⚠️ 站點存活(載入受限) | 443 | 🎬 一般 | https://www.didahd.xyz (HTTP 403) |
+| Python | `py` | `py/AV大平台<18+>.py` | ⚠️ 站點存活(載入受限) | 498 | 🔞 成人 | https://porndav.com (HTTP 403) |
+| Python | `py` | `py/心跳盘搜.py` | ⚠️ 站點存活(載入受限) | 674 | 🎬 一般 | https://ppan.dyuzi.com (HTTP 403) |
+| Python | `py` | `py/心跳.py` | ⚠️ 站點存活(載入受限) | 676 | 🎬 一般 | https://ppan.dyuzi.com (HTTP 403) |
+| Python | `py` | `py/零度影视.py` | ⚠️ 站點存活(載入受限) | 766 | 🎬 一般 | http://ldys.sq1005.top (HTTP 403) |
+| Python | `py` | `py/心跳不跳.py` | ⚠️ 站點存活(載入受限) | 988 | 🎬 一般 | https://ppan.dyuzi.com (HTTP 403) |
+| Python | `py` | `py/歪比巴卜.py` | ⚠️ 站點存活(載入受限) | 1055 | 🎬 一般 | https://wbbb1.com (HTTP 403) |
+| Python | `py` | `py/共青春影院.py` | ⚠️ 站點存活(載入受限) | 1082 | 🎬 一般 | https://gqc.ink (HTTP 403) |
+| Python | `py` | `py/黄豆短剧<18+>.py` | ⚠️ 站點存活(載入受限) | 1657 | 🔞 成人 | https://vjs.zencdn.net/v/oceans.mp4 (HTTP 403) |
+| Python | `py` | `py/py_电影猎手.py` | ⚠️ 站點存活(載入受限) | 2049 | 🎬 一般 | https://ls2026.madp8.cn (HTTP 403) |
+| Python | `py` | `py/猎手影视.py` | ⚠️ 站點存活(載入受限) | 2253 | 🎬 一般 | https://ls2026.madp8.cn (HTTP 403) |
+| Python | `py` | `py/边缘影视.py` | ⚠️ 站點存活(載入受限) | 2825 | 🎬 一般 | https://bianyuan001.oss-cn-beijing.aliyuncs.com/huidu1.0.0.json (HTTP 403) |
+| Python | `py` | `py/蓝莓短剧.py` | ⚠️ 站點存活(載入受限) | 3707 | 🎬 一般 | http://qcapp.xingya.com.cn (HTTP 403) |
+| Python | `py` | `py/木兮.py` | ⚠️ 站點存活(載入受限) | 21710 | 🎬 一般 | https://gcaptcha4.geetest.com (HTTP 403) |
+| Python | `py` | `py/爱看短剧.py` | ⚠️ 站點存活(載入受限) | 40944 | 🎬 一般 | https://dbtp.tgydy.com (SSL 握手異常 (站點存活)) |
+| Python | `py` | `py/可可影视.py` | ⚠️ 站點存活(載入受限) | 42183 | 🎬 一般 | https://vres.zyxpedu.com (SSL 握手異常 (站點存活)) |
+| Python | `py` | `py/芒果TV (1).py` | ✅ 正常 | 10 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
+| Python | `py` | `py/聚合直播.py` | ✅ 正常 | 77 | 🎬 一般 | https://www.huya.com (HTTP 200) |
 | Python | `py` | `py/剧多短剧.py` | ✅ 正常 | 100 | 🎬 一般 | 白名單強制保留 (http://192.151.245.34:8089) |
 | Python | `py` | `py/韩小圈.py` | ✅ 正常 | 100 | 🎬 一般 | 白名單強制保留 (https://www.jennyhow.com) |
 | Python | `py` | `py/剧多短剧APP.py` | ✅ 正常 | 100 | 🎬 一般 | 白名單強制保留 (http://192.151.245.34:8089) |
-| Python | `py` | `py/小鸭子看看.py` | ✅ 正常 | 101 | 🎬 一般 | https://xiaoyakankan.com (HTTP 200) |
-| Python | `py` | `py/奇优影院.py` | ✅ 正常 | 111 | 🎬 一般 | http://qiyoudy5.com/search.php (HTTP 200) |
-| Python | `py` | `py/盘友圈.py` | ✅ 正常 | 131 | 🎬 一般 | https://panyq.com (HTTP 200) |
-| Python | `py` | `py/黃果短劇<18+>.py` | ✅ 正常 | 153 | 🔞 成人 | https://huangguodrama.ai (HTTP 200) |
-| Python | `py` | `py/qiyoudy.py` | ✅ 正常 | 156 | 🎬 一般 | http://www.qiyoudy2.com (HTTP 200) |
-| Python | `py` | `py/oule.py` | ✅ 正常 | 172 | 🎬 一般 | https://www.olevod.one (HTTP 200) |
-| Python | `py` | `py/亚色影库<18+>.py` | ✅ 正常 | 183 | 🔞 成人 | https://www.yasetube.com (HTTP 200) |
-| Python | `py` | `py/爱奇艺.py` | ✅ 正常 | 187 | 🎬 一般 | https://www.iqiyi.com (HTTP 200) |
-| Python | `py` | `py/每日大赛.py` | ✅ 正常 | 194 | 🎬 一般 | https://www.mrds66.com (HTTP 200) |
-| Python | `py` | `py/wbbb.py` | ✅ 正常 | 199 | 🎬 一般 | https://wbbb1.com (HTTP 200) |
-| Python | `py` | `py/youtubelive.py` | ✅ 正常 | 215 | 🎬 一般 | https://www.youtube.com/watch (HTTP 200) |
-| Python | `py` | `py/茶杯狐影视.py` | ✅ 正常 | 222 | 🎬 一般 | https://cupfoxys.cc (HTTP 200) |
-| Python | `py` | `py/bubuzhuiju.py` | ✅ 正常 | 231 | 🎬 一般 | https://323433ssdfd.top (HTTP 200) |
-| Python | `py` | `py/聚合直播.py` | ✅ 正常 | 235 | 🎬 一般 | https://www.huya.com (HTTP 200) |
-| Python | `py` | `py/茶杯狐.py` | ✅ 正常 | 241 | 🎬 一般 | https://citapa.com (HTTP 200) |
-| Python | `py` | `py/fqdm.py` | ✅ 正常 | 245 | 🎬 一般 | https://www.fqdm.cc (HTTP 200) |
-| Python | `py` | `py/VHUB<18+>.py` | ✅ 正常 | 270 | 🔞 成人 | https://newxvideos.pages.dev (HTTP 200) |
-| Python | `py` | `py/韩国色情电影<18+>.py` | ✅ 正常 | 272 | 🔞 成人 | https://koreanpornmovie.com (HTTP 200) |
-| Python | `py` | `py/Mang.py` | ✅ 正常 | 273 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
-| Python | `py` | `py/撸一天<18+>.py` | ✅ 正常 | 285 | 🔞 成人 | https://luyitian.com (HTTP 200) |
-| Python | `py` | `py/小苹果影视.py` | ✅ 正常 | 287 | 🎬 一般 | http://item.xpgcom.com (HTTP 200) |
-| Python | `py` | `py/爱瓜影视.py` | ✅ 正常 | 325 | 🎬 一般 | https://tvapi211.magicetech.com (HTTP 200) |
-| Python | `py` | `py/4KAV.py` | ✅ 正常 | 326 | 🔞 成人 | https://4k-av.com (HTTP 200) |
-| Python | `py` | `py/6v.py` | ✅ 正常 | 327 | 🎬 一般 | https://www.xb6v.org (HTTP 200) |
-| Python | `py` | `py/ytb.py` | ✅ 正常 | 335 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
-| Python | `py` | `py/柚子短劇<18+>.py` | ✅ 正常 | 339 | 🔞 成人 | https://youzidj.com (HTTP 200) |
-| Python | `py` | `py/aikanbot.py` | ✅ 正常 | 340 | 🎬 一般 | https://www1.aikanbot.com (HTTP 200) |
-| Python | `py` | `py/哔哩直播.py` | ✅ 正常 | 341 | 🎬 一般 | https://search.bilibili.com (HTTP 200) |
-| Python | `py` | `py/茄子<18+>.py` | ✅ 正常 | 392 | 🔞 成人 | https://xtu.qzjp6.ink/cn/home/web (HTTP 200) |
-| Python | `py` | `py/低端影视.py` | ✅ 正常 | 403 | 🎬 一般 | https://www.ddys24.com (HTTP 200) |
-| Python | `py` | `py/duoduo.py` | ✅ 正常 | 409 | 🎬 一般 | https://duoduosdf12223234334.top (HTTP 200) |
-| Python | `py` | `py/芒果视频.py` | ✅ 正常 | 424 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
-| Python | `py` | `py/pansou.py` | ✅ 正常 | 437 | 🎬 一般 | https://so.252035.xyz (HTTP 200) |
-| Python | `py` | `py/泥视频.py` | ✅ 正常 | 443 | 🎬 一般 | https://www.nivod.cc (HTTP 200) |
-| Python | `py` | `py/4K影院.py` | ✅ 正常 | 447 | 🎬 一般 | https://www.4kvm.net (HTTP 200) |
-| Python | `py` | `py/两个BT.py` | ✅ 正常 | 456 | 🎬 一般 | https://www.bttwoo.com (HTTP 200) |
-| Python | `py` | `py/网络直播.py` | ✅ 正常 | 458 | 🎬 一般 | https://search.bilibili.com (HTTP 200) |
-| Python | `py` | `py/瓜子.py` | ✅ 正常 | 466 | 🎬 一般 | https://api.w32z7vtd.com (HTTP 200) |
-| Python | `py` | `py/dsystv.py` | ✅ 正常 | 470 | 🎬 一般 | https://dsystv.com (HTTP 200) |
-| Python | `py` | `py/ppnix.py` | ✅ 正常 | 500 | 🎬 一般 | https://www.ppnix.com (HTTP 200) |
-| Python | `py` | `py/黑料不打烊<18+>.py` | ✅ 正常 | 501 | 🔞 成人 | https://heiliao.com (HTTP 200) |
-| Python | `py` | `py/youtube.py` | ✅ 正常 | 507 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
-| Python | `py` | `py/盘链.py` | ✅ 正常 | 537 | 🎬 一般 | https://pinglian.lol (HTTP 200) |
-| Python | `py` | `py/怦然心动<18+>.py` | ✅ 正常 | 542 | 🔞 成人 | https://prshinezenx.blog (HTTP 200) |
-| Python | `py` | `py/youzidj.py` | ✅ 正常 | 553 | 🎬 一般 | https://youzidj.com (HTTP 200) |
-| Python | `py` | `py/8kvod.py` | ✅ 正常 | 574 | 🎬 一般 | https://www.8kvod.com (HTTP 200) |
-| Python | `py` | `py/优视频.py` | ✅ 正常 | 623 | 🎬 一般 | https://api-h5.uvod.tv (HTTP 200) |
-| Python | `py` | `py/saohuo.py` | ✅ 正常 | 696 | 🎬 一般 | https://shdy5.us (HTTP 200) |
-| Python | `py` | `py/Pandalive直播.py` | ✅ 正常 | 697 | 🎬 一般 | https://5721004.xyz (HTTP 200) |
-| Python | `py` | `py/河马短剧.py` | ✅ 正常 | 723 | 🎬 一般 | https://www.kuaikaw.cn (HTTP 200) |
-| Python | `py` | `py/香肠派对<18+>.py` | ✅ 正常 | 737 | 🔞 成人 | https://xiang512.xiang.party/xcpd (HTTP 200) |
-| Python | `py` | `py/LIVES.py` | ✅ 正常 | 737 | 🎬 一般 | https://www.huya.com (HTTP 200) |
-| Python | `py` | `py/huavod.py` | ✅ 正常 | 745 | 🎬 一般 | https://huavod.com (HTTP 200) |
-| Python | `py` | `py/努努影院.py` | ✅ 正常 | 771 | 🎬 一般 | https://nnyy.la (HTTP 200) |
-| Python | `py` | `py/广东荔枝.py` | ✅ 正常 | 792 | 🎬 一般 | https://www.gdtv.cn (HTTP 200) |
-| Python | `py` | `py/麦田影院.py` | ✅ 正常 | 793 | 🎬 一般 | https://www.mtyy1.com (HTTP 200) |
-| Python | `py` | `py/光鸭社区.py` | ✅ 正常 | 833 | 🎬 一般 | https://www.guangya.cc (HTTP 200) |
-| Python | `py` | `py/偷乐短剧.py` | ✅ 正常 | 864 | 🎬 一般 | https://www.toule.top (HTTP 200) |
-| Python | `py` | `py/央视影视.py` | ✅ 正常 | 866 | 🎬 一般 | https://api.cntv.cn/NewVideo/getVideoListByColumn (HTTP 200) |
-| Python | `py` | `py/骚火影视.py` | ✅ 正常 | 903 | 🎬 一般 | https://shdy2.com (HTTP 200) |
-| Python | `py` | `py/Xvideos<18+>.py` | ✅ 正常 | 904 | 🔞 成人 | https://www.xvideos.com (HTTP 200) |
-| Python | `py` | `py/yinhuaone.py` | ✅ 正常 | 914 | 🎬 一般 | https://www.yinhuaone.net (HTTP 200) |
-| Python | `py` | `py/like.py` | ✅ 正常 | 956 | 🎬 一般 | https://www.iqiyi.com (HTTP 200) |
-| Python | `py` | `py/神秘电影.py` | ✅ 正常 | 973 | 🎬 一般 | https://h4ivs.sm431.vip (HTTP 200) |
-| Python | `py` | `py/TOPTV<18+>.py` | ✅ 正常 | 997 | 🔞 成人 | https://toptv15.cyou (HTTP 200) |
-| Python | `py` | `py/acfun.py` | ✅ 正常 | 1054 | 🎬 一般 | https://www.acfun.cn (HTTP 200) |
-| Python | `py` | `py/哔哩.py` | ✅ 正常 | 1059 | 🎬 一般 | https://www.bilibili.com (HTTP 200) |
-| Python | `py` | `py/河马剧场.py` | ✅ 正常 | 1105 | 🎬 一般 | https://www.kuaikaw.cn (HTTP 200) |
-| Python | `py` | `py/618.py` | ✅ 正常 | 1126 | 🎬 一般 | https://618041.xyz (HTTP 200) |
-| Python | `py` | `py/hongguo.py` | ✅ 正常 | 1133 | 🎬 一般 | https://hongguoduanju.com (HTTP 200) |
-| Python | `py` | `py/魔方影视.py` | ✅ 正常 | 1145 | 🎬 一般 | https://www.ky4k14t.top (HTTP 200) |
-| Python | `py` | `py/dandanqi.py` | ✅ 正常 | 1147 | 🎬 一般 | https://www.dandanqi.vip (HTTP 200) |
-| Python | `py` | `py/275听书.py` | ✅ 正常 | 1198 | 🎬 一般 | https://www.i275.com (HTTP 200) |
-| Python | `py` | `py/mifun.py` | ✅ 正常 | 1260 | 🎬 一般 | https://getcn.mymifun.com (HTTP 200) |
-| Python | `py` | `py/麒麟影视.py` | ✅ 正常 | 1321 | 🎬 一般 | https://www.qlys.cc (HTTP 200) |
-| Python | `py` | `py/shortfilm.py` | ✅ 正常 | 1326 | 🎬 一般 | https://hongguoduanju.com (HTTP 200) |
-| Python | `py` | `py/guazi.py` | ✅ 正常 | 1348 | 🔞 成人 | https://apinew.uozvr.com (HTTP 200) |
-| Python | `py` | `py/优酷视频.py` | ✅ 正常 | 1379 | 🎬 一般 | https://www.youku.com (HTTP 200) |
-| Python | `py` | `py/Xhm<18+>.py` | ✅ 正常 | 1492 | 🔞 成人 | https://xhamster.com (HTTP 200) |
-| Python | `py` | `py/kkys.py` | ✅ 正常 | 1520 | 🎬 一般 | https://www.kkys20.com (HTTP 200) |
-| Python | `py` | `py/Xvd<18+>.py` | ✅ 正常 | 1546 | 🔞 成人 | https://www.xvideos.com (HTTP 200) |
-| Python | `py` | `py/MiFun动漫.py` | ✅ 正常 | 1656 | 🎬 一般 | https://getcf.mymifun.com (HTTP 200) |
-| Python | `py` | `py/熊猫视频.py` | ✅ 正常 | 1671 | 🎬 一般 | https://www.88xff.com/home.html (HTTP 200) |
-| Python | `py` | `py/actor.py` | ✅ 正常 | 1952 | 🎬 一般 | https://www.youku.com (HTTP 200) |
-| Python | `py` | `py/界影视.py` | ✅ 正常 | 1963 | 🎬 一般 | https://www.hkybqufgh.com (HTTP 200) |
-| Python | `py` | `py/枫叶音乐.py` | ✅ 正常 | 2057 | 🎬 一般 | https://mu-jie.cc (HTTP 200) |
-| Python | `py` | `py/七味.py` | ✅ 正常 | 2071 | 🎬 一般 | https://115.com/web/lixian (HTTP 200) |
-| Python | `py` | `py/goldmedal.py` | ✅ 正常 | 2096 | 🎬 一般 | https://www.x8kb9k8.com (HTTP 200) |
-| Python | `py` | `py/熊猫tv.py` | ✅ 正常 | 2585 | 🎬 一般 | https://www.pandalive.co.kr (HTTP 200) |
-| Python | `py` | `py/Pornhub<18+>.py` | ✅ 正常 | 2631 | 🔞 成人 | https://cn.pornhub.com (HTTP 200) |
-| Python | `py` | `py/aigua.py` | ✅ 正常 | 2653 | 🎬 一般 | https://aigua8.com (HTTP 200) |
-| Python | `py` | `py/jieyingshi.py` | ✅ 正常 | 2707 | 🎬 一般 | https://www.hkybqufgh.com (HTTP 200) |
-| Python | `py` | `py/瓜子影视.py` | ✅ 正常 | 2943 | 🔞 成人 | https://apinew.uozvr.com (HTTP 200) |
-| Python | `py` | `py/Phb<18+>.py` | ✅ 正常 | 3276 | 🔞 成人 | https://cn.pornhub.com (HTTP 200) |
-| Python | `py` | `py/熊猫直播.py` | ✅ 正常 | 3319 | 🎬 一般 | https://www.pandalive.co.kr (HTTP 200) |
-| Python | `py` | `py/maple.py` | ✅ 正常 | 3442 | 🎬 一般 | https://www.fyeys.com (HTTP 200) |
-| Python | `py` | `py/wxty.py` | ✅ 正常 | 6660 | 🎬 一般 | https://live.kankanews.com (HTTP 200) |
-| Python | `py` | `py/短剧聚合2.py` | ✅ 正常 | 14119 | 🎬 一般 | https://api.drama.9ddm.com (HTTP 200) |
-| Python | `py` | `py/ytbzb.py` | ✅ 正常 | 14573 | 🎬 一般 | https://www.youtube.com/watch (HTTP 200) |
-| Python | `py` | `py/短剧聚合.py` | ✅ 正常 | 14714 | 🎬 一般 | https://api.drama.9ddm.com (HTTP 200) |
-| Python | `py` | `py/猫咪TV.py` | ✅ 正常 | 15676 | 🎬 一般 | https://maomi66.cc (HTTP 200) |
-| Python | `py` | `py/juok3.py` | ✅ 正常 | 40718 | 🎬 一般 | https://jx.xmflv.com (HTTP 200) |
-| Python | `py` | `py/胖虎APP.py` | ✅ 正常 | 40934 | 🎬 一般 | https://www.yemu.xyz (HTTP 200) |
-| Python | `py` | `py/短剧聚合1.py` | ✅ 正常 | 44264 | 🎬 一般 | https://api.drama.9ddm.com (HTTP 200) |
-| Python | `py` | `py/哔哩聚合.py` | ✅ 正常 | 77325 | 🎬 一般 | https://www.bilibili.com (HTTP 200) |
+| Python | `py` | `py/央视影视.py` | ✅ 正常 | 122 | 🎬 一般 | https://api.cntv.cn/NewVideo/getVideoListByColumn (HTTP 200) |
+| Python | `py` | `py/麻豆社<18+>.py` | ✅ 正常 | 124 | 🔞 成人 | https://madou.club (HTTP 200) |
+| Python | `py` | `py/aikanbot.py` | ✅ 正常 | 140 | 🎬 一般 | https://www1.aikanbot.com (HTTP 200) |
+| Python | `py` | `py/小鸭子看看.py` | ✅ 正常 | 170 | 🎬 一般 | https://xiaoyakankan.com (HTTP 200) |
+| Python | `py` | `py/奇优影院.py` | ✅ 正常 | 177 | 🎬 一般 | http://qiyoudy5.com/search.php (HTTP 200) |
+| Python | `py` | `py/每日大赛.py` | ✅ 正常 | 187 | 🎬 一般 | https://www.mrds66.com (HTTP 200) |
+| Python | `py` | `py/youtubelive.py` | ✅ 正常 | 197 | 🎬 一般 | https://www.youtube.com/watch (HTTP 200) |
+| Python | `py` | `py/优视频.py` | ✅ 正常 | 203 | 🎬 一般 | https://api-h5.uvod.tv (HTTP 200) |
+| Python | `py` | `py/韩国色情电影<18+>.py` | ✅ 正常 | 203 | 🔞 成人 | https://koreanpornmovie.com (HTTP 200) |
+| Python | `py` | `py/qiyoudy.py` | ✅ 正常 | 215 | 🎬 一般 | http://www.qiyoudy2.com (HTTP 200) |
+| Python | `py` | `py/VHUB<18+>.py` | ✅ 正常 | 239 | 🔞 成人 | https://newxvideos.pages.dev (HTTP 200) |
+| Python | `py` | `py/Mang.py` | ✅ 正常 | 239 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
+| Python | `py` | `py/wbbb.py` | ✅ 正常 | 270 | 🎬 一般 | https://wbbb1.com (HTTP 200) |
+| Python | `py` | `py/爱瓜影视.py` | ✅ 正常 | 277 | 🎬 一般 | https://tvapi211.magicetech.com (HTTP 200) |
+| Python | `py` | `py/亚色影库<18+>.py` | ✅ 正常 | 282 | 🔞 成人 | https://www.yasetube.com (HTTP 200) |
+| Python | `py` | `py/撸一天<18+>.py` | ✅ 正常 | 287 | 🔞 成人 | https://luyitian.com (HTTP 200) |
+| Python | `py` | `py/bubuzhuiju.py` | ✅ 正常 | 287 | 🎬 一般 | https://323433ssdfd.top (HTTP 200) |
+| Python | `py` | `py/ppnix.py` | ✅ 正常 | 292 | 🎬 一般 | https://www.ppnix.com (HTTP 200) |
+| Python | `py` | `py/盘友圈.py` | ✅ 正常 | 293 | 🎬 一般 | https://panyq.com (HTTP 200) |
+| Python | `py` | `py/茶杯狐影视.py` | ✅ 正常 | 304 | 🎬 一般 | https://cupfoxys.cc (HTTP 200) |
+| Python | `py` | `py/oule.py` | ✅ 正常 | 311 | 🎬 一般 | https://www.olevod.one (HTTP 200) |
+| Python | `py` | `py/泥视频.py` | ✅ 正常 | 315 | 🎬 一般 | https://www.nivod.cc (HTTP 200) |
+| Python | `py` | `py/ytb.py` | ✅ 正常 | 317 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
+| Python | `py` | `py/茶杯狐.py` | ✅ 正常 | 322 | 🎬 一般 | https://citapa.com (HTTP 200) |
+| Python | `py` | `py/dsystv.py` | ✅ 正常 | 349 | 🎬 一般 | https://dsystv.com (HTTP 200) |
+| Python | `py` | `py/低端影视.py` | ✅ 正常 | 368 | 🎬 一般 | https://www.ddys24.com (HTTP 200) |
+| Python | `py` | `py/茄子<18+>.py` | ✅ 正常 | 375 | 🔞 成人 | https://xtu.qzjp6.ink/cn/home/web (HTTP 200) |
+| Python | `py` | `py/小苹果影视.py` | ✅ 正常 | 385 | 🎬 一般 | http://item.xpgcom.com (HTTP 200) |
+| Python | `py` | `py/fqdm.py` | ✅ 正常 | 386 | 🎬 一般 | https://www.fqdm.cc (HTTP 200) |
+| Python | `py` | `py/6v.py` | ✅ 正常 | 390 | 🎬 一般 | https://www.xb6v.org (HTTP 200) |
+| Python | `py` | `py/怦然心动<18+>.py` | ✅ 正常 | 394 | 🔞 成人 | https://prshinezenx.blog (HTTP 200) |
+| Python | `py` | `py/Pandalive直播.py` | ✅ 正常 | 399 | 🎬 一般 | https://5721004.xyz (HTTP 200) |
+| Python | `py` | `py/4KAV.py` | ✅ 正常 | 404 | 🔞 成人 | https://4k-av.com (HTTP 200) |
+| Python | `py` | `py/哔哩直播.py` | ✅ 正常 | 428 | 🎬 一般 | https://search.bilibili.com (HTTP 200) |
+| Python | `py` | `py/偷乐短剧.py` | ✅ 正常 | 428 | 🎬 一般 | https://www.toule.top (HTTP 200) |
+| Python | `py` | `py/duoduo.py` | ✅ 正常 | 436 | 🎬 一般 | https://duoduosdf12223234334.top (HTTP 200) |
+| Python | `py` | `py/网络直播.py` | ✅ 正常 | 448 | 🎬 一般 | https://search.bilibili.com (HTTP 200) |
+| Python | `py` | `py/youtube.py` | ✅ 正常 | 495 | 🎬 一般 | https://www.youtube.com (HTTP 200) |
+| Python | `py` | `py/pansou.py` | ✅ 正常 | 565 | 🎬 一般 | https://so.252035.xyz (HTTP 200) |
+| Python | `py` | `py/4K影院.py` | ✅ 正常 | 598 | 🎬 一般 | https://www.4kvm.net (HTTP 200) |
+| Python | `py` | `py/youzidj.py` | ✅ 正常 | 604 | 🎬 一般 | https://youzidj.com (HTTP 200) |
+| Python | `py` | `py/光鸭社区.py` | ✅ 正常 | 614 | 🎬 一般 | https://www.guangya.cc (HTTP 200) |
+| Python | `py` | `py/saohuo.py` | ✅ 正常 | 630 | 🎬 一般 | https://shdy5.us (HTTP 200) |
+| Python | `py` | `py/芒果视频.py` | ✅ 正常 | 643 | 🎬 一般 | https://www.mgtv.com (HTTP 200) |
+| Python | `py` | `py/两个BT.py` | ✅ 正常 | 655 | 🎬 一般 | https://www.bttwoo.com (HTTP 200) |
+| Python | `py` | `py/Xhm<18+>.py` | ✅ 正常 | 691 | 🔞 成人 | https://xhamster.com (HTTP 200) |
+| Python | `py` | `py/huavod.py` | ✅ 正常 | 701 | 🎬 一般 | https://huavod.com (HTTP 200) |
+| Python | `py` | `py/盘链.py` | ✅ 正常 | 703 | 🎬 一般 | https://pinglian.lol (HTTP 200) |
+| Python | `py` | `py/LIVES.py` | ✅ 正常 | 704 | 🎬 一般 | https://www.huya.com (HTTP 200) |
+| Python | `py` | `py/hongguo.py` | ✅ 正常 | 735 | 🎬 一般 | https://hongguoduanju.com (HTTP 200) |
+| Python | `py` | `py/TOPTV<18+>.py` | ✅ 正常 | 747 | 🔞 成人 | https://toptv15.cyou (HTTP 200) |
+| Python | `py` | `py/香肠派对<18+>.py` | ✅ 正常 | 770 | 🔞 成人 | https://xiang512.xiang.party/xcpd (HTTP 200) |
+| Python | `py` | `py/Xvideos<18+>.py` | ✅ 正常 | 781 | 🔞 成人 | https://www.xvideos.com (HTTP 200) |
+| Python | `py` | `py/8kvod.py` | ✅ 正常 | 808 | 🎬 一般 | https://www.8kvod.com (HTTP 200) |
+| Python | `py` | `py/黑料不打烊<18+>.py` | ✅ 正常 | 854 | 🔞 成人 | https://heiliao.com (HTTP 200) |
+| Python | `py` | `py/like.py` | ✅ 正常 | 876 | 🎬 一般 | https://www.iqiyi.com (HTTP 200) |
+| Python | `py` | `py/618.py` | ✅ 正常 | 884 | 🎬 一般 | https://618041.xyz (HTTP 200) |
+| Python | `py` | `py/shortfilm.py` | ✅ 正常 | 909 | 🎬 一般 | https://hongguoduanju.com (HTTP 200) |
+| Python | `py` | `py/骚火影视.py` | ✅ 正常 | 921 | 🎬 一般 | https://shdy2.com (HTTP 200) |
+| Python | `py` | `py/黃果短劇<18+>.py` | ✅ 正常 | 933 | 🔞 成人 | https://huangguodrama.ai (HTTP 200) |
+| Python | `py` | `py/柚子短劇<18+>.py` | ✅ 正常 | 1058 | 🔞 成人 | https://youzidj.com (HTTP 200) |
+| Python | `py` | `py/哔哩.py` | ✅ 正常 | 1069 | 🎬 一般 | https://www.bilibili.com (HTTP 200) |
+| Python | `py` | `py/麦田影院.py` | ✅ 正常 | 1114 | 🎬 一般 | https://www.mtyy1.com (HTTP 200) |
+| Python | `py` | `py/瓜子.py` | ✅ 正常 | 1121 | 🎬 一般 | https://api.w32z7vtd.com (HTTP 200) |
+| Python | `py` | `py/Xvd<18+>.py` | ✅ 正常 | 1167 | 🔞 成人 | https://www.xvideos.com (HTTP 200) |
+| Python | `py` | `py/广东荔枝.py` | ✅ 正常 | 1186 | 🎬 一般 | https://www.gdtv.cn (HTTP 200) |
+| Python | `py` | `py/河马短剧.py` | ✅ 正常 | 1212 | 🎬 一般 | https://www.kuaikaw.cn (HTTP 200) |
+| Python | `py` | `py/goldmedal.py` | ✅ 正常 | 1262 | 🎬 一般 | https://www.x8kb9k8.com (HTTP 200) |
+| Python | `py` | `py/魔方影视.py` | ✅ 正常 | 1367 | 🎬 一般 | https://www.ky4k14t.top (HTTP 200) |
+| Python | `py` | `py/爱奇艺.py` | ✅ 正常 | 1395 | 🎬 一般 | https://www.iqiyi.com (HTTP 200) |
+| Python | `py` | `py/275听书.py` | ✅ 正常 | 1423 | 🎬 一般 | https://www.i275.com (HTTP 200) |
+| Python | `py` | `py/神秘电影.py` | ✅ 正常 | 1434 | 🎬 一般 | https://h4ivs.sm431.vip (HTTP 200) |
+| Python | `py` | `py/努努影院.py` | ✅ 正常 | 1443 | 🎬 一般 | https://nnyy.la (HTTP 200) |
+| Python | `py` | `py/acfun.py` | ✅ 正常 | 1446 | 🎬 一般 | https://www.acfun.cn (HTTP 200) |
+| Python | `py` | `py/麒麟影视.py` | ✅ 正常 | 1570 | 🎬 一般 | https://www.qlys.cc (HTTP 200) |
+| Python | `py` | `py/MiFun动漫.py` | ✅ 正常 | 1571 | 🎬 一般 | http://get.mymifun.com (HTTP 200) |
+| Python | `py` | `py/河马剧场.py` | ✅ 正常 | 1574 | 🎬 一般 | https://www.kuaikaw.cn (HTTP 200) |
+| Python | `py` | `py/yinhuaone.py` | ✅ 正常 | 1599 | 🎬 一般 | https://www.yinhuaone.net (HTTP 200) |
+| Python | `py` | `py/dandanqi.py` | ✅ 正常 | 1766 | 🎬 一般 | https://www.dandanqi.vip (HTTP 200) |
+| Python | `py` | `py/jieyingshi.py` | ✅ 正常 | 1769 | 🎬 一般 | https://www.hkybqufgh.com (HTTP 200) |
+| Python | `py` | `py/优酷视频.py` | ✅ 正常 | 1807 | 🎬 一般 | https://www.youku.com (HTTP 200) |
+| Python | `py` | `py/kkys.py` | ✅ 正常 | 1910 | 🎬 一般 | https://www.kkys20.com (HTTP 200) |
+| Python | `py` | `py/Pornhub<18+>.py` | ✅ 正常 | 2103 | 🔞 成人 | https://cn.pornhub.com (HTTP 200) |
+| Python | `py` | `py/guazi.py` | ✅ 正常 | 2126 | 🔞 成人 | https://apinew.uozvr.com (HTTP 200) |
+| Python | `py` | `py/七味.py` | ✅ 正常 | 2173 | 🎬 一般 | https://115.com/web/lixian (HTTP 200) |
+| Python | `py` | `py/界影视.py` | ✅ 正常 | 2260 | 🎬 一般 | https://www.hkybqufgh.com (HTTP 200) |
+| Python | `py` | `py/aigua.py` | ✅ 正常 | 2363 | 🎬 一般 | https://aigua8.com (HTTP 200) |
+| Python | `py` | `py/mifun.py` | ✅ 正常 | 2503 | 🎬 一般 | http://get.mymifun.com (HTTP 200) |
+| Python | `py` | `py/熊猫视频.py` | ✅ 正常 | 2620 | 🎬 一般 | https://www.88xff.com/home.html (HTTP 200) |
+| Python | `py` | `py/枫叶音乐.py` | ✅ 正常 | 2754 | 🎬 一般 | https://mu-jie.cc (HTTP 200) |
+| Python | `py` | `py/actor.py` | ✅ 正常 | 2934 | 🎬 一般 | https://www.youku.com (HTTP 200) |
+| Python | `py` | `py/wxty.py` | ✅ 正常 | 3082 | 🎬 一般 | https://live.kankanews.com (HTTP 200) |
+| Python | `py` | `py/瓜子影视.py` | ✅ 正常 | 3261 | 🔞 成人 | https://apinew.uozvr.com (HTTP 200) |
+| Python | `py` | `py/Phb<18+>.py` | ✅ 正常 | 3299 | 🔞 成人 | https://cn.pornhub.com (HTTP 200) |
+| Python | `py` | `py/熊猫tv.py` | ✅ 正常 | 3517 | 🎬 一般 | https://www.pandalive.co.kr (HTTP 200) |
+| Python | `py` | `py/熊猫直播.py` | ✅ 正常 | 4445 | 🎬 一般 | https://www.pandalive.co.kr (HTTP 200) |
+| Python | `py` | `py/短剧聚合1.py` | ✅ 正常 | 5522 | 🎬 一般 | https://api.drama.9ddm.com (HTTP 200) |
+| Python | `py` | `py/短剧聚合2.py` | ✅ 正常 | 6781 | 🎬 一般 | https://api.drama.9ddm.com (HTTP 200) |
+| Python | `py` | `py/短剧聚合.py` | ✅ 正常 | 7040 | 🎬 一般 | https://api.drama.9ddm.com (HTTP 200) |
+| Python | `py` | `py/maple.py` | ✅ 正常 | 8201 | 🎬 一般 | https://www.fyeys.com (HTTP 200) |
+| Python | `py` | `py/ytbzb.py` | ✅ 正常 | 8761 | 🎬 一般 | https://www.youtube.com/watch (HTTP 200) |
+| Python | `py` | `py/juok3.py` | ✅ 正常 | 40463 | 🎬 一般 | https://jx.xmflv.com (HTTP 200) |
+| Python | `py` | `py/胖虎APP.py` | ✅ 正常 | 40902 | 🎬 一般 | https://www.yemu.xyz (HTTP 200) |
+| Python | `py` | `py/哔哩聚合.py` | ✅ 正常 | 73581 | 🎬 一般 | https://www.bilibili.com (HTTP 200) |
