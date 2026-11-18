@@ -20,10 +20,13 @@ class Spider(Spider):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,*/*;q=0.8",
             "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
-            "Referer": self.host + "/"
+            "Referer": self.host + "/",
+            "Origin": self.host
         }
         self.session = requests.Session()
         self.session.headers.update(self.headers)
+        # 預設帶入年齡確認 Cookie，避免部分資源請求被攔截
+        self.session.cookies.set("age_confirmed", "true", domain="youzidj.com")
 
     def isVideoFormat(self, url):
         pass
@@ -103,7 +106,6 @@ class Spider(Spider):
                                 episodes.append(f"{label}${ep_url}")
                         break
                     elif data.get("@type") == "VideoObject" and not title:
-                        # 若直接點進單集或單支影片頁面
                         title = data.get("name", "")
                         thumbs = data.get("thumbnailUrl", [])
                         pic = thumbs[0] if isinstance(thumbs, list) and thumbs else (thumbs if isinstance(thumbs, str) else "")
@@ -132,8 +134,8 @@ class Spider(Spider):
                 "vod_name": html.unescape(title),
                 "vod_pic": pic,
                 "vod_content": html.unescape(content),
-                "vod_play_from": "柚子專線",
-                "vod_play_url": "#".join(episodes)
+                "vod_play_from": "柚子直連$$$柚子嗅探",
+                "vod_play_url": f"{'#'.join(episodes)}$$${'#'.join(episodes)}"
             }
             return {"list": [vod]}
         except Exception:
@@ -156,12 +158,35 @@ class Spider(Spider):
 
     def playerContent(self, flag, id, vipFlags):
         play_page_url = id if id.startswith("http") else f"{self.host}{id}"
+
+        # 若使用者切換到「柚子嗅探」備援線路，直接交由內建瀏覽器核心自動執行 JS 並嗅探串流
+        if flag == "柚子嗅探":
+            return {
+                "parse": 1,
+                "playUrl": "",
+                "url": play_page_url,
+                "header": json.dumps({
+                    "User-Agent": self.headers["User-Agent"],
+                    "Referer": self.host + "/"
+                })
+            }
+
         try:
             res = self.session.get(play_page_url, timeout=10)
             res.encoding = "utf-8"
             text = res.text
 
-            # 方法 A：從 VideoObject JSON-LD 直接提取 contentUrl (.m3u8)
+            # 組合完整防盜鏈請求標頭（含 Origin 與動態取得的 Session Cookie）
+            play_headers = {
+                "User-Agent": self.headers["User-Agent"],
+                "Referer": play_page_url,
+                "Origin": self.host
+            }
+            cookie_str = "; ".join([f"{k}={v}" for k, v in self.session.cookies.items()])
+            if cookie_str:
+                play_headers["Cookie"] = cookie_str
+
+            # 方法 A：從 VideoObject JSON-LD 提取 contentUrl (.m3u8)
             ld_matches = re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.S | re.I)
             for ld_raw in ld_matches:
                 try:
@@ -169,18 +194,15 @@ class Spider(Spider):
                     if data.get("@type") == "VideoObject" and data.get("contentUrl"):
                         m3u8_url = html.unescape(data["contentUrl"].strip())
                         return {
-                            "parse": 0,  # 0 = 直連串流，免嗅探秒開
+                            "parse": 0,
                             "playUrl": "",
                             "url": m3u8_url,
-                            "header": json.dumps({
-                                "User-Agent": self.headers["User-Agent"],
-                                "Referer": play_page_url
-                            })
+                            "header": json.dumps(play_headers)
                         }
                 except Exception:
                     continue
 
-            # 方法 B：備援提取 <section id="player" data-video="..." data-version="..."> 組合出 master.m3u8
+            # 方法 B：從播放器標籤屬性組合 master.m3u8
             vid_m = re.search(r'id=["\']player["\'][^>]*data-video=["\']([^"\']+)["\'][^>]*data-version=["\']([^"\']+)["\']', text, re.I)
             if vid_m:
                 m3u8_url = f"{self.host}/media/{vid_m.group(1)}/{vid_m.group(2)}/master.m3u8"
@@ -188,10 +210,7 @@ class Spider(Spider):
                     "parse": 0,
                     "playUrl": "",
                     "url": m3u8_url,
-                    "header": json.dumps({
-                        "User-Agent": self.headers["User-Agent"],
-                        "Referer": play_page_url
-                    })
+                    "header": json.dumps(play_headers)
                 }
 
             # 方法 C：通用正則匹配任意 .m3u8 網址
@@ -201,15 +220,12 @@ class Spider(Spider):
                     "parse": 0,
                     "playUrl": "",
                     "url": html.unescape(m3u8_m.group(1)),
-                    "header": json.dumps({
-                        "User-Agent": self.headers["User-Agent"],
-                        "Referer": play_page_url
-                    })
+                    "header": json.dumps(play_headers)
                 }
         except Exception:
             pass
 
-        # 若以上皆失敗，才降級交由 OK影視 內建 WebView 嗅探
+        # 降級交由 OK影視 內建 WebView 嗅探
         return {
             "parse": 1,
             "playUrl": "",
