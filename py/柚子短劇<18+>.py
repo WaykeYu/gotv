@@ -5,15 +5,16 @@
 1. 适配站内 SSR HTML + /api/catalogue/search（HTML片段）双重解析
 2. 搜索支持首页直出（/search/?q=）与多类型（dramas/videos）无限翻页加载
 3. 详情页直接提取全季所有分集（a.series-episode-link）
-4. 播放页直接提取 master.m3u8，并将完整 Session Cookie、Origin、Referer 注入播放器 header
+4. 通过播放器内置 localProxy 代理转发 master.m3u8 与 ts 切片，自动注入 Session Cookie、Origin 与 Referer 解决 403 Forbidden
 5. 针对弱网/DNS 抖动内置指数退避重试与 Session/直连自动降级
 """
 import re
 import sys
 import json
 import time
+import base64
 import requests
-from urllib.parse import quote, urljoin
+from urllib.parse import quote, unquote, urljoin, parse_qs
 from lxml import etree
 
 try:
@@ -77,7 +78,6 @@ class Spider(BaseSpider):
         return u
 
     def _path(self, u):
-        """将完整 URL 标准化为站内相对路径（如 /dramas/xxx/season-1/）"""
         if not u:
             return ""
         u = str(u).strip()
@@ -141,7 +141,7 @@ class Spider(BaseSpider):
                 continue
         return html
 
-    # ---------- 卡片解析（适配 article.drama-card 结构与 API HTML 片段） ----------
+    # ---------- 卡片解析 ----------
     def _cards(self, html):
         out, seen = [], set()
         if not html or self._is_cf(html):
@@ -152,7 +152,6 @@ class Spider(BaseSpider):
             tree = None
 
         if tree is not None:
-            # 1. 标准剧集卡片 article.drama-card
             cards = tree.xpath('//article[contains(@class,"drama-card")]')
             for card in cards:
                 try:
@@ -201,7 +200,6 @@ class Spider(BaseSpider):
                 except Exception:
                     continue
 
-            # 2. 兜底匹配任意指向作品页的链接
             if not out:
                 for a in tree.xpath('//a[contains(@href,"/dramas/") or contains(@href,"/ai-face-swap/") or contains(@href,"/ai-adult/")]'):
                     try:
@@ -264,12 +262,10 @@ class Spider(BaseSpider):
         if not tid_path.endswith("/"):
             tid_path += "/"
 
-        # 1. 第 1 页直接取 SSR 页面；第 2 页起优先尝试 ?page=N
         url = self.host + tid_path + (f"?page={pg}" if pg > 1 else "")
         html = self._get(url)
         items = self._cards(html)
 
-        # 2. 若 ?page=N 未翻页成功，调用 /api/catalogue/browse（返回 HTML 片段）
         if not items and pg > 1:
             parts = [p for p in tid_path.strip("/").split("/") if p]
             if len(parts) == 1:
@@ -376,7 +372,7 @@ class Spider(BaseSpider):
         result["list"].append(vod)
         return result
 
-    # ---------- 搜索接口（适配 /search/?q= 与 /api/catalogue/search?q=&kind=&page=） ----------
+    # ---------- 搜索接口 ----------
     def searchContent(self, key, quick, pg="1"):
         pg = int(pg or 1)
         kw = str(key or "").strip()
@@ -387,11 +383,9 @@ class Spider(BaseSpider):
         items = []
 
         if pg == 1:
-            # 第 1 页直接请求 SSR 搜索结果页，同时包含短剧与视频结果
             html = self._get(f"{self.host}/search/?q={q}")
             items = self._cards(html)
 
-        # 第 2 页起（或第 1 页未命中时）调用前端同款 /api/catalogue/search 接口（返回 HTML 片段）
         if not items or pg > 1:
             seen = {it["vod_id"] for it in items}
             for kind in ("dramas", "videos"):
@@ -413,7 +407,7 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, page):
         return self.searchContent(key, quick, page)
 
-    # ---------- 直链播放解析与完整请求头注入 ----------
+    # ---------- 直链提取与内置 localProxy 代理播放 ----------
     def _extract_m3u8(self, html):
         if not html:
             return ""
@@ -444,46 +438,41 @@ class Spider(BaseSpider):
                 return self._fix(m.group(1))
         return ""
 
+    def _build_proxy_url(self, stream_url, page_url):
+        # 将 url 与 ref 打包为一个安全的 URL 参数，避免多参数在部分壳子中丢失
+        payload = json.dumps({"u": stream_url, "r": page_url}, separators=(",", ":"))
+        b64 = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
+        try:
+            pbase = self.getProxyUrl()
+            if pbase:
+                sep = "&" if "?" in pbase else "?"
+                return f"{pbase}{sep}p={b64}"
+        except Exception:
+            pass
+        return f"http://127.0.0.1:9978/proxy?do=py&p={b64}"
+
     def playerContent(self, flag, id, vipFlags):
         page_url = self._fix(id or "")
         if not page_url:
             return {"parse": 1, "jx": 0, "url": ""}
 
-        # 1. 确保 Session 先访问过首页建立基础 Cookie，再访问播放页
         if not self._sess.cookies.get_dict():
             self._get(self.host + "/")
         html = self._get(page_url)
 
         stream_url = page_url if self.isVideoFormat(page_url) else self._extract_m3u8(html)
-
-        # 2. 提取完整 Cookie 与浏览器标准 CORS 播放请求头
-        cookie_str = "; ".join([f"{k}={v}" for k, v in self._sess.cookies.get_dict().items()])
-        play_headers = {
-            "User-Agent": self.ua,
-            "Referer": page_url,
-            "Origin": self.host,
-            "Accept": "*/*",
-            "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-        }
-        if cookie_str:
-            play_headers["Cookie"] = cookie_str
-
         if stream_url:
             return {
                 "parse": 0,
                 "jx": 0,
-                "url": stream_url,
-                "header": play_headers,
+                "url": self._build_proxy_url(stream_url, page_url),
             }
 
         return {
             "parse": 1,
             "jx": 0,
             "url": page_url,
-            "header": play_headers,
+            "header": {"User-Agent": self.ua, "Referer": page_url},
         }
 
     def isVideoFormat(self, url):
@@ -494,7 +483,79 @@ class Spider(BaseSpider):
         return False
 
     def localProxy(self, param):
-        return None
+        if not isinstance(param, dict):
+            param = {}
+
+        target_url = ""
+        ref = self.host + "/"
+
+        # 1. 优先解析打包的 p 参数
+        p_val = param.get("p", "")
+        if p_val:
+            try:
+                pad = "=" * ((4 - len(p_val) % 4) % 4)
+                raw = base64.urlsafe_b64decode((p_val + pad).encode("ascii")).decode("utf-8")
+                obj = json.loads(raw)
+                target_url = obj.get("u", "")
+                ref = obj.get("r", ref)
+            except Exception:
+                pass
+
+        # 2. 兼容直接传递的 url/ref 参数或 path 末尾的 base64 查询串
+        if not target_url and param.get("url"):
+            target_url = unquote(str(param.get("url")))
+            ref = unquote(str(param.get("ref", ref)))
+
+        if not target_url:
+            for k, v in param.items():
+                if isinstance(v, str) and "url=" in v:
+                    qs = parse_qs(v)
+                    if qs.get("url"):
+                        target_url = unquote(qs["url"][0])
+                        if qs.get("ref"):
+                            ref = unquote(qs["ref"][0])
+                        break
+
+        if not target_url:
+            return [404, "text/plain", b"missing target_url"]
+
+        headers = {
+            "User-Agent": self.ua,
+            "Referer": ref,
+            "Origin": self.host,
+            "Accept": "*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+        }
+        try:
+            r = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
+            if r.status_code == 403:
+                self._get(ref)
+                r = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
+
+            ctype = r.headers.get("Content-Type", "application/octet-stream")
+            if ".m3u8" in target_url.lower() or "mpegurl" in ctype.lower():
+                r.encoding = "utf-8"
+                lines = []
+                for line in r.text.splitlines():
+                    s = line.strip()
+                    if s and not s.startswith("#"):
+                        abs_u = urljoin(target_url, s)
+                        lines.append(self._build_proxy_url(abs_u, ref))
+                    elif 'URI="' in s:
+                        def _rep_uri(m):
+                            abs_u = urljoin(target_url, m.group(1))
+                            return f'URI="{self._build_proxy_url(abs_u, ref)}"'
+                        lines.append(re.sub(r'URI="([^"]+)"', _rep_uri, s))
+                    else:
+                        lines.append(line)
+                return [200, "application/vnd.apple.mpegurl", "\n".join(lines).encode("utf-8")]
+
+            return [r.status_code, ctype, r.content]
+        except Exception as e:
+            return [502, "text/plain", str(e).encode("utf-8")]
 
     def getDependence(self):
         return []
