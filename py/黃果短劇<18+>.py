@@ -10,15 +10,15 @@ from base.spider import Spider
 
 
 class Spider(Spider):
-    # 預先編譯正則表達式，提升迴圈解析效能
+    # 預先編譯正則表達式
     RE_CLASS_HREF = re.compile(r"^/zh-hant/(?:library|tag|category)/([a-zA-Z0-9_-]+)/?$")
     RE_TRAILING_NUM = re.compile(r"\d+$")
     RE_VOD_HREF = re.compile(r"(?:^|/)\d{3,10}(?:/|$|\?)")
     RE_VID_NUM = re.compile(r"\d{3,10}")
     RE_EP_REMARKS = re.compile(r"(\d+\s*集可觀看)")
     RE_JSON_VOD = re.compile(r'"id"\s*:\s*"?(\d{3,10})"?[^{}]{0,300}?"title"\s*:\s*"([^"\\]{2,60})"')
-    RE_EP_TEXT = re.compile(r"^(第\s*\d+\s*集|EP\s*\d+|\d+)$", re.I)
-    RE_VIDEO_URL = re.compile(r'(https?://[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)')
+    RE_EP_TEXT = re.compile(r"^(?:第\s*\d+\s*[集話期]|EP\s*\d+|\d+)$", re.I)
+    RE_VIDEO_URL = re.compile(r'(https?:\\?/\\?/[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)')
     RE_PAGE_NUM = re.compile(r"[?&]page=(\d+)")
 
     EXCLUDE_SLUGS = {"novels", "comics", "games", "login"}
@@ -60,7 +60,6 @@ class Spider(Spider):
             "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
         }
 
-        # 建立具備連線池與自動重試機制的 Session
         self.session = requests.Session()
         self.session.headers.update(self.headers)
         retries = Retry(total=2, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504])
@@ -69,11 +68,9 @@ class Spider(Spider):
         self.session.mount("http://", adapter)
 
     def _fetch(self, url, timeout=10):
-        """統一網路請求入口"""
         return self.session.get(url, timeout=timeout)
 
     def _normalize_url(self, href):
-        """統一處理相對路徑、協議相對路徑與完整網址"""
         if not href:
             return ""
         return urllib.parse.urljoin(self.base_lib, href.strip())
@@ -123,7 +120,6 @@ class Spider(Spider):
         return self.categoryContent("all", "1", False, {})
 
     def _extract_pagecount(self, soup, current_pg):
-        """從分頁連結動態推算最大頁數"""
         max_pg = int(current_pg)
         for a in soup.find_all("a", href=True):
             m = self.RE_PAGE_NUM.search(a["href"])
@@ -145,14 +141,13 @@ class Spider(Spider):
             if any(x in href for x in self.EXCLUDE_HREF_KEYS):
                 continue
 
-            # 提取純數字影片 ID 作為核心去重依據
             vid_num = self.RE_VID_NUM.search(vid_match.group(0)).group(0)
             if vid_num in seen_vids:
                 continue
 
-            # 排除直接指向單集播放的連結 (如 /12345/ep-1 或 /12345/1)
-            if re.search(rf"/{vid_num}/(?:ep-?|episode-?|watch/)?\d+", href):
-                continue
+            # 保留原始真實路徑（去除多餘的 query 參數即可，不再硬改目錄名稱）
+            raw_full_url = self._normalize_url(href)
+            clean_url = raw_full_url.split("?")[0]
 
             # 向上尋找單張卡片容器
             card = a
@@ -203,11 +198,10 @@ class Spider(Spider):
             ep_match = self.RE_EP_REMARKS.search(card_lines)
             remarks = ep_match.group(1) if ep_match else ""
 
-            # 同時記錄影片 ID 與劇名，杜絕重複片卡
             seen_vids.add(vid_num)
             seen_titles.add(title)
             videos.append({
-                "vod_id": f"{self.base_lib}{vid_num}/",
+                "vod_id": clean_url,  # 直接使用網頁上原本的有效連結
                 "vod_name": title,
                 "vod_pic": pic,
                 "vod_remarks": remarks,
@@ -222,13 +216,12 @@ class Spider(Spider):
                     seen_vids.add(vid_num)
                     seen_titles.add(title)
                     videos.append({
-                        "vod_id": f"{self.base_lib}{vid_num}/",
+                        "vod_id": f"{self.host}/zh-hant/drama/{vid_num}/",
                         "vod_name": title,
                         "vod_pic": "",
                         "vod_remarks": "短劇",
                     })
 
-        # 診斷資訊
         if not videos:
             sample_hrefs = [
                 a["href"] for a in soup.find_all("a", href=True)
@@ -285,7 +278,8 @@ class Spider(Spider):
         url = ids[0]
         try:
             res = self._fetch(url)
-            soup = BeautifulSoup(res.text, "html.parser")
+            html = res.text
+            soup = BeautifulSoup(html, "html.parser")
         except Exception as e:
             return {"list": [{
                 "vod_id": url,
@@ -296,27 +290,42 @@ class Spider(Spider):
             }]}
 
         h1 = soup.find("h1")
-        title = h1.get_text(strip=True) if h1 else "未知劇名"
+        title = h1.get_text(strip=True) if h1 else ""
+        if not title or title == "404":
+            og_title = soup.find("meta", {"property": "og:title"})
+            title = og_title.get("content", "未知劇名").split("-")[0].strip() if og_title else "未知劇名"
+
         desc_el = soup.find("meta", {"name": "description"})
         desc = desc_el.get("content", "") if desc_el else ""
         img_el = soup.find("meta", {"property": "og:image"})
         pic = self._normalize_url(img_el.get("content", "")) if img_el else ""
 
-        vid_match = re.search(r"/(\d+)/?$", url)
-        vid_num = vid_match.group(1) if vid_match else ""
-        ep_href_re = re.compile(rf"/{vid_num}/(?:ep-?|episode-?|watch/)?\d+") if vid_num else None
+        vid_match = self.RE_VID_NUM.search(url)
+        vid_num = vid_match.group(0) if vid_match else ""
+        ep_href_re = re.compile(rf"/{vid_num}/(?:ep-?|episode-?|watch/|play/)?\d+") if vid_num else None
 
         play_list = []
         seen_eps = set()
+
+        # 1. 從網頁 <a> 標籤提取分集連結
         for a in soup.find_all("a", href=True):
             ep_href = a["href"].strip()
             ep_text = a.get_text(strip=True)
             is_ep_link = (ep_href_re and ep_href_re.search(ep_href)) or self.RE_EP_TEXT.search(ep_text)
             if is_ep_link:
                 full_ep = self._normalize_url(ep_href)
-                if full_ep not in seen_eps:
+                if full_ep not in seen_eps and full_ep != url:
                     seen_eps.add(full_ep)
                     play_list.append(f"{ep_text or f'第{len(play_list) + 1}集'}${full_ep}")
+
+        # 2. 若 <a> 標籤沒抓到（例如單頁動態切換集數），嘗試從網頁文字或 JSON 偵測總集數並構造連結
+        if not play_list and vid_num:
+            unescaped = html.replace('\\"', '"').replace("\\\\/", "/")
+            # 尋找內嵌的 m3u8 / mp4 清單
+            direct_streams = self.RE_VIDEO_URL.findall(unescaped)
+            for idx, stream in enumerate(dict.fromkeys(direct_streams), 1):
+                clean_stream = stream.replace("\\/", "/")
+                play_list.append(f"第{idx}集${clean_stream}")
 
         if not play_list:
             play_list.append(f"立即觀看${url}")
@@ -347,15 +356,31 @@ class Spider(Spider):
             return {"list": []}
 
     def playerContent(self, flag, id, vipFlags):
+        # 若在 detailContent 已直接提取出 m3u8 / mp4 直鏈，直接交給播放器
+        if re.search(r"\.(?:m3u8|mp4)(?:\?|$)", id, re.I):
+            return {
+                "parse": 0,
+                "url": id,
+                "header": json.dumps(self.headers),
+            }
+
         try:
             res = self._fetch(id)
-            m3u8_match = self.RE_VIDEO_URL.search(res.text)
+            unescaped = res.text.replace("\\/", "/")
+            m3u8_match = self.RE_VIDEO_URL.search(unescaped)
             if m3u8_match:
                 return {
                     "parse": 0,
-                    "url": m3u8_match.group(1).replace("\\/", "/"),
+                    "url": m3u8_match.group(1),
                     "header": json.dumps(self.headers),
                 }
         except Exception:
             pass
-        return {"parse": 1, "jx": 0, "url": id, "header": json.dumps(self.headers)}
+
+        # 若無靜態直鏈，交由 TVBox WebView 嗅探播放
+        return {
+            "parse": 1,
+            "jx": 0,
+            "url": id,
+            "header": json.dumps(self.headers),
+        }
