@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 柚子短剧 (youzidj / https://youzidj.com) —— TVBox/FongMi/修狗TV Python Spider
-特性：
-1. 适配站内 SSR HTML + /api/catalogue/search（HTML片段）双重解析
-2. 搜索支持首页直出（/search/?q=）与多类型（dramas/videos）无限翻页加载
-3. 详情页直接提取全季所有分集（a.series-episode-link）
-4. 通过播放器内置 localProxy 代理转发 master.m3u8 与 ts 切片，自动注入 Session Cookie、Origin 与 Referer 解决 403 Forbidden
-5. 针对弱网/DNS 抖动内置指数退避重试与 Session/直连自动降级
 """
 import re
 import sys
 import json
 import time
 import base64
+import threading
 import requests
-from urllib.parse import quote, unquote, urljoin, parse_qs
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import quote, unquote, urljoin, urlparse, parse_qs
 from lxml import etree
 
 try:
@@ -33,7 +29,7 @@ except Exception:
 class Spider(BaseSpider):
 
     def getName(self):
-        return "柚子短剧"
+        return "柚子短剧_v3"
 
     def init(self, extend=""):
         self.host = "https://youzidj.com"
@@ -61,6 +57,127 @@ class Spider(BaseSpider):
             self._sess.headers.update(self.headers)
         except Exception:
             pass
+
+        self._httpd = None
+        self._proxy_port = 0
+        self._start_local_server()
+
+    # ---------- 独立本地 HTTP 代理服务器（兼容明文查询串与 Base64 路径参数） ----------
+    def _start_local_server(self):
+        spider_ref = self
+
+        class ProxyHandler(BaseHTTPRequestHandler):
+            def log_message(self, format, *args):
+                pass
+
+            def do_GET(self):
+                parsed = urlparse(self.path)
+                target_url = ""
+                ref = spider_ref.host + "/"
+
+                # 1. 解析明文查询参数 ?url=...&ref=...
+                if parsed.query:
+                    qs = parse_qs(parsed.query)
+                    if qs.get("url"):
+                        target_url = unquote(qs["url"][0])
+                    if qs.get("ref"):
+                        ref = unquote(qs["ref"][0])
+
+                # 2. 解析修狗TV自动转换的 /proxy/<base64> 路径参数
+                if not target_url and parsed.path.startswith("/proxy/"):
+                    b64_part = parsed.path[len("/proxy/"):].strip("/")
+                    try:
+                        pad = "=" * ((4 - len(b64_part) % 4) % 4)
+                        decoded_qs = base64.urlsafe_b64decode(
+                            (b64_part + pad).encode("ascii")
+                        ).decode("utf-8", errors="ignore")
+                        qs = parse_qs(decoded_qs)
+                        if qs.get("url"):
+                            target_url = unquote(qs["url"][0])
+                        if qs.get("ref"):
+                            ref = unquote(qs["ref"][0])
+                    except Exception:
+                        pass
+
+                if not target_url:
+                    msg = f"bad proxy path: {self.path}".encode("utf-8")
+                    self.send_response(400)
+                    self.send_header("Content-Type", "text/plain; charset=utf-8")
+                    self.send_header("Content-Length", str(len(msg)))
+                    self.end_headers()
+                    self.wfile.write(msg)
+                    return
+
+                req_headers = {
+                    "User-Agent": spider_ref.ua,
+                    "Referer": ref,
+                    "Origin": spider_ref.host,
+                    "Accept": "*/*",
+                    "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-origin",
+                }
+                try:
+                    r = spider_ref._sess.get(
+                        target_url, headers=req_headers, timeout=15, verify=False
+                    )
+                    if r.status_code == 403:
+                        spider_ref._get(ref)
+                        r = spider_ref._sess.get(
+                            target_url, headers=req_headers, timeout=15, verify=False
+                        )
+
+                    ctype = r.headers.get("Content-Type", "application/octet-stream")
+                    if ".m3u8" in target_url.lower() or "mpegurl" in ctype.lower():
+                        r.encoding = "utf-8"
+                        base_proxy = f"http://127.0.0.1:{spider_ref._proxy_port}/proxy"
+                        lines = []
+                        for line in r.text.splitlines():
+                            s = line.strip()
+                            if s and not s.startswith("#"):
+                                abs_u = urljoin(target_url, s)
+                                lines.append(
+                                    f"{base_proxy}?url={quote(abs_u)}&ref={quote(ref)}"
+                                )
+                            elif 'URI="' in s:
+                                def _rep_uri(m):
+                                    abs_u = urljoin(target_url, m.group(1))
+                                    return f'URI="{base_proxy}?url={quote(abs_u)}&ref={quote(ref)}"'
+                                lines.append(re.sub(r'URI="([^"]+)"', _rep_uri, s))
+                            else:
+                                lines.append(line)
+
+                        body = "\n".join(lines).encode("utf-8")
+                        self.send_response(200)
+                        self.send_header("Content-Type", "application/vnd.apple.mpegurl; charset=utf-8")
+                        self.send_header("Content-Length", str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+                    else:
+                        body = r.content
+                        self.send_response(r.status_code)
+                        self.send_header("Content-Type", ctype)
+                        self.send_header("Content-Length", str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+                except Exception as e:
+                    err = str(e).encode("utf-8", errors="ignore")
+                    self.send_response(502)
+                    self.send_header("Content-Type", "text/plain; charset=utf-8")
+                    self.send_header("Content-Length", str(len(err)))
+                    self.end_headers()
+                    self.wfile.write(err)
+
+        try:
+            server = HTTPServer(("127.0.0.1", 0), ProxyHandler)
+            self._httpd = server
+            self._proxy_port = server.server_address[1]
+            t = threading.Thread(target=server.serve_forever, daemon=True)
+            t.start()
+        except Exception:
+            self._httpd = None
+            self._proxy_port = 0
 
     # ---------- 基础工具 ----------
     def _fix(self, u):
@@ -407,7 +524,7 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, page):
         return self.searchContent(key, quick, page)
 
-    # ---------- 直链提取与内置 localProxy 代理播放 ----------
+    # ---------- 直链提取与本地代理播放 ----------
     def _extract_m3u8(self, html):
         if not html:
             return ""
@@ -438,19 +555,6 @@ class Spider(BaseSpider):
                 return self._fix(m.group(1))
         return ""
 
-    def _build_proxy_url(self, stream_url, page_url):
-        # 将 url 与 ref 打包为一个安全的 URL 参数，避免多参数在部分壳子中丢失
-        payload = json.dumps({"u": stream_url, "r": page_url}, separators=(",", ":"))
-        b64 = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
-        try:
-            pbase = self.getProxyUrl()
-            if pbase:
-                sep = "&" if "?" in pbase else "?"
-                return f"{pbase}{sep}p={b64}"
-        except Exception:
-            pass
-        return f"http://127.0.0.1:9978/proxy?do=py&p={b64}"
-
     def playerContent(self, flag, id, vipFlags):
         page_url = self._fix(id or "")
         if not page_url:
@@ -461,11 +565,22 @@ class Spider(BaseSpider):
         html = self._get(page_url)
 
         stream_url = page_url if self.isVideoFormat(page_url) else self._extract_m3u8(html)
+
         if stream_url:
+            if not self._proxy_port:
+                self._start_local_server()
+            if self._proxy_port:
+                proxy_url = f"http://127.0.0.1:{self._proxy_port}/proxy?url={quote(stream_url)}&ref={quote(page_url)}"
+                return {
+                    "parse": 0,
+                    "jx": 0,
+                    "url": proxy_url,
+                }
             return {
                 "parse": 0,
                 "jx": 0,
-                "url": self._build_proxy_url(stream_url, page_url),
+                "url": stream_url,
+                "header": {"User-Agent": self.ua, "Referer": page_url},
             }
 
         return {
@@ -483,84 +598,18 @@ class Spider(BaseSpider):
         return False
 
     def localProxy(self, param):
-        if not isinstance(param, dict):
-            param = {}
-
-        target_url = ""
-        ref = self.host + "/"
-
-        # 1. 优先解析打包的 p 参数
-        p_val = param.get("p", "")
-        if p_val:
-            try:
-                pad = "=" * ((4 - len(p_val) % 4) % 4)
-                raw = base64.urlsafe_b64decode((p_val + pad).encode("ascii")).decode("utf-8")
-                obj = json.loads(raw)
-                target_url = obj.get("u", "")
-                ref = obj.get("r", ref)
-            except Exception:
-                pass
-
-        # 2. 兼容直接传递的 url/ref 参数或 path 末尾的 base64 查询串
-        if not target_url and param.get("url"):
-            target_url = unquote(str(param.get("url")))
-            ref = unquote(str(param.get("ref", ref)))
-
-        if not target_url:
-            for k, v in param.items():
-                if isinstance(v, str) and "url=" in v:
-                    qs = parse_qs(v)
-                    if qs.get("url"):
-                        target_url = unquote(qs["url"][0])
-                        if qs.get("ref"):
-                            ref = unquote(qs["ref"][0])
-                        break
-
-        if not target_url:
-            return [404, "text/plain", b"missing target_url"]
-
-        headers = {
-            "User-Agent": self.ua,
-            "Referer": ref,
-            "Origin": self.host,
-            "Accept": "*/*",
-            "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-        }
-        try:
-            r = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
-            if r.status_code == 403:
-                self._get(ref)
-                r = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
-
-            ctype = r.headers.get("Content-Type", "application/octet-stream")
-            if ".m3u8" in target_url.lower() or "mpegurl" in ctype.lower():
-                r.encoding = "utf-8"
-                lines = []
-                for line in r.text.splitlines():
-                    s = line.strip()
-                    if s and not s.startswith("#"):
-                        abs_u = urljoin(target_url, s)
-                        lines.append(self._build_proxy_url(abs_u, ref))
-                    elif 'URI="' in s:
-                        def _rep_uri(m):
-                            abs_u = urljoin(target_url, m.group(1))
-                            return f'URI="{self._build_proxy_url(abs_u, ref)}"'
-                        lines.append(re.sub(r'URI="([^"]+)"', _rep_uri, s))
-                    else:
-                        lines.append(line)
-                return [200, "application/vnd.apple.mpegurl", "\n".join(lines).encode("utf-8")]
-
-            return [r.status_code, ctype, r.content]
-        except Exception as e:
-            return [502, "text/plain", str(e).encode("utf-8")]
+        return None
 
     def getDependence(self):
         return []
 
     def destroy(self):
+        try:
+            if self._httpd:
+                self._httpd.shutdown()
+                self._httpd.server_close()
+        except Exception:
+            pass
         try:
             self._sess.close()
         except Exception:
