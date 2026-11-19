@@ -5,7 +5,7 @@
 1. 适配站内 SSR HTML + /api/catalogue/search（HTML片段）双重解析
 2. 搜索支持首页直出（/search/?q=）与多类型（dramas/videos）无限翻页加载
 3. 详情页直接提取全季所有分集（a.series-episode-link）
-4. 播放页直接从 Schema.org JSON-LD 提取 master.m3u8，并通过 localProxy 复用 Session Cookie 与 Origin 头解决 403
+4. 播放页自动探测 master.m3u8 放行状态：可直取则走本地代理复用 Session/Origin，若遭 403/TLS 指纹拦截则自动降级 WebView 嗅探（parse=1, jx=0）
 5. 针对弱网/DNS 抖动内置指数退避重试与 Session/直连自动降级
 """
 import re
@@ -413,7 +413,7 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, page):
         return self.searchContent(key, quick, page)
 
-    # ---------- 直链提取与本地代理播放（解决 403 Forbidden） ----------
+    # ---------- 直链提取、本地代理与自动降级嗅探 ----------
     def _extract_m3u8(self, html):
         if not html:
             return ""
@@ -444,30 +444,63 @@ class Spider(BaseSpider):
                 return self._fix(m.group(1))
         return ""
 
+    def _proxy_base(self):
+        try:
+            u = self.getProxyUrl()
+            if u:
+                return u
+        except Exception:
+            pass
+        return "http://127.0.0.1:9978/proxy?do=py"
+
     def playerContent(self, flag, id, vipFlags):
         page_url = self._fix(id or "")
         if not page_url:
-            return {"parse": 1, "url": ""}
+            return {"parse": 1, "jx": 0, "url": ""}
 
         html = self._get(page_url)
         if self._is_cf(html):
             return {"parse": 1, "jx": 0, "url": page_url}
 
         stream_url = page_url if self.isVideoFormat(page_url) else self._extract_m3u8(html)
-        if not stream_url:
-            return {
-                "parse": 1,
-                "jx": 0,
-                "url": page_url,
-                "header": {"User-Agent": self.ua, "Referer": page_url},
-            }
 
-        # 走本地代理，复用 self._sess 的 Cookie 与完整浏览器请求头解决 403
-        proxy_url = f"{self.getProxyUrl()}&url={quote(stream_url)}&ref={quote(page_url)}"
+        cookie_str = "; ".join([f"{k}={v}" for k, v in self._sess.cookies.get_dict().items()])
+        play_headers = {
+            "User-Agent": self.ua,
+            "Referer": page_url,
+            "Origin": self.host,
+            "Accept": "*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
+        }
+        if cookie_str:
+            play_headers["Cookie"] = cookie_str
+
+        if stream_url:
+            # 探测 master.m3u8 是否对 Python 放行
+            try:
+                test_r = self._sess.get(stream_url, headers=play_headers, timeout=8, verify=False)
+                if test_r.status_code == 200 and "#EXTM3U" in (test_r.text or "")[:100]:
+                    pbase = self._proxy_base()
+                    sep = "&" if "?" in pbase else "?"
+                    proxy_url = f"{pbase}{sep}url={quote(stream_url)}&ref={quote(page_url)}"
+                    return {
+                        "parse": 0,
+                        "jx": 0,
+                        "url": proxy_url,
+                    }
+            except Exception:
+                pass
+
+        # 若 master.m3u8 对 Python 依然返回 403（需浏览器 JS/TLS 指纹或动态授权），
+        # 自动降级交由播放器内置 WebView 嗅探播放页
         return {
-            "parse": 0,
+            "parse": 1,
             "jx": 0,
-            "url": proxy_url,
+            "url": page_url,
+            "header": {
+                "User-Agent": self.ua,
+                "Referer": self.host + "/",
+            },
         }
 
     def isVideoFormat(self, url):
@@ -489,20 +522,13 @@ class Spider(BaseSpider):
             "Origin": self.host,
             "Accept": "*/*",
             "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
         }
         try:
             r = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
-            if r.status_code == 403:
-                # 若 Session 过期，尝试重新访问播放页刷新 Cookie 后重试一次
-                self._get(ref)
-                r = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
-
             content_type = r.headers.get("Content-Type", "application/octet-stream")
+            pbase = self._proxy_base()
+            sep = "&" if "?" in pbase else "?"
 
-            # 重写 m3u8 内部的二级索引与 ts 切片，确保后续分片也携带完整 Header/Cookie
             if ".m3u8" in target_url.lower() or "mpegurl" in content_type.lower():
                 r.encoding = "utf-8"
                 lines = []
@@ -510,11 +536,11 @@ class Spider(BaseSpider):
                     s = line.strip()
                     if s and not s.startswith("#"):
                         abs_u = urljoin(target_url, s)
-                        lines.append(f"{self.getProxyUrl()}&url={quote(abs_u)}&ref={quote(ref)}")
+                        lines.append(f"{pbase}{sep}url={quote(abs_u)}&ref={quote(ref)}")
                     elif 'URI="' in s:
                         def _rep_uri(m):
                             abs_u = urljoin(target_url, m.group(1))
-                            return f'URI="{self.getProxyUrl()}&url={quote(abs_u)}&ref={quote(ref)}"'
+                            return f'URI="{pbase}{sep}url={quote(abs_u)}&ref={quote(ref)}"'
                         lines.append(re.sub(r'URI="([^"]+)"', _rep_uri, s))
                     else:
                         lines.append(line)
