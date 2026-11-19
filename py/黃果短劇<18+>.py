@@ -14,6 +14,7 @@ class Spider(Spider):
     RE_CLASS_HREF = re.compile(r"^/zh-hant/(?:library|tag|category)/([a-zA-Z0-9_-]+)/?$")
     RE_TRAILING_NUM = re.compile(r"\d+$")
     RE_VOD_HREF = re.compile(r"(?:^|/)\d{3,10}(?:/|$|\?)")
+    RE_VID_NUM = re.compile(r"\d{3,10}")
     RE_EP_REMARKS = re.compile(r"(\d+\s*集可觀看)")
     RE_JSON_VOD = re.compile(r'"id"\s*:\s*"?(\d{3,10})"?[^{}]{0,300}?"title"\s*:\s*"([^"\\]{2,60})"')
     RE_EP_TEXT = re.compile(r"^(第\s*\d+\s*集|EP\s*\d+|\d+)$", re.I)
@@ -132,18 +133,25 @@ class Spider(Spider):
 
     def _parse_videos(self, html, status_code=200, current_pg=1):
         videos = []
-        seen_urls = set()
+        seen_vids = set()
+        seen_titles = set()
         soup = BeautifulSoup(html, "html.parser")
 
         for a in soup.find_all("a", href=True):
             href = a["href"].strip()
-            if not self.RE_VOD_HREF.search(href):
+            vid_match = self.RE_VOD_HREF.search(href)
+            if not vid_match:
                 continue
             if any(x in href for x in self.EXCLUDE_HREF_KEYS):
                 continue
 
-            full_url = self._normalize_url(href)
-            if full_url in seen_urls:
+            # 提取純數字影片 ID 作為核心去重依據
+            vid_num = self.RE_VID_NUM.search(vid_match.group(0)).group(0)
+            if vid_num in seen_vids:
+                continue
+
+            # 排除直接指向單集播放的連結 (如 /12345/ep-1 或 /12345/1)
+            if re.search(rf"/{vid_num}/(?:ep-?|episode-?|watch/)?\d+", href):
                 continue
 
             # 向上尋找單張卡片容器
@@ -182,7 +190,7 @@ class Spider(Spider):
                         title = line
                         break
 
-            if not title:
+            if not title or title in seen_titles:
                 continue
 
             # 2. 提取封面圖
@@ -195,24 +203,26 @@ class Spider(Spider):
             ep_match = self.RE_EP_REMARKS.search(card_lines)
             remarks = ep_match.group(1) if ep_match else ""
 
-            seen_urls.add(full_url)
+            # 同時記錄影片 ID 與劇名，杜絕重複片卡
+            seen_vids.add(vid_num)
+            seen_titles.add(title)
             videos.append({
-                "vod_id": full_url,
+                "vod_id": f"{self.base_lib}{vid_num}/",
                 "vod_name": title,
                 "vod_pic": pic,
                 "vod_remarks": remarks,
             })
 
-        # Fallback: 嘗試從內嵌 JSON (如 Next.js / Nuxt 狀態) 撈取
+        # Fallback: 嘗試從內嵌 JSON 撈取
         if not videos:
             unescaped = html.replace('\\"', '"').replace("\\\\/", "/")
             for m in self.RE_JSON_VOD.finditer(unescaped):
                 vid_num, title = m.group(1), m.group(2)
-                full_url = f"{self.base_lib}{vid_num}/"
-                if full_url not in seen_urls and not any(k in title for k in ("黃果", "片庫", "首頁")):
-                    seen_urls.add(full_url)
+                if vid_num not in seen_vids and title not in seen_titles and not any(k in title for k in ("黃果", "片庫", "首頁")):
+                    seen_vids.add(vid_num)
+                    seen_titles.add(title)
                     videos.append({
-                        "vod_id": full_url,
+                        "vod_id": f"{self.base_lib}{vid_num}/",
                         "vod_name": title,
                         "vod_pic": "",
                         "vod_remarks": "短劇",
