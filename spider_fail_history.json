@@ -1,13 +1,5 @@
 {
-  "py/qiyoudy.py": {
-    "first_fail_date": "2026-11-19",
-    "last_fail_date": "2026-11-19"
-  },
-  "js/s/小镇.json": {
-    "first_fail_date": "2026-11-19",
-    "last_fail_date": "2026-11-19"
-  },
-  "js/xiaosa/XBPQ/小镇影视.json": {
+  "js/低端影视.js": {
     "first_fail_date": "2026-11-19",
     "last_fail_date": "2026-11-19"
   }
