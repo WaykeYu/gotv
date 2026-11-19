@@ -2,8 +2,28 @@
   "spider": "./custom_spider.jar;md5;auto",
   "sites": [
     {
+      "key": "py_qiyoudy",
+      "name": "[PY] qiyoudy (56ms)",
+      "type": 3,
+      "api": "./py/qiyoudy.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "http://www.qiyoudy2.com"
+    },
+    {
+      "key": "py_py_imaple",
+      "name": "[PY] py_imaple (64ms)",
+      "type": 3,
+      "api": "./py/py_imaple.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://imaple.tv"
+    },
+    {
       "key": "py_芒果TV (1)",
-      "name": "[PY] 芒果TV (1) (53ms)",
+      "name": "[PY] 芒果TV (1) (72ms)",
       "type": 3,
       "api": "./py/芒果TV (1).py",
       "searchable": 1,
@@ -22,24 +42,54 @@
       "ext": "https://www.juzong01.me"
     },
     {
-      "key": "py_qiyoudy",
-      "name": "[PY] qiyoudy (94ms)",
+      "key": "py_bubuzhuiju",
+      "name": "[PY] bubuzhuiju (79ms)",
       "type": 3,
-      "api": "./py/qiyoudy.py",
+      "api": "./py/bubuzhuiju.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "http://www.qiyoudy2.com"
+      "ext": "https://323433ssdfd.top"
     },
     {
-      "key": "py_py_imaple",
-      "name": "[PY] py_imaple (95ms)",
+      "key": "py_奇优影院",
+      "name": "[PY] 奇优影院 (79ms)",
       "type": 3,
-      "api": "./py/py_imaple.py",
+      "api": "./py/奇优影院.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://imaple.tv"
+      "ext": "http://qiyoudy5.com/search.php"
+    },
+    {
+      "key": "py_咖啡直播",
+      "name": "[PY] 咖啡直播 (92ms)",
+      "type": 3,
+      "api": "./py/咖啡直播.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://kafeizhibo.com"
+    },
+    {
+      "key": "py_茶杯狐影视",
+      "name": "[PY] 茶杯狐影视 (95ms)",
+      "type": 3,
+      "api": "./py/茶杯狐影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://cupfoxys.cc"
+    },
+    {
+      "key": "py_粤漫",
+      "name": "[PY] 粤漫 (99ms)",
+      "type": 3,
+      "api": "./py/粤漫.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.ymvid.com"
     },
     {
       "key": "py_剧多短剧",
@@ -62,258 +112,8 @@
       "ext": "https://www.jennyhow.com"
     },
     {
-      "key": "py_wbbb",
-      "name": "[PY] wbbb (102ms)",
-      "type": 3,
-      "api": "./py/wbbb.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://wbbb1.com"
-    },
-    {
-      "key": "py_盘友圈",
-      "name": "[PY] 盘友圈 (110ms)",
-      "type": 3,
-      "api": "./py/盘友圈.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://panyq.com"
-    },
-    {
-      "key": "py_奇优影院",
-      "name": "[PY] 奇优影院 (119ms)",
-      "type": 3,
-      "api": "./py/奇优影院.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "http://qiyoudy5.com/search.php"
-    },
-    {
-      "key": "py_茶杯狐影视",
-      "name": "[PY] 茶杯狐影视 (121ms)",
-      "type": 3,
-      "api": "./py/茶杯狐影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://cupfoxys.cc"
-    },
-    {
-      "key": "py_小鸭子看看",
-      "name": "[PY] 小鸭子看看 (123ms)",
-      "type": 3,
-      "api": "./py/小鸭子看看.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://xiaoyakankan.com"
-    },
-    {
-      "key": "py_ruyishipin",
-      "name": "[PY] ruyishipin (125ms)",
-      "type": 3,
-      "api": "./py/ruyishipin.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://rysp.tv"
-    },
-    {
-      "key": "py_每日大赛",
-      "name": "[PY] 每日大赛 (135ms)",
-      "type": 3,
-      "api": "./py/每日大赛.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.mrds66.com"
-    },
-    {
-      "key": "py_6v",
-      "name": "[PY] 6v (135ms)",
-      "type": 3,
-      "api": "./py/6v.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.xb6v.org"
-    },
-    {
-      "key": "py_低端影视",
-      "name": "[PY] 低端影视 (141ms)",
-      "type": 3,
-      "api": "./py/低端影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.ddys24.com"
-    },
-    {
-      "key": "py_粤漫",
-      "name": "[PY] 粤漫 (144ms)",
-      "type": 3,
-      "api": "./py/粤漫.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.ymvid.com"
-    },
-    {
-      "key": "py_bubuzhuiju",
-      "name": "[PY] bubuzhuiju (148ms)",
-      "type": 3,
-      "api": "./py/bubuzhuiju.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://323433ssdfd.top"
-    },
-    {
-      "key": "py_hongguo_fixed",
-      "name": "[PY] hongguo_fixed (155ms)",
-      "type": 3,
-      "api": "./py/hongguo_fixed.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.hongguoapp.cn"
-    },
-    {
-      "key": "py_dsystv",
-      "name": "[PY] dsystv (161ms)",
-      "type": 3,
-      "api": "./py/dsystv.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://dsystv.com"
-    },
-    {
-      "key": "py_咖啡直播",
-      "name": "[PY] 咖啡直播 (171ms)",
-      "type": 3,
-      "api": "./py/咖啡直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://kafeizhibo.com"
-    },
-    {
-      "key": "py_fqdm",
-      "name": "[PY] fqdm (177ms)",
-      "type": 3,
-      "api": "./py/fqdm.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.fqdm.cc"
-    },
-    {
-      "key": "py_aikanbot",
-      "name": "[PY] aikanbot (188ms)",
-      "type": 3,
-      "api": "./py/aikanbot.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www1.aikanbot.com"
-    },
-    {
-      "key": "py_爱瓜影视",
-      "name": "[PY] 爱瓜影视 (192ms)",
-      "type": 3,
-      "api": "./py/爱瓜影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://tvapi211.magicetech.com"
-    },
-    {
-      "key": "py_茶杯狐",
-      "name": "[PY] 茶杯狐 (194ms)",
-      "type": 3,
-      "api": "./py/茶杯狐.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://citapa.com"
-    },
-    {
-      "key": "py_聚合直播",
-      "name": "[PY] 聚合直播 (196ms)",
-      "type": 3,
-      "api": "./py/聚合直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.huya.com"
-    },
-    {
-      "key": "py_yangshipin",
-      "name": "[PY] yangshipin (206ms)",
-      "type": 3,
-      "api": "./py/yangshipin.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://epg.112114.xyz/pp.xml"
-    },
-    {
-      "key": "py_pianku4k",
-      "name": "[PY] pianku4k (217ms)",
-      "type": 3,
-      "api": "./py/pianku4k.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://4k01.pianku.online"
-    },
-    {
-      "key": "py_Pandalive直播",
-      "name": "[PY] Pandalive直播 (217ms)",
-      "type": 3,
-      "api": "./py/Pandalive直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://5721004.xyz"
-    },
-    {
-      "key": "py_七七影視",
-      "name": "[PY] 七七影視 (218ms)",
-      "type": 3,
-      "api": "./py/七七影視.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.7749tv.cc"
-    },
-    {
-      "key": "py_duoduo",
-      "name": "[PY] duoduo (223ms)",
-      "type": 3,
-      "api": "./py/duoduo.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://duoduosdf12223234334.top"
-    },
-    {
-      "key": "py_小苹果影视",
-      "name": "[PY] 小苹果影视 (234ms)",
-      "type": 3,
-      "api": "./py/小苹果影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "http://item.xpgcom.com"
-    },
-    {
       "key": "py_oule",
-      "name": "[PY] oule (238ms)",
+      "name": "[PY] oule (111ms)",
       "type": 3,
       "api": "./py/oule.py",
       "searchable": 1,
@@ -322,138 +122,38 @@
       "ext": "https://www.olevod.one"
     },
     {
-      "key": "py_努努影院",
-      "name": "[PY] 努努影院 (239ms)",
+      "key": "py_ruyishipin",
+      "name": "[PY] ruyishipin (114ms)",
       "type": 3,
-      "api": "./py/努努影院.py",
+      "api": "./py/ruyishipin.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://nnyy.la"
+      "ext": "https://rysp.tv"
     },
     {
-      "key": "py_yysub",
-      "name": "[PY] yysub (253ms)",
+      "key": "py_盘友圈",
+      "name": "[PY] 盘友圈 (115ms)",
       "type": 3,
-      "api": "./py/yysub.py",
+      "api": "./py/盘友圈.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://m.yysub.cc"
+      "ext": "https://panyq.com"
     },
     {
-      "key": "py_ppnix",
-      "name": "[PY] ppnix (282ms)",
+      "key": "py_pianku4k",
+      "name": "[PY] pianku4k (119ms)",
       "type": 3,
-      "api": "./py/ppnix.py",
+      "api": "./py/pianku4k.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.ppnix.com"
-    },
-    {
-      "key": "py_youtubelive",
-      "name": "[PY] youtubelive (298ms)",
-      "type": 3,
-      "api": "./py/youtubelive.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.youtube.com/watch"
-    },
-    {
-      "key": "py_ytb",
-      "name": "[PY] ytb (305ms)",
-      "type": 3,
-      "api": "./py/ytb.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.youtube.com"
-    },
-    {
-      "key": "py_saohuo",
-      "name": "[PY] saohuo (349ms)",
-      "type": 3,
-      "api": "./py/saohuo.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://shdy5.us"
-    },
-    {
-      "key": "py_嘀嗒影视",
-      "name": "[PY] 嘀嗒影视 (355ms)",
-      "type": 3,
-      "api": "./py/嘀嗒影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.didahd.xyz"
-    },
-    {
-      "key": "py_央视影视",
-      "name": "[PY] 央视影视 (372ms)",
-      "type": 3,
-      "api": "./py/央视影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://api.cntv.cn/NewVideo/getVideoListByColumn"
-    },
-    {
-      "key": "py_哔哩直播",
-      "name": "[PY] 哔哩直播 (384ms)",
-      "type": 3,
-      "api": "./py/哔哩直播.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://search.bilibili.com"
-    },
-    {
-      "key": "py_pansou",
-      "name": "[PY] pansou (454ms)",
-      "type": 3,
-      "api": "./py/pansou.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://so.252035.xyz"
-    },
-    {
-      "key": "py_泥视频",
-      "name": "[PY] 泥视频 (469ms)",
-      "type": 3,
-      "api": "./py/泥视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.nivod.cc"
-    },
-    {
-      "key": "py_优视频",
-      "name": "[PY] 优视频 (470ms)",
-      "type": 3,
-      "api": "./py/优视频.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://api-h5.uvod.tv"
-    },
-    {
-      "key": "py_光鸭社区",
-      "name": "[PY] 光鸭社区 (492ms)",
-      "type": 3,
-      "api": "./py/光鸭社区.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.guangya.cc"
+      "ext": "https://4k01.pianku.online"
     },
     {
       "key": "py_小红薯APP",
-      "name": "[PY] 小红薯APP (528ms)",
+      "name": "[PY] 小红薯APP (120ms)",
       "type": 3,
       "api": "./py/小红薯APP.py",
       "searchable": 1,
@@ -462,8 +162,308 @@
       "ext": "https://jhfkdnov21vfd.dyfcbkggxn.work"
     },
     {
+      "key": "py_低端影视",
+      "name": "[PY] 低端影视 (126ms)",
+      "type": 3,
+      "api": "./py/低端影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.ddys24.com"
+    },
+    {
+      "key": "py_每日大赛",
+      "name": "[PY] 每日大赛 (128ms)",
+      "type": 3,
+      "api": "./py/每日大赛.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.mrds66.com"
+    },
+    {
+      "key": "py_aikanbot",
+      "name": "[PY] aikanbot (131ms)",
+      "type": 3,
+      "api": "./py/aikanbot.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www1.aikanbot.com"
+    },
+    {
+      "key": "py_yangshipin",
+      "name": "[PY] yangshipin (134ms)",
+      "type": 3,
+      "api": "./py/yangshipin.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://epg.112114.xyz/pp.xml"
+    },
+    {
+      "key": "py_fqdm",
+      "name": "[PY] fqdm (144ms)",
+      "type": 3,
+      "api": "./py/fqdm.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.fqdm.cc"
+    },
+    {
+      "key": "py_wbbb",
+      "name": "[PY] wbbb (146ms)",
+      "type": 3,
+      "api": "./py/wbbb.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://wbbb1.com"
+    },
+    {
+      "key": "py_小鸭子看看",
+      "name": "[PY] 小鸭子看看 (149ms)",
+      "type": 3,
+      "api": "./py/小鸭子看看.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://xiaoyakankan.com"
+    },
+    {
+      "key": "py_6v",
+      "name": "[PY] 6v (153ms)",
+      "type": 3,
+      "api": "./py/6v.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.xb6v.org"
+    },
+    {
+      "key": "py_爱瓜影视",
+      "name": "[PY] 爱瓜影视 (155ms)",
+      "type": 3,
+      "api": "./py/youtubelive.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://tvapi211.magicetech.com"
+    },
+    {
+      "key": "py_七七影視",
+      "name": "[PY] 七七影視 (163ms)",
+      "type": 3,
+      "api": "./py/七七影視.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.7749tv.cc"
+    },
+    {
+      "key": "py_yysub",
+      "name": "[PY] yysub (167ms)",
+      "type": 3,
+      "api": "./py/yysub.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://m.yysub.cc"
+    },
+    {
+      "key": "py_Pandalive直播",
+      "name": "[PY] Pandalive直播 (172ms)",
+      "type": 3,
+      "api": "./py/Pandalive直播.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://5721004.xyz"
+    },
+    {
+      "key": "py_聚合直播",
+      "name": "[PY] 聚合直播 (188ms)",
+      "type": 3,
+      "api": "./py/聚合直播.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.huya.com"
+    },
+    {
+      "key": "py_小苹果影视",
+      "name": "[PY] 小苹果影视 (206ms)",
+      "type": 3,
+      "api": "./py/小苹果影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "http://item.xpgcom.com"
+    },
+    {
+      "key": "py_茶杯狐",
+      "name": "[PY] 茶杯狐 (207ms)",
+      "type": 3,
+      "api": "./py/茶杯狐.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://citapa.com"
+    },
+    {
+      "key": "py_youtubelive",
+      "name": "[PY] youtubelive (210ms)",
+      "type": 3,
+      "api": "./py/youtubelive.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.youtube.com/watch"
+    },
+    {
+      "key": "py_努努影院",
+      "name": "[PY] 努努影院 (230ms)",
+      "type": 3,
+      "api": "./py/努努影院.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://nnyy.la"
+    },
+    {
+      "key": "py_hongguo_fixed",
+      "name": "[PY] hongguo_fixed (246ms)",
+      "type": 3,
+      "api": "./py/hongguo_fixed.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.hongguoapp.cn"
+    },
+    {
+      "key": "py_优视频",
+      "name": "[PY] 优视频 (252ms)",
+      "type": 3,
+      "api": "./py/优视频.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://api-h5.uvod.tv"
+    },
+    {
+      "key": "py_哔哩直播",
+      "name": "[PY] 哔哩直播 (262ms)",
+      "type": 3,
+      "api": "./py/哔哩直播.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://search.bilibili.com"
+    },
+    {
+      "key": "py_泥视频",
+      "name": "[PY] 泥视频 (282ms)",
+      "type": 3,
+      "api": "./py/泥视频.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.nivod.cc"
+    },
+    {
+      "key": "py_dsystv",
+      "name": "[PY] dsystv (290ms)",
+      "type": 3,
+      "api": "./py/dsystv.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://dsystv.com"
+    },
+    {
+      "key": "py_duoduo",
+      "name": "[PY] duoduo (292ms)",
+      "type": 3,
+      "api": "./py/duoduo.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://duoduosdf12223234334.top"
+    },
+    {
+      "key": "py_央视影视",
+      "name": "[PY] 央视影视 (301ms)",
+      "type": 3,
+      "api": "./py/央视影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://api.cntv.cn/NewVideo/getVideoListByColumn"
+    },
+    {
+      "key": "py_saohuo",
+      "name": "[PY] saohuo (345ms)",
+      "type": 3,
+      "api": "./py/saohuo.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://shdy5.us"
+    },
+    {
+      "key": "py_ytb",
+      "name": "[PY] ytb (346ms)",
+      "type": 3,
+      "api": "./py/ytb.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.youtube.com"
+    },
+    {
+      "key": "py_嘀嗒影视",
+      "name": "[PY] 嘀嗒影视 (359ms)",
+      "type": 3,
+      "api": "./py/嘀嗒影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.didahd.xyz"
+    },
+    {
+      "key": "py_ppnix",
+      "name": "[PY] ppnix (421ms)",
+      "type": 3,
+      "api": "./py/ppnix.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.ppnix.com"
+    },
+    {
+      "key": "py_心跳",
+      "name": "[PY] 心跳 (466ms)",
+      "type": 3,
+      "api": "./py/心跳.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://ppan.dyuzi.com"
+    },
+    {
+      "key": "py_猫咪TV",
+      "name": "[PY] 猫咪TV (471ms)",
+      "type": 3,
+      "api": "./py/猫咪TV.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://maomi66.cc"
+    },
+    {
       "key": "py_4K影院",
-      "name": "[PY] 4K影院 (530ms)",
+      "name": "[PY] 4K影院 (488ms)",
       "type": 3,
       "api": "./py/4K影院.py",
       "searchable": 1,
@@ -473,7 +473,7 @@
     },
     {
       "key": "py_两个BT",
-      "name": "[PY] 两个BT (539ms)",
+      "name": "[PY] 两个BT (505ms)",
       "type": 3,
       "api": "./py/两个BT.py",
       "searchable": 1,
@@ -482,68 +482,28 @@
       "ext": "https://www.bttwoo.com"
     },
     {
-      "key": "py_like",
-      "name": "[PY] like (547ms)",
+      "key": "py_盘链",
+      "name": "[PY] 盘链 (513ms)",
       "type": 3,
-      "api": "./py/like.py",
+      "api": "./py/盘链.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://pinglian.lol"
+    },
+    {
+      "key": "py_爱奇艺",
+      "name": "[PY] 爱奇艺 (523ms)",
+      "type": 3,
+      "api": "./py/爱奇艺.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "ext": "https://www.iqiyi.com"
     },
     {
-      "key": "py_8kvod",
-      "name": "[PY] 8kvod (594ms)",
-      "type": 3,
-      "api": "./py/8kvod.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.8kvod.com"
-    },
-    {
-      "key": "py_猫咪TV",
-      "name": "[PY] 猫咪TV (595ms)",
-      "type": 3,
-      "api": "./py/猫咪TV.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://maomi66.cc"
-    },
-    {
-      "key": "py_yinhuaone",
-      "name": "[PY] yinhuaone (636ms)",
-      "type": 3,
-      "api": "./py/yinhuaone.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.yinhuaone.net"
-    },
-    {
-      "key": "py_骚火影视",
-      "name": "[PY] 骚火影视 (637ms)",
-      "type": 3,
-      "api": "./py/骚火影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://shdy2.com"
-    },
-    {
-      "key": "py_心跳盘搜",
-      "name": "[PY] 心跳盘搜 (659ms)",
-      "type": 3,
-      "api": "./py/心跳盘搜.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://ppan.dyuzi.com"
-    },
-    {
       "key": "py_huavod",
-      "name": "[PY] huavod (681ms)",
+      "name": "[PY] huavod (528ms)",
       "type": 3,
       "api": "./py/huavod.py",
       "searchable": 1,
@@ -552,18 +512,28 @@
       "ext": "https://huavod.com"
     },
     {
-      "key": "py_共青春影院",
-      "name": "[PY] 共青春影院 (698ms)",
+      "key": "py_8kvod",
+      "name": "[PY] 8kvod (600ms)",
       "type": 3,
-      "api": "./py/共青春影院.py",
+      "api": "./py/8kvod.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://gqc.ink"
+      "ext": "https://www.8kvod.com"
+    },
+    {
+      "key": "py_骚火影视",
+      "name": "[PY] 骚火影视 (614ms)",
+      "type": 3,
+      "api": "./py/骚火影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://shdy2.com"
     },
     {
       "key": "py_零度影视",
-      "name": "[PY] 零度影视 (698ms)",
+      "name": "[PY] 零度影视 (644ms)",
       "type": 3,
       "api": "./py/零度影视.py",
       "searchable": 1,
@@ -573,7 +543,7 @@
     },
     {
       "key": "py_瓜子",
-      "name": "[PY] 瓜子 (701ms)",
+      "name": "[PY] 瓜子 (665ms)",
       "type": 3,
       "api": "./py/瓜子.py",
       "searchable": 1,
@@ -582,8 +552,18 @@
       "ext": "https://api.w32z7vtd.com"
     },
     {
+      "key": "py_yinhuaone",
+      "name": "[PY] yinhuaone (682ms)",
+      "type": 3,
+      "api": "./py/yinhuaone.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.yinhuaone.net"
+    },
+    {
       "key": "py_618",
-      "name": "[PY] 618 (722ms)",
+      "name": "[PY] 618 (724ms)",
       "type": 3,
       "api": "./py/618.py",
       "searchable": 1,
@@ -592,48 +572,18 @@
       "ext": "https://618041.xyz"
     },
     {
-      "key": "py_广东荔枝",
-      "name": "[PY] 广东荔枝 (750ms)",
+      "key": "py_光鸭社区",
+      "name": "[PY] 光鸭社区 (764ms)",
       "type": 3,
-      "api": "./py/广东荔枝.py",
+      "api": "./py/光鸭社区.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.gdtv.cn"
-    },
-    {
-      "key": "py_麦田影院",
-      "name": "[PY] 麦田影院 (796ms)",
-      "type": 3,
-      "api": "./py/麦田影院.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.mtyy1.com"
-    },
-    {
-      "key": "py_acfun",
-      "name": "[PY] acfun (831ms)",
-      "type": 3,
-      "api": "./py/acfun.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.acfun.cn"
-    },
-    {
-      "key": "py_偷乐短剧",
-      "name": "[PY] 偷乐短剧 (835ms)",
-      "type": 3,
-      "api": "./py/偷乐短剧.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.toule.top"
+      "ext": "https://www.guangya.cc"
     },
     {
       "key": "py_哔哩",
-      "name": "[PY] 哔哩 (837ms)",
+      "name": "[PY] 哔哩 (804ms)",
       "type": 3,
       "api": "./py/哔哩.py",
       "searchable": 1,
@@ -642,18 +592,28 @@
       "ext": "https://www.bilibili.com"
     },
     {
-      "key": "py_河马短剧",
-      "name": "[PY] 河马短剧 (888ms)",
+      "key": "py_偷乐短剧",
+      "name": "[PY] 偷乐短剧 (836ms)",
       "type": 3,
-      "api": "./py/河马短剧.py",
+      "api": "./py/偷乐短剧.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.kuaikaw.cn"
+      "ext": "https://www.toule.top"
+    },
+    {
+      "key": "py_麦田影院",
+      "name": "[PY] 麦田影院 (883ms)",
+      "type": 3,
+      "api": "./py/麦田影院.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.mtyy1.com"
     },
     {
       "key": "py_神秘电影",
-      "name": "[PY] 神秘电影 (958ms)",
+      "name": "[PY] 神秘电影 (936ms)",
       "type": 3,
       "api": "./py/神秘电影.py",
       "searchable": 1,
@@ -662,20 +622,30 @@
       "ext": "https://h4ivs.sm431.vip"
     },
     {
-      "key": "py_盘链",
-      "name": "[PY] 盘链 (1027ms)",
+      "key": "py_广东荔枝",
+      "name": "[PY] 广东荔枝 (939ms)",
       "type": 3,
-      "api": "./py/盘链.py",
+      "api": "./py/广东荔枝.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://pinglian.lol"
+      "ext": "https://www.gdtv.cn"
     },
     {
-      "key": "py_MiFun动漫",
-      "name": "[PY] MiFun动漫 (1043ms)",
+      "key": "py_acfun",
+      "name": "[PY] acfun (945ms)",
       "type": 3,
-      "api": "./py/MiFun动漫.py",
+      "api": "./py/acfun.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.acfun.cn"
+    },
+    {
+      "key": "py_mifun",
+      "name": "[PY] mifun (979ms)",
+      "type": 3,
+      "api": "./py/mifun.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
@@ -683,7 +653,7 @@
     },
     {
       "key": "py_dandanqi",
-      "name": "[PY] dandanqi (1094ms)",
+      "name": "[PY] dandanqi (1066ms)",
       "type": 3,
       "api": "./py/dandanqi.py",
       "searchable": 1,
@@ -692,28 +662,28 @@
       "ext": "https://www.dandanqi.vip"
     },
     {
-      "key": "py_麒麟影视",
-      "name": "[PY] 麒麟影视 (1195ms)",
+      "key": "py_河马短剧",
+      "name": "[PY] 河马短剧 (1144ms)",
       "type": 3,
-      "api": "./py/麒麟影视.py",
+      "api": "./py/河马短剧.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.qlys.cc"
+      "ext": "https://www.kuaikaw.cn"
     },
     {
-      "key": "py_shortfilm",
-      "name": "[PY] shortfilm (1222ms)",
+      "key": "py_麒麟影视",
+      "name": "[PY] 麒麟影视 (1153ms)",
       "type": 3,
-      "api": "./py/shortfilm.py",
+      "api": "./py/哔哩.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://hongguoduanju.com"
+      "ext": "https://www.bilibili.com"
     },
     {
       "key": "py_魔方影视",
-      "name": "[PY] 魔方影视 (1248ms)",
+      "name": "[PY] 魔方影视 (1204ms)",
       "type": 3,
       "api": "./py/魔方影视.py",
       "searchable": 1,
@@ -722,18 +692,18 @@
       "ext": "https://www.ky4k14t.top"
     },
     {
-      "key": "py_mifun",
-      "name": "[PY] mifun (1334ms)",
+      "key": "py_shortfilm",
+      "name": "[PY] shortfilm (1277ms)",
       "type": 3,
-      "api": "./py/mifun.py",
+      "api": "./py/神秘电影.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://getcn.mymifun.com"
+      "ext": "https://h4ivs.sm431.vip"
     },
     {
       "key": "py_275听书",
-      "name": "[PY] 275听书 (1378ms)",
+      "name": "[PY] 275听书 (1332ms)",
       "type": 3,
       "api": "./py/275听书.py",
       "searchable": 1,
@@ -742,8 +712,18 @@
       "ext": "https://www.i275.com"
     },
     {
+      "key": "py_pansou",
+      "name": "[PY] pansou (1347ms)",
+      "type": 3,
+      "api": "./py/pansou.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://so.252035.xyz"
+    },
+    {
       "key": "py_优酷视频",
-      "name": "[PY] 优酷视频 (1458ms)",
+      "name": "[PY] 优酷视频 (1388ms)",
       "type": 3,
       "api": "./py/优酷视频.py",
       "searchable": 1,
@@ -752,28 +732,18 @@
       "ext": "https://www.youku.com"
     },
     {
-      "key": "py_jieyingshi",
-      "name": "[PY] jieyingshi (1799ms)",
+      "key": "py_共青春影院",
+      "name": "[PY] 共青春影院 (1395ms)",
       "type": 3,
-      "api": "./py/jieyingshi.py",
+      "api": "./py/共青春影院.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://www.hkybqufgh.com"
-    },
-    {
-      "key": "py_猎手影视",
-      "name": "[PY] 猎手影视 (1867ms)",
-      "type": 3,
-      "api": "./py/猎手影视.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://ls2026.madp8.cn"
+      "ext": "https://gqc.ink"
     },
     {
       "key": "py_kkys",
-      "name": "[PY] kkys (1910ms)",
+      "name": "[PY] kkys (1444ms)",
       "type": 3,
       "api": "./py/kkys.py",
       "searchable": 1,
@@ -782,24 +752,24 @@
       "ext": "https://www.kkys20.com"
     },
     {
-      "key": "py_边缘影视",
-      "name": "[PY] 边缘影视 (2007ms)",
+      "key": "py_py_电影猎手",
+      "name": "[PY] py_电影猎手 (1485ms)",
       "type": 3,
-      "api": "./py/边缘影视.py",
+      "api": "./py/py_电影猎手.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://bianyuan001.oss-cn-beijing.aliyuncs.com/huidu1.0.0.json"
+      "ext": "https://ls2026.madp8.cn"
     },
     {
-      "key": "py_七味",
-      "name": "[PY] 七味 (2014ms)",
+      "key": "py_jieyingshi",
+      "name": "[PY] jieyingshi (1496ms)",
       "type": 3,
-      "api": "./py/七味.py",
+      "api": "./py/jieyingshi.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://115.com/web/lixian"
+      "ext": "https://www.hkybqufgh.com"
     },
     {
       "key": "py_熊猫视频",
@@ -813,7 +783,7 @@
     },
     {
       "key": "py_aigua",
-      "name": "[PY] aigua (2291ms)",
+      "name": "[PY] aigua (1779ms)",
       "type": 3,
       "api": "./py/aigua.py",
       "searchable": 1,
@@ -822,38 +792,18 @@
       "ext": "https://aigua8.com"
     },
     {
-      "key": "py_蓝莓短剧",
-      "name": "[PY] 蓝莓短剧 (2423ms)",
+      "key": "py_七味",
+      "name": "[PY] 七味 (1823ms)",
       "type": 3,
-      "api": "./py/蓝莓短剧.py",
+      "api": "./py/七味.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "http://qcapp.xingya.com.cn"
-    },
-    {
-      "key": "py_熊猫tv",
-      "name": "[PY] 熊猫tv (2675ms)",
-      "type": 3,
-      "api": "./py/熊猫tv.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.pandalive.co.kr"
-    },
-    {
-      "key": "py_wxty",
-      "name": "[PY] wxty (2794ms)",
-      "type": 3,
-      "api": "./py/wxty.py",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://live.kankanews.com"
+      "ext": "https://115.com/web/lixian"
     },
     {
       "key": "py_枫叶音乐",
-      "name": "[PY] 枫叶音乐 (3161ms)",
+      "name": "[PY] 枫叶音乐 (1953ms)",
       "type": 3,
       "api": "./py/枫叶音乐.py",
       "searchable": 1,
@@ -862,8 +812,48 @@
       "ext": "https://mu-jie.cc"
     },
     {
+      "key": "py_边缘影视",
+      "name": "[PY] 边缘影视 (2009ms)",
+      "type": 3,
+      "api": "./py/边缘影视.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://bianyuan001.oss-cn-beijing.aliyuncs.com/huidu1.0.0.json"
+    },
+    {
+      "key": "py_熊猫视频",
+      "name": "[PY] 熊猫视频 (2028ms)",
+      "type": 3,
+      "api": "./py/熊猫视频.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.88xff.com/home.html"
+    },
+    {
+      "key": "py_wxty",
+      "name": "[PY] wxty (2292ms)",
+      "type": 3,
+      "api": "./py/wxty.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://live.kankanews.com"
+    },
+    {
+      "key": "py_熊猫tv",
+      "name": "[PY] 熊猫tv (2645ms)",
+      "type": 3,
+      "api": "./py/熊猫tv.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.pandalive.co.kr"
+    },
+    {
       "key": "py_goldmedal",
-      "name": "[PY] goldmedal (3985ms)",
+      "name": "[PY] goldmedal (2845ms)",
       "type": 3,
       "api": "./py/goldmedal.py",
       "searchable": 1,
@@ -872,8 +862,28 @@
       "ext": "https://www.x8kb9k8.com"
     },
     {
+      "key": "py_MiFun动漫",
+      "name": "[PY] MiFun动漫 (3347ms)",
+      "type": 3,
+      "api": "./py/MiFun动漫.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://getcf.mymifun.com"
+    },
+    {
+      "key": "py_蓝莓短剧",
+      "name": "[PY] 蓝莓短剧 (4321ms)",
+      "type": 3,
+      "api": "./py/蓝莓短剧.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "http://qcapp.xingya.com.cn"
+    },
+    {
       "key": "py_短剧聚合1",
-      "name": "[PY] 短剧聚合1 (4643ms)",
+      "name": "[PY] 短剧聚合1 (4488ms)",
       "type": 3,
       "api": "./py/短剧聚合1.py",
       "searchable": 1,
@@ -883,7 +893,7 @@
     },
     {
       "key": "py_maple",
-      "name": "[PY] maple (4691ms)",
+      "name": "[PY] maple (4656ms)",
       "type": 3,
       "api": "./py/maple.py",
       "searchable": 1,
@@ -893,7 +903,7 @@
     },
     {
       "key": "py_木兮",
-      "name": "[PY] 木兮 (31460ms)",
+      "name": "[PY] 木兮 (31221ms)",
       "type": 3,
       "api": "./py/木兮.py",
       "searchable": 1,
@@ -903,7 +913,7 @@
     },
     {
       "key": "py_juok3",
-      "name": "[PY] juok3 (40300ms)",
+      "name": "[PY] juok3 (40421ms)",
       "type": 3,
       "api": "./py/juok3.py",
       "searchable": 1,
@@ -913,7 +923,7 @@
     },
     {
       "key": "py_胖虎APP",
-      "name": "[PY] 胖虎APP (40801ms)",
+      "name": "[PY] 胖虎APP (40910ms)",
       "type": 3,
       "api": "./py/胖虎APP.py",
       "searchable": 1,
@@ -923,7 +933,7 @@
     },
     {
       "key": "py_爱看短剧",
-      "name": "[PY] 爱看短剧 (41575ms)",
+      "name": "[PY] 爱看短剧 (41155ms)",
       "type": 3,
       "api": "./py/爱看短剧.py",
       "searchable": 1,
@@ -933,7 +943,7 @@
     },
     {
       "key": "py_可可影视",
-      "name": "[PY] 可可影视 (42141ms)",
+      "name": "[PY] 可可影视 (41436ms)",
       "type": 3,
       "api": "./py/可可影视.py",
       "searchable": 1,
