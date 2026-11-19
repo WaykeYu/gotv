@@ -29,7 +29,7 @@ except Exception:
 class Spider(BaseSpider):
 
     def getName(self):
-        return "柚子短剧_v4"
+        return "柚子短剧_v5"
 
     def init(self, extend=""):
         self.host = "https://youzidj.com"
@@ -70,6 +70,24 @@ class Spider(BaseSpider):
             def log_message(self, format, *args):
                 pass
 
+            def _upstream_get(self, url, headers):
+                # 优先尝试 curl_cffi 模拟 Chrome TLS 指纹，未安装时自动回退至 Session
+                try:
+                    from curl_cffi import requests as c_req
+                    cookies = spider_ref._sess.cookies.get_dict()
+                    return c_req.get(
+                        url,
+                        headers=headers,
+                        cookies=cookies,
+                        impersonate="chrome124",
+                        timeout=15,
+                        verify=False,
+                    )
+                except Exception:
+                    return spider_ref._sess.get(
+                        url, headers=headers, timeout=15, verify=False
+                    )
+
             def do_GET(self):
                 parsed = urlparse(self.path)
                 target_url = ""
@@ -86,7 +104,6 @@ class Spider(BaseSpider):
                 # 2. 解析修狗TV自动转换的 /proxy/<base64> 路径参数
                 if not target_url and parsed.path.startswith("/proxy/"):
                     b64_part = parsed.path[len("/proxy/"):].strip("/")
-                    # 去掉可能附加的 .m3u8 后缀
                     if b64_part.endswith(".m3u8"):
                         b64_part = b64_part[:-5]
                     try:
@@ -116,22 +133,13 @@ class Spider(BaseSpider):
                     "Referer": ref,
                     "Origin": spider_ref.host,
                     "Accept": "*/*",
-                    "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8",
-                    "Sec-Fetch-Dest": "empty",
-                    "Sec-Fetch-Mode": "cors",
-                    "Sec-Fetch-Site": "same-origin",
                 }
                 try:
-                    r = spider_ref._sess.get(
-                        target_url, headers=req_headers, timeout=15, verify=False
-                    )
+                    r = self._upstream_get(target_url, req_headers)
                     if r.status_code == 403:
                         spider_ref._get(ref)
-                        r = spider_ref._sess.get(
-                            target_url, headers=req_headers, timeout=15, verify=False
-                        )
+                        r = self._upstream_get(target_url, req_headers)
 
-                    # 若源站仍拒绝(非200)，明确返回 HTTP 错误码与前 120 字节提示，避免播放器误把 HTML 当视频报格式错误
                     if r.status_code != 200:
                         snippet = (r.text or "")[:120].replace("\n", " ")
                         err = f"upstream {r.status_code}: {snippet}".encode("utf-8", errors="ignore")
@@ -150,8 +158,7 @@ class Spider(BaseSpider):
                     )
 
                     if is_m3u8:
-                        r.encoding = "utf-8"
-                        text = r.text
+                        text = r.content.decode("utf-8", errors="ignore")
                         if not text.lstrip().startswith("#EXTM3U"):
                             snippet = text[:120].replace("\n", " ")
                             err = f"not_m3u8: {snippet}".encode("utf-8", errors="ignore")
@@ -602,7 +609,6 @@ class Spider(BaseSpider):
             if not self._proxy_port:
                 self._start_local_server()
             if self._proxy_port:
-                # 结尾加上 &type=.m3u8，提示播放器按 HLS 格式解析
                 proxy_url = f"http://127.0.0.1:{self._proxy_port}/proxy?url={quote(stream_url)}&ref={quote(page_url)}&type=.m3u8"
                 return {
                     "parse": 0,
