@@ -29,7 +29,7 @@ except Exception:
 class Spider(BaseSpider):
 
     def getName(self):
-        return "柚子短剧_v3"
+        return "柚子短剧_v4"
 
     def init(self, extend=""):
         self.host = "https://youzidj.com"
@@ -62,7 +62,7 @@ class Spider(BaseSpider):
         self._proxy_port = 0
         self._start_local_server()
 
-    # ---------- 独立本地 HTTP 代理服务器（兼容明文查询串与 Base64 路径参数） ----------
+    # ---------- 独立本地 HTTP 代理服务器 ----------
     def _start_local_server(self):
         spider_ref = self
 
@@ -86,6 +86,9 @@ class Spider(BaseSpider):
                 # 2. 解析修狗TV自动转换的 /proxy/<base64> 路径参数
                 if not target_url and parsed.path.startswith("/proxy/"):
                     b64_part = parsed.path[len("/proxy/"):].strip("/")
+                    # 去掉可能附加的 .m3u8 后缀
+                    if b64_part.endswith(".m3u8"):
+                        b64_part = b64_part[:-5]
                     try:
                         pad = "=" * ((4 - len(b64_part) % 4) % 4)
                         decoded_qs = base64.urlsafe_b64decode(
@@ -128,17 +131,46 @@ class Spider(BaseSpider):
                             target_url, headers=req_headers, timeout=15, verify=False
                         )
 
+                    # 若源站仍拒绝(非200)，明确返回 HTTP 错误码与前 120 字节提示，避免播放器误把 HTML 当视频报格式错误
+                    if r.status_code != 200:
+                        snippet = (r.text or "")[:120].replace("\n", " ")
+                        err = f"upstream {r.status_code}: {snippet}".encode("utf-8", errors="ignore")
+                        self.send_response(r.status_code)
+                        self.send_header("Content-Type", "text/plain; charset=utf-8")
+                        self.send_header("Content-Length", str(len(err)))
+                        self.end_headers()
+                        self.wfile.write(err)
+                        return
+
                     ctype = r.headers.get("Content-Type", "application/octet-stream")
-                    if ".m3u8" in target_url.lower() or "mpegurl" in ctype.lower():
+                    is_m3u8 = (
+                        ".m3u8" in target_url.lower()
+                        or "mpegurl" in ctype.lower()
+                        or r.content.lstrip().startswith(b"#EXTM3U")
+                    )
+
+                    if is_m3u8:
                         r.encoding = "utf-8"
+                        text = r.text
+                        if not text.lstrip().startswith("#EXTM3U"):
+                            snippet = text[:120].replace("\n", " ")
+                            err = f"not_m3u8: {snippet}".encode("utf-8", errors="ignore")
+                            self.send_response(403)
+                            self.send_header("Content-Type", "text/plain; charset=utf-8")
+                            self.send_header("Content-Length", str(len(err)))
+                            self.end_headers()
+                            self.wfile.write(err)
+                            return
+
                         base_proxy = f"http://127.0.0.1:{spider_ref._proxy_port}/proxy"
                         lines = []
-                        for line in r.text.splitlines():
+                        for line in text.splitlines():
                             s = line.strip()
                             if s and not s.startswith("#"):
                                 abs_u = urljoin(target_url, s)
+                                ext_hint = "&type=.m3u8" if ".m3u8" in abs_u.lower() else "&type=.ts"
                                 lines.append(
-                                    f"{base_proxy}?url={quote(abs_u)}&ref={quote(ref)}"
+                                    f"{base_proxy}?url={quote(abs_u)}&ref={quote(ref)}{ext_hint}"
                                 )
                             elif 'URI="' in s:
                                 def _rep_uri(m):
@@ -156,7 +188,7 @@ class Spider(BaseSpider):
                         self.wfile.write(body)
                     else:
                         body = r.content
-                        self.send_response(r.status_code)
+                        self.send_response(200)
                         self.send_header("Content-Type", ctype)
                         self.send_header("Content-Length", str(len(body)))
                         self.end_headers()
@@ -570,7 +602,8 @@ class Spider(BaseSpider):
             if not self._proxy_port:
                 self._start_local_server()
             if self._proxy_port:
-                proxy_url = f"http://127.0.0.1:{self._proxy_port}/proxy?url={quote(stream_url)}&ref={quote(page_url)}"
+                # 结尾加上 &type=.m3u8，提示播放器按 HLS 格式解析
+                proxy_url = f"http://127.0.0.1:{self._proxy_port}/proxy?url={quote(stream_url)}&ref={quote(page_url)}&type=.m3u8"
                 return {
                     "parse": 0,
                     "jx": 0,
