@@ -2,5 +2,13 @@
   "py/goldmedal.py": {
     "first_fail_date": "2026-11-21",
     "last_fail_date": "2026-11-21"
+  },
+  "py/爱看短剧.py": {
+    "first_fail_date": "2026-11-21",
+    "last_fail_date": "2026-11-21"
+  },
+  "js/s/七新影视.json": {
+    "first_fail_date": "2026-11-21",
+    "last_fail_date": "2026-11-21"
   }
 }
