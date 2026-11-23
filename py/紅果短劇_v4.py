@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows / TVBox / FongMi 完整整合版
-（2026-11 最终修复版）：
-1. 分类与筛选：内置短剧题材分类（全部/都市/古装/逆袭/甜宠/战神/重生/总裁/家庭）与 filters 筛选器。
-2. 搜索优化：走无 CF 拦截的 /index.php/ajax/suggest 接口，支持快搜限流与 60s 本地缓存，翻页零延迟。
-3. 详情与选集：兼容 /voddetail/ 与 /vodplay/ 双向提取全集列表，并在简介头部附带播放参数摘要。
-4. 播放与证书绕过（针对 Yumilo Windows）：
-   - 精准解析 player_aaaa（支持 encrypt=1 URL解码、encrypt=2 Base64解码）及 /static/player/{from}.js。
-   - 验证真实 HLS (#EXTM3U) 头部与多 Referer 自适应。
-   - 彻底解决“与媒体服务器的安全连接失败”：优先尝试降级 http://，若强制 https:// 则统一交由 localProxy
-     本地代理剥离 SSL 证书校验，并重写 m3u8 内部所有切片与密钥路径。
+红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows / TVBox / FongMi 完整修复版
+（2026-11 解决“来源没有返回播放地址”与 SSL 证书校验）：
+1. 绝不返回空 url：只要从 player_aaaa 或播放页提取到地址，立即做解码与 SSL 降级处理后返回。
+2. 放宽流验证策略：当 _verify_stream 探测超时或非标准响应头时，仍保留解析出的直链并尝试最佳 Header，
+   避免误杀有效视频流导致返回空地址。
+3. 保留完整题材分类筛选、60s 搜索缓存及 localProxy 本地代理（自动重写 m3u8 切片绕过证书错误）。
 """
 import re
 import sys
@@ -199,9 +195,9 @@ class Spider(BaseSpider):
 
     def _fix_ssl_url(self, url, referer=""):
         """
-        彻底绕过 Yumilo Windows 底层播放器 SSL 证书校验失败：
-        1. 若域名支持纯 http://，直接降级为 http://（最快、零代理开销）；
-        2. 若强制 https://，统一走 localProxy 本地代理剥离 SSL 证书校验。
+        绕过 Yumilo Windows 底层播放器 SSL 证书校验失败：
+        1. 若域名支持纯 http://，直接降级为 http://；
+        2. 若强制 https://，转交 localProxy 本地代理剥离 SSL 证书校验。
         """
         if not url or not url.startswith("https://"):
             return url
@@ -621,6 +617,7 @@ class Spider(BaseSpider):
                 jx_prefix = self._get_player_jx_prefix(pa.get("from", ""))
                 if jx_prefix:
                     return jx_prefix + quote(decoded)
+                return decoded
 
         m_js = self._RE_JS_URL.search(html)
         if m_js:
@@ -655,21 +652,26 @@ class Spider(BaseSpider):
         if extracted:
             if self.isVideoFormat(extracted):
                 return extracted
-            if extracted != target_url:
-                return self._resolve_jx_or_page(extracted, referer=target_url, depth=depth + 1)
+            if extracted.startswith("http") and extracted != target_url:
+                sub = self._resolve_jx_or_page(extracted, referer=target_url, depth=depth + 1)
+                return sub or extracted
+            return extracted
 
         m_if = self._RE_IFRAME.search(html)
         if m_if:
             fr = urljoin(target_url, m_if.group(1).strip())
             if fr != target_url:
-                return self._resolve_jx_or_page(fr, referer=target_url, depth=depth + 1)
+                sub = self._resolve_jx_or_page(fr, referer=target_url, depth=depth + 1)
+                return sub or fr
 
         return ""
 
-    def _verify_stream(self, url, referer=""):
-        if not url:
-            return None
-        path = url.lower().split("?")[0]
+    def _pick_best_header(self, url, referer=""):
+        """探测最佳 Referer，即使探测失败也返回默认 Header，绝不返回 None 误杀有效链接。"""
+        default_hdr = {"User-Agent": self.ua, "Referer": referer or self.host + "/"}
+        if not url or not url.startswith("http"):
+            return default_hdr
+
         header_candidates = [
             {"User-Agent": self.ua, "Referer": referer},
             {"User-Agent": self.ua, "Referer": self.host + "/"},
@@ -678,24 +680,18 @@ class Spider(BaseSpider):
         for hdrs in header_candidates:
             try:
                 r = self._sess.get(
-                    url, headers=hdrs, timeout=6, verify=False, stream=True, allow_redirects=True
+                    url, headers=hdrs, timeout=4, verify=False, stream=True, allow_redirects=True
                 )
                 if r.status_code in (200, 206):
                     ct = (r.headers.get("Content-Type") or "").lower()
-                    chunk = next(r.iter_content(chunk_size=512), b"")
                     r.close()
-                    if not path.endswith(".m3u8"):
-                        if "text/html" not in ct:
-                            return hdrs
-                    else:
-                        head_txt = chunk.decode("utf-8", errors="ignore").lstrip()
-                        if head_txt.startswith("#EXTM3U"):
-                            return hdrs
+                    if "text/html" not in ct:
+                        return hdrs
                 else:
                     r.close()
             except Exception:
                 continue
-        return None
+        return default_hdr
 
     def playerContent(self, flag, id, vipFlags):
         pid = str(id or "").strip()
@@ -708,16 +704,21 @@ class Spider(BaseSpider):
 
         media_url = self._resolve_jx_or_page(target, referer=self.host + "/")
         if media_url:
-            best_hdr = self._verify_stream(media_url, target)
-            if best_hdr is not None:
-                safe_url = self._fix_ssl_url(media_url, best_hdr.get("Referer", ""))
-                return {
-                    "parse": 0,
-                    "url": safe_url,
-                    "header": best_hdr,
-                }
+            best_hdr = self._pick_best_header(media_url, target)
+            is_direct = self.isVideoFormat(media_url)
+            safe_url = self._fix_ssl_url(media_url, best_hdr.get("Referer", ""))
+            return {
+                "parse": 0 if is_direct else 1,
+                "url": safe_url,
+                "header": best_hdr,
+            }
 
-        return {"parse": 0, "url": ""}
+        # 兜底：若播放页被临时限制，回传原始播放页链接而非空字符串
+        return {
+            "parse": 1,
+            "url": target,
+            "header": {"User-Agent": self.ua, "Referer": self.host + "/"},
+        }
 
     def localProxy(self, param):
         if not param or param.get("do") != "hongguo":
