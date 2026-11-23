@@ -2,5 +2,13 @@
   "py/goldmedal.py": {
     "first_fail_date": "2026-11-23",
     "last_fail_date": "2026-11-23"
+  },
+  "js/xiaosa/XBPQ/雪糕影视.json": {
+    "first_fail_date": "2026-11-23",
+    "last_fail_date": "2026-11-23"
+  },
+  "js/s/雪糕影视.json": {
+    "first_fail_date": "2026-11-23",
+    "last_fail_date": "2026-11-23"
   }
 }
