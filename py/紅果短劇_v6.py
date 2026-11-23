@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows 1.0.5 专用完整版
-（2026-11 内置 127.0.0.1 本地 HTTP 代理版）：
-1. 彻底解决 Yumilo Windows 不支持 proxy:// 导致“来源没有返回播放地址”，以及直连 HTTPS
-   导致“与媒体服务器的安全连接失败”的双重死结：
-   在 Spider 初始化时于后台线程启动一个绑定 127.0.0.1 的轻量 HTTP 代理服务器，
-   返回标准 http://127.0.0.1:{port}/stream?url=... 给播放器，内部使用 verify=False
-   转发 m3u8 索引与 ts 视频切片。
-2. 保留完整题材分类筛选、60s 搜索缓存及 player_aaaa 精准解析。
+红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows 1.0.5 完整诊断版
+（2026-11）：
+1. 在详情页【简介】最上方直接输出第一集播放页的 player_aaaa 关键字段（from / encrypt / url），
+   方便一眼确认播放器类型与实际播放参数格式。
+2. 内置 127.0.0.1 本地 HTTP 代理服务器，解决 Yumilo Windows 不支持 proxy:// 与 HTTPS 证书校验问题。
+3. 保留完整题材分类筛选、60s 搜索缓存及全集提取逻辑。
 """
 import re
 import sys
@@ -39,7 +37,6 @@ class _LocalRelayHandler(BaseHTTPRequestHandler):
     spider_ref = None
 
     def log_message(self, format, *args):
-        # 静默控制台日志
         return
 
     def do_GET(self):
@@ -75,7 +72,6 @@ class _LocalRelayHandler(BaseHTTPRequestHandler):
             ct = r.headers.get("Content-Type", "application/octet-stream")
             final_url = r.url or target
 
-            # 若为 m3u8 播放列表，重写内部所有 ts 切片与子 m3u8 地址为本地代理 URL
             if ".m3u8" in final_url.lower().split("?")[0] or "mpegurl" in ct.lower():
                 r.encoding = "utf-8"
                 text = r.text
@@ -105,7 +101,6 @@ class _LocalRelayHandler(BaseHTTPRequestHandler):
                 self.wfile.write(body)
                 return
 
-            # 普通媒体切片 (.ts / .mp4 / .key)，流式透传字节
             self.send_response(r.status_code)
             self.send_header("Content-Type", ct)
             if "Content-Length" in r.headers:
@@ -189,7 +184,6 @@ class Spider(BaseSpider):
         self._http_ok_domains = set()
         self._http_fail_domains = set()
 
-        # 启动内置 127.0.0.1 本地 HTTP 中继服务
         self._httpd = None
         self._local_port = 0
         self._start_local_server()
@@ -207,7 +201,6 @@ class Spider(BaseSpider):
             self._local_port = 0
 
     def _wrap_local_proxy(self, url, referer=""):
-        """将 HTTPS 媒体链接转换为纯 HTTP 或本地 127.0.0.1 HTTP 代理链接。"""
         if not url:
             return ""
         if url.startswith("http://127.0.0.1"):
@@ -542,13 +535,21 @@ class Spider(BaseSpider):
         if not eps:
             eps = [f"全集${play1_url}"]
 
+        # 在简介顶部输出 player_aaaa 的 from / encrypt / url，便于一眼确认实际播放地址格式
+        sample_p = play1_html or self._get(play1_url)
+        pa = self._parse_player_aaaa(sample_p or "")
+        if pa:
+            diag_line = f"[播放参数] from={pa.get('from','')} | enc={pa.get('encrypt',0)} | url={pa.get('url','')}\n"
+        else:
+            diag_line = f"[播放页快照] len={len(sample_p or '')} | cf={self._is_cf(sample_p)}\n"
+
         result["list"].append({
             "vod_id": num_vid,
             "vod_name": name,
             "vod_pic": self._fix(pic),
             "vod_actor": actor,
             "vod_director": director,
-            "vod_content": des,
+            "vod_content": diag_line + des,
             "vod_play_from": "红果",
             "vod_play_url": "#".join(eps),
         })
@@ -815,7 +816,6 @@ class Spider(BaseSpider):
         if media_url:
             best_hdr = self._pick_best_header(media_url, target)
             is_direct = self.isVideoFormat(media_url)
-            # 通过内置 127.0.0.1 HTTP 代理或纯 http 链接输出，完全绕过 SSL 证书错误
             safe_url = self._wrap_local_proxy(media_url, best_hdr.get("Referer", ""))
             return {
                 "parse": 0 if is_direct else 1,
