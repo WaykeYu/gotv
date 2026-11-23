@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 红果短剧 (hongguo / www.hongguoapp.cn) —— TVBox/FongMi Spider
-详情接口 CF 绕过与播放修复版（2026-11）：
-1. 修复“获取详情失败: 站点暂不可用”：由于 /voddetail/*.html 已被 Cloudflare 拦截，
-   detailContent 优先改走无 CF 拦截的 JSON/API 接口（ajax/detail、ajax/data、provide/vod）
-   直接获取剧集列表与播放地址，HTML 仅作最后兜底。
-2. 保留分类标签与 filters 筛选器、搜索结果缓存及播放 SSL 证书降级/代理机制。
+完整整合修复版（2026-11）：
+1. 搜索优化：走无 CF 拦截的 /index.php/ajax/suggest 接口，修复快搜 limit 参数传递并新增 60s 内存缓存，翻页零延迟。
+2. 分类与筛选：内置短剧题材分类（都市/古装/逆袭/甜宠/战神/重生/总裁/家庭）与 filters 筛选器。
+3. 详情与选集：优先走无 CF 拦截的 JSON/API 接口（provide/vod、ajax/detail、ajax/data），规避 HTML 详情页 CF 403，完整生成全集列表。
+4. 播放防错：
+   - 支持苹果CMS player_aaaa 的 encrypt=1 (URL解码) 与 encrypt=2 (Base64解码)。
+   - 新增真实 HLS (#EXTM3U) 头部校验与多 Referer 自动探测，非有效直链自动回退 WebView 嗅探（parse: 1），杜绝“不是有效的 HLS 播放列表”报错。
+   - 内置 SSL 证书探测与 localProxy 代理转发，解决媒体服务器证书异常导致的“安全连接失败”。
 """
 import re
 import sys
@@ -36,6 +39,7 @@ class Spider(BaseSpider):
     _RE_STYLE_URL = re.compile(r"url\(['\"]?([^'\")]+)['\"]?\)")
     _RE_YEAR = re.compile(r"((?:19|20)\d{2})")
     _RE_PLAYER_JSON = re.compile(r'player_[a-z0-9_]+\s*=\s*(\{.*?\})\s*(?:;|</script>)', re.S)
+    _RE_JS_URL = re.compile(r"""(?:var|let|const)\s+(?:url|play_url|video_url|main)\s*=\s*['"](https?[^'"]+)['"]""")
     _RE_M3U8 = re.compile(r'(?:["\']url["\']\s*:\s*["\']|)(https?[^"\'\s\\]+\.m3u8[^"\'\s\\]*)')
     _RE_MP4 = re.compile(r'(?:["\']url["\']\s*:\s*["\']|)(https?[^"\'\s\\]+\.mp4[^"\'\s\\]*)')
     _RE_IFRAME = re.compile(r'<iframe[^>]+src=["\']([^"\']+)["\']', re.I)
@@ -148,7 +152,6 @@ class Spider(BaseSpider):
             return last
 
     def _fetch_json_raw(self, url, timeout=10, retries=2, fallback_direct=True):
-        """通用 JSON 抓取（兼容 list 为列表或 info 为字典的多种苹果CMS接口格式）。"""
         attempts = max(1, int(retries or 1))
         for i in range(attempts):
             try:
@@ -480,9 +483,8 @@ class Spider(BaseSpider):
         pc = max(ms + [pg]) if ms else pg
         return {"page": pg, "pagecount": pc, "limit": 24, "total": pc * 24, "list": items}
 
-    # ---------- 详情页（优先走无 CF 拦截的 JSON/API 接口） ----------
+    # ---------- 详情页 ----------
     def _parse_api_vod(self, it, fallback_vid=""):
-        """将苹果CMS JSON/API 返回的单条影片数据标准化为 TVBox 详情结构。"""
         if not isinstance(it, dict):
             return None
         vid = str(it.get("vod_id") or fallback_vid or "").strip()
@@ -493,8 +495,6 @@ class Spider(BaseSpider):
         play_from = str(it.get("vod_play_from") or "").strip()
         play_url = str(it.get("vod_play_url") or "").strip()
 
-        # 若接口直接返回了 vod_play_url（如：第1集$https://...m3u8#第2集$https://...m3u8）
-        # 且里面不是直链而是相对路径，则补全域名
         if play_url:
             fixed_groups = []
             for grp in play_url.split("$$$"):
@@ -510,7 +510,6 @@ class Spider(BaseSpider):
             if not play_from:
                 play_from = "$$$".join([f"红果{i+1}" if i > 0 else "红果" for i in range(len(fixed_groups))])
 
-        # 若接口没有返回 vod_play_url，但返回了总集数 vod_total / vod_remarks，自动生成集数路由
         if not play_url:
             total_eps = 0
             try:
@@ -551,10 +550,8 @@ class Spider(BaseSpider):
         if not vid:
             return result
 
-        # 提取纯数字 ID（防止传入完整 URL）
         num_vid = self._vid(vid) or vid
 
-        # 1. 优先尝试苹果CMS 3 个无 CF 拦截的 JSON/API 接口
         api_candidates = [
             f"{self.host}/api.php/provide/vod/?ac=detail&ids={quote(num_vid)}",
             f"{self.host}/index.php/ajax/detail?mid=1&id={quote(num_vid)}",
@@ -564,20 +561,17 @@ class Spider(BaseSpider):
             j = self._fetch_json_raw(api_url, timeout=8, retries=1)
             if not j:
                 continue
-            # 形态 A: {"list": [{...}]} (provide/vod 或 ajax/data)
             if isinstance(j.get("list"), list) and j["list"]:
                 vod = self._parse_api_vod(j["list"][0], num_vid)
                 if vod:
                     result["list"].append(vod)
                     return result
-            # 形态 B: {"info": {...}} (ajax/detail)
             if isinstance(j.get("info"), dict) and j["info"]:
                 vod = self._parse_api_vod(j["info"], num_vid)
                 if vod:
                     result["list"].append(vod)
                     return result
 
-        # 2. 兜底：尝试抓取 HTML 详情页（若某镜像域名未开 CF 盾则可生效）
         urls = [vid] if vid.startswith("http") else [
             f"{self.host}/voddetail/{num_vid}.html",
             f"{self.host}/index.php/vod/detail/id/{num_vid}.html",
@@ -791,7 +785,7 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, page):
         return self.searchContent(key, quick, page)
 
-    # ---------- 播放 ----------
+    # ---------- 播放与 HLS 真实性校验 ----------
     def _decode_player_url(self, raw_url, encrypt):
         if not raw_url:
             return ""
@@ -813,6 +807,35 @@ class Spider(BaseSpider):
                 u = unquote(u)
         return u.replace("\\/", "/").strip()
 
+    def _verify_hls_or_media(self, url, referer=""):
+        if not url:
+            return False, {}
+        path = url.lower().split("?")[0]
+        if not path.endswith(".m3u8"):
+            return True, {"User-Agent": self.ua, "Referer": referer}
+
+        header_candidates = [
+            {"User-Agent": self.ua, "Referer": referer},
+            {"User-Agent": self.ua, "Referer": self.host + "/"},
+            {"User-Agent": self.ua},
+        ]
+        for hdrs in header_candidates:
+            try:
+                r = self._sess.get(
+                    url, headers=hdrs, timeout=5, verify=False, stream=True, allow_redirects=True
+                )
+                if r.status_code == 200:
+                    chunk = next(r.iter_content(chunk_size=512), b"")
+                    r.close()
+                    text_head = chunk.decode("utf-8", errors="ignore").lstrip()
+                    if text_head.startswith("#EXTM3U"):
+                        return True, hdrs
+                else:
+                    r.close()
+            except Exception:
+                continue
+        return False, {}
+
     def _playurl(self, html):
         if not html:
             return ""
@@ -825,6 +848,10 @@ class Spider(BaseSpider):
                     return url
             except Exception:
                 continue
+
+        m_js = self._RE_JS_URL.search(html)
+        if m_js:
+            return unquote(m_js.group(1).replace("\\/", "/"))
 
         for rx in (self._RE_M3U8, self._RE_MP4):
             m = rx.search(html)
@@ -842,12 +869,14 @@ class Spider(BaseSpider):
             page = f"{self.host}/vodplay/{pid}.html"
 
         if self.isVideoFormat(page):
-            safe_url = self._fix_ssl_url(self._fix(page), self.host + "/")
-            return {
-                "parse": 0,
-                "url": safe_url,
-                "header": {"User-Agent": self.ua, "Referer": self.host + "/"},
-            }
+            fixed_page = self._fix(page)
+            ok, best_hdr = self._verify_hls_or_media(fixed_page, self.host + "/")
+            if ok:
+                return {
+                    "parse": 0,
+                    "url": self._fix_ssl_url(fixed_page, best_hdr.get("Referer", "")),
+                    "header": best_hdr,
+                }
 
         html = self._get(page)
         if self._is_cf(html):
@@ -856,11 +885,18 @@ class Spider(BaseSpider):
         url = self._playurl(html)
         if url and (url.startswith("http") or url.startswith("//")):
             fixed_url = self._fix(url)
-            is_direct = self.isVideoFormat(fixed_url)
-            safe_url = self._fix_ssl_url(fixed_url, page)
+            if self.isVideoFormat(fixed_url):
+                ok, best_hdr = self._verify_hls_or_media(fixed_url, page)
+                if ok:
+                    return {
+                        "parse": 0,
+                        "url": self._fix_ssl_url(fixed_url, best_hdr.get("Referer", "")),
+                        "header": best_hdr,
+                    }
             return {
-                "parse": 0 if is_direct else 1,
-                "url": safe_url,
+                "parse": 1,
+                "jx": 0,
+                "url": self._fix_ssl_url(fixed_url, page),
                 "header": {"User-Agent": self.ua, "Referer": page},
             }
 
@@ -871,15 +907,24 @@ class Spider(BaseSpider):
             url = self._playurl(fr_html)
             if url:
                 fixed_url = self._fix(url)
-                safe_url = self._fix_ssl_url(fixed_url, fr)
-                return {
-                    "parse": 0 if self.isVideoFormat(fixed_url) else 1,
-                    "url": safe_url,
-                    "header": {"User-Agent": self.ua, "Referer": fr},
-                }
+                if self.isVideoFormat(fixed_url):
+                    ok, best_hdr = self._verify_hls_or_media(fixed_url, fr)
+                    if ok:
+                        return {
+                            "parse": 0,
+                            "url": self._fix_ssl_url(fixed_url, best_hdr.get("Referer", "")),
+                            "header": best_hdr,
+                        }
+            return {
+                "parse": 1,
+                "jx": 0,
+                "url": self._fix_ssl_url(fr, page),
+                "header": {"User-Agent": self.ua, "Referer": page},
+            }
 
         return {
             "parse": 1,
+            "jx": 0,
             "url": self._fix_ssl_url(page, page),
             "header": {"User-Agent": self.ua, "Referer": page},
         }
@@ -924,8 +969,10 @@ class Spider(BaseSpider):
             return None
 
     def isVideoFormat(self, url):
-        u = (url or "").lower().split("?")[0]
-        return any(u.endswith(ext) or (ext in u) for ext in (".m3u8", ".mp4", ".m4v", ".flv", ".ts", ".webm", ".mov", ".mpd"))
+        if not url:
+            return False
+        path = url.lower().split("?")[0].split("#")[0]
+        return path.endswith((".m3u8", ".mp4", ".m4v", ".flv", ".ts", ".webm", ".mov", ".mpd"))
 
     def manualVideoCheck(self):
         return False
