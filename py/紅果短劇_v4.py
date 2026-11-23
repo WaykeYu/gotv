@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 红果短剧 (hongguo / www.hongguoapp.cn) —— TVBox/FongMi Spider
-分类筛选与播放 SSL 证书绕过修复版（2026-11）：
-1. 修复“没有分类”：该站为纯短剧站（主分类 tid=51），新增短剧题材分类映射与 filters 筛选器，支持按题材翻页。
-2. 修复“只抓到立即免费播放”：过滤伪播放按钮，强化海螺(conch)播放列表容器解析，完整提取全集列表。
-3. 修复“与媒体服务器的安全连接失败”：内置 SSL 证书快速探测，若媒体服务器 HTTPS 证书异常，自动切换 HTTP 或走 localProxy 绕过证书校验。
+详情接口 CF 绕过与播放修复版（2026-11）：
+1. 修复“获取详情失败: 站点暂不可用”：由于 /voddetail/*.html 已被 Cloudflare 拦截，
+   detailContent 优先改走无 CF 拦截的 JSON/API 接口（ajax/detail、ajax/data、provide/vod）
+   直接获取剧集列表与播放地址，HTML 仅作最后兜底。
+2. 保留分类标签与 filters 筛选器、搜索结果缓存及播放 SSL 证书降级/代理机制。
 """
 import re
 import sys
@@ -39,7 +40,6 @@ class Spider(BaseSpider):
     _RE_MP4 = re.compile(r'(?:["\']url["\']\s*:\s*["\']|)(https?[^"\'\s\\]+\.mp4[^"\'\s\\]*)')
     _RE_IFRAME = re.compile(r'<iframe[^>]+src=["\']([^"\']+)["\']', re.I)
 
-    # 纯短剧站虚拟题材分类（通过 ajax/data 的 class 参数筛选）
     _VIRTUAL_CATS = [
         ("51", "全部短剧"),
         ("51:都市", "都市"),
@@ -78,7 +78,7 @@ class Spider(BaseSpider):
         }
         self._json_headers = {
             "User-Agent": self.ua,
-            "Accept": "*/*",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
             "Accept-Language": "zh-CN,zh;q=0.9",
             "Referer": self.host + "/",
             "X-Requested-With": "XMLHttpRequest",
@@ -147,7 +147,8 @@ class Spider(BaseSpider):
         except Exception:
             return last
 
-    def _fetch_json(self, url, timeout=10, retries=2, fallback_direct=True):
+    def _fetch_json_raw(self, url, timeout=10, retries=2, fallback_direct=True):
+        """通用 JSON 抓取（兼容 list 为列表或 info 为字典的多种苹果CMS接口格式）。"""
         attempts = max(1, int(retries or 1))
         for i in range(attempts):
             try:
@@ -158,12 +159,12 @@ class Spider(BaseSpider):
                 if r.status_code != 200:
                     return {}
                 j = r.json()
-                if isinstance(j, dict) and j.get("code") == 1 and isinstance(j.get("list"), list):
+                if isinstance(j, dict):
                     return j
                 return {}
             except Exception:
                 if i < attempts - 1:
-                    time.sleep(0.6 * (i + 1))
+                    time.sleep(0.5 * (i + 1))
 
         if fallback_direct:
             try:
@@ -173,10 +174,16 @@ class Spider(BaseSpider):
                 )
                 if r.status_code == 200:
                     j = r.json()
-                    if isinstance(j, dict) and j.get("code") == 1 and isinstance(j.get("list"), list):
+                    if isinstance(j, dict):
                         return j
             except Exception:
                 pass
+        return {}
+
+    def _fetch_json(self, url, timeout=10, retries=2, fallback_direct=True):
+        j = self._fetch_json_raw(url, timeout=timeout, retries=retries, fallback_direct=fallback_direct)
+        if isinstance(j, dict) and j.get("code") == 1 and isinstance(j.get("list"), list):
+            return j
         return {}
 
     def _get(self, url):
@@ -195,11 +202,6 @@ class Spider(BaseSpider):
         return html
 
     def _fix_ssl_url(self, url, referer=""):
-        """
-        针对 ExoPlayer '与媒体服务器的安全连接失败，请检查证书或代理'：
-        探测目标 HTTPS 域名的 SSL 证书是否有效；若证书过期/自签导致 SSLError，
-        优先尝试降级为 http://，若 http 不通则转交 localProxy 代理流（verify=False）。
-        """
         if not url or not url.startswith("https://"):
             return url
 
@@ -211,7 +213,6 @@ class Spider(BaseSpider):
         is_bad = domain in self._ssl_bad_domains
         if not is_bad:
             try:
-                # 严格验证 SSL 证书（verify=True），超时 3 秒
                 requests.head(
                     url,
                     headers={"User-Agent": self.ua, "Referer": referer or self.host + "/"},
@@ -224,7 +225,6 @@ class Spider(BaseSpider):
                 self._ssl_bad_domains.add(domain)
                 is_bad = True
             except Exception:
-                # 非 SSL 错误（如 405 Method Not Allowed 或超时），保持原链接
                 return url
 
         if is_bad:
@@ -240,7 +240,6 @@ class Spider(BaseSpider):
                     return http_url
             except Exception:
                 pass
-            # 若目标服务器强制 HTTPS 且证书无效，走本地代理剥离 SSL 校验
             return f"proxy://do=hongguo&url={quote(url)}&ref={quote(referer or self.host + '/')}"
 
         return url
@@ -352,7 +351,7 @@ class Spider(BaseSpider):
                     continue
         return out
 
-    # ---------- 主接口（修复分类与筛选） ----------
+    # ---------- 主接口 ----------
     def homeContent(self, filter):
         html = self._get(self.host + "/")
         cls = []
@@ -378,7 +377,6 @@ class Spider(BaseSpider):
         except Exception:
             pass
 
-        # 若站点为纯短剧站（仅提取到 0 或 1 个主分类），启用内置题材分类 Tab
         if len(cls) <= 1:
             cls = [{"type_id": cid, "type_name": cname} for cid, cname in self._VIRTUAL_CATS]
 
@@ -421,7 +419,6 @@ class Spider(BaseSpider):
         extend = extend or {}
         raw_tid = str(tid or "51")
 
-        # 解析虚拟分类 "51:古装" -> tid="51", sub_class="古装"
         sub_class = ""
         if ":" in raw_tid:
             real_tid, sub_class = raw_tid.split(":", 1)
@@ -467,7 +464,6 @@ class Spider(BaseSpider):
                 "list": items,
             }
 
-        # HTML 兜底
         html, items = "", []
         candidates = [
             f"{self.host}/vodshow/{real_tid}--------{pg}---.html" if pg > 1 else f"{self.host}/vodshow/{real_tid}-----------.html",
@@ -484,17 +480,108 @@ class Spider(BaseSpider):
         pc = max(ms + [pg]) if ms else pg
         return {"page": pg, "pagecount": pc, "limit": 24, "total": pc * 24, "list": items}
 
-    # ---------- 详情页（过滤伪按钮、提取完整分集） ----------
+    # ---------- 详情页（优先走无 CF 拦截的 JSON/API 接口） ----------
+    def _parse_api_vod(self, it, fallback_vid=""):
+        """将苹果CMS JSON/API 返回的单条影片数据标准化为 TVBox 详情结构。"""
+        if not isinstance(it, dict):
+            return None
+        vid = str(it.get("vod_id") or fallback_vid or "").strip()
+        name = str(it.get("vod_name") or "").strip()
+        if not vid or not name:
+            return None
+
+        play_from = str(it.get("vod_play_from") or "").strip()
+        play_url = str(it.get("vod_play_url") or "").strip()
+
+        # 若接口直接返回了 vod_play_url（如：第1集$https://...m3u8#第2集$https://...m3u8）
+        # 且里面不是直链而是相对路径，则补全域名
+        if play_url:
+            fixed_groups = []
+            for grp in play_url.split("$$$"):
+                eps = []
+                for ep in grp.split("#"):
+                    if "$" in ep:
+                        t, u = ep.split("$", 1)
+                        eps.append(f"{t.strip()}${self._fix(u.strip())}")
+                    elif ep.strip():
+                        eps.append(f"正片${self._fix(ep.strip())}")
+                fixed_groups.append("#".join(eps))
+            play_url = "$$$".join(fixed_groups)
+            if not play_from:
+                play_from = "$$$".join([f"红果{i+1}" if i > 0 else "红果" for i in range(len(fixed_groups))])
+
+        # 若接口没有返回 vod_play_url，但返回了总集数 vod_total / vod_remarks，自动生成集数路由
+        if not play_url:
+            total_eps = 0
+            try:
+                total_eps = int(it.get("vod_total") or 0)
+            except Exception:
+                pass
+            if not total_eps:
+                m_ep = re.search(r"(\d+)\s*集", str(it.get("vod_remarks") or ""))
+                if m_ep:
+                    total_eps = int(m_ep.group(1))
+            if total_eps > 0:
+                total_eps = min(total_eps, 200)
+                play_from = "红果"
+                play_url = "#".join(
+                    [f"第{i}集${self.host}/vodplay/{vid}-1-{i}.html" for i in range(1, total_eps + 1)]
+                )
+
+        if not play_url:
+            return None
+
+        des = re.sub(r"<[^>]+>", "", str(it.get("vod_content") or it.get("vod_blurb") or "")).strip()
+        return {
+            "vod_id": vid,
+            "vod_name": name,
+            "vod_pic": self._fix(it.get("vod_pic") or ""),
+            "vod_actor": str(it.get("vod_actor") or "").strip(),
+            "vod_director": str(it.get("vod_director") or "").strip(),
+            "vod_year": str(it.get("vod_year") or "").strip(),
+            "vod_area": str(it.get("vod_area") or "").strip(),
+            "vod_content": des[:2000],
+            "vod_play_from": play_from,
+            "vod_play_url": play_url,
+        }
+
     def detailContent(self, ids):
         vid = str(ids[0]) if ids else ""
         result = {"list": []}
         if not vid:
             return result
 
+        # 提取纯数字 ID（防止传入完整 URL）
+        num_vid = self._vid(vid) or vid
+
+        # 1. 优先尝试苹果CMS 3 个无 CF 拦截的 JSON/API 接口
+        api_candidates = [
+            f"{self.host}/api.php/provide/vod/?ac=detail&ids={quote(num_vid)}",
+            f"{self.host}/index.php/ajax/detail?mid=1&id={quote(num_vid)}",
+            f"{self.host}/index.php/ajax/data?mid=1&id={quote(num_vid)}",
+        ]
+        for api_url in api_candidates:
+            j = self._fetch_json_raw(api_url, timeout=8, retries=1)
+            if not j:
+                continue
+            # 形态 A: {"list": [{...}]} (provide/vod 或 ajax/data)
+            if isinstance(j.get("list"), list) and j["list"]:
+                vod = self._parse_api_vod(j["list"][0], num_vid)
+                if vod:
+                    result["list"].append(vod)
+                    return result
+            # 形态 B: {"info": {...}} (ajax/detail)
+            if isinstance(j.get("info"), dict) and j["info"]:
+                vod = self._parse_api_vod(j["info"], num_vid)
+                if vod:
+                    result["list"].append(vod)
+                    return result
+
+        # 2. 兜底：尝试抓取 HTML 详情页（若某镜像域名未开 CF 盾则可生效）
         urls = [vid] if vid.startswith("http") else [
-            f"{self.host}/voddetail/{vid}.html",
-            f"{self.host}/index.php/vod/detail/id/{vid}.html",
-            f"{self.host}/detail/{vid}.html",
+            f"{self.host}/voddetail/{num_vid}.html",
+            f"{self.host}/index.php/vod/detail/id/{num_vid}.html",
+            f"{self.host}/detail/{num_vid}.html",
         ]
         html = ""
         for u in urls:
@@ -576,10 +663,8 @@ class Spider(BaseSpider):
                 )
             ).strip()[:2000]
 
-        # 优先从正规播放列表容器中提取分集，过滤掉“立即免费播放”等封面大按钮
         eps, seen_ep = [], set()
         fallback_btn = None
-
         play_nodes = tree.xpath(
             '//*[contains(@class,"hl-plays-list") or contains(@class,"playlist") '
             'or contains(@class,"play-list") or contains(@id,"playlist")]'
@@ -603,29 +688,11 @@ class Spider(BaseSpider):
                 seen_ep.add(h)
                 eps.append(f"{t}${h}")
 
-        if not eps:
-            for m in re.finditer(
-                r'href="([^"]*/(?:vodplay|vod/play|play)/[^"]*\.html)"[^>]*>([^<]{1,30})</a>',
-                html
-            ):
-                t = m.group(2).strip()
-                h = self._fix(m.group(1))
-                if not t:
-                    continue
-                if "播放" in t and len(t) >= 4:
-                    if not fallback_btn:
-                        fallback_btn = (t, h)
-                    continue
-                if h not in seen_ep:
-                    seen_ep.add(h)
-                    eps.append(f"{t}${h}")
-
-        # 若整页确实只有一个“立即免费播放”按钮，则作为第1集保底
         if not eps and fallback_btn:
             eps.append(f"第1集${fallback_btn[1]}")
 
         result["list"].append({
-            "vod_id": vid,
+            "vod_id": num_vid,
             "vod_name": name,
             "vod_pic": self._fix(pic),
             "vod_actor": actor,
@@ -724,7 +791,7 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, page):
         return self.searchContent(key, quick, page)
 
-    # ---------- 播放（SSL 证书绕过与解密） ----------
+    # ---------- 播放 ----------
     def _decode_player_url(self, raw_url, encrypt):
         if not raw_url:
             return ""
@@ -818,7 +885,6 @@ class Spider(BaseSpider):
         }
 
     def localProxy(self, param):
-        """当媒体服务器 SSL 证书无效且不支持纯 HTTP 时，由本地代理忽略证书转发媒体流/M3U8。"""
         if not param or param.get("do") != "hongguo":
             return None
         target = unquote(param.get("url", ""))
@@ -836,7 +902,6 @@ class Spider(BaseSpider):
                 allow_redirects=True,
             )
             ct = r.headers.get("Content-Type", "application/octet-stream")
-            # 如果是 m3u8 索引文件，重写里面的相对路径或坏 SSL 的 https 链接
             if ".m3u8" in target.lower() or "mpegurl" in ct.lower():
                 text = r.text
                 base_url = target.rsplit("/", 1)[0] + "/"
