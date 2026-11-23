@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 """
-红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows / TVBox / FongMi 完整修复版
-（2026-11 解决“来源没有返回播放地址”与 SSL 证书校验）：
-1. 绝不返回空 url：只要从 player_aaaa 或播放页提取到地址，立即做解码与 SSL 降级处理后返回。
-2. 放宽流验证策略：当 _verify_stream 探测超时或非标准响应头时，仍保留解析出的直链并尝试最佳 Header，
-   避免误杀有效视频流导致返回空地址。
-3. 保留完整题材分类筛选、60s 搜索缓存及 localProxy 本地代理（自动重写 m3u8 切片绕过证书错误）。
+红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows 1.0.5 专用完整版
+（2026-11 内置 127.0.0.1 本地 HTTP 代理版）：
+1. 彻底解决 Yumilo Windows 不支持 proxy:// 导致“来源没有返回播放地址”，以及直连 HTTPS
+   导致“与媒体服务器的安全连接失败”的双重死结：
+   在 Spider 初始化时于后台线程启动一个绑定 127.0.0.1 的轻量 HTTP 代理服务器，
+   返回标准 http://127.0.0.1:{port}/stream?url=... 给播放器，内部使用 verify=False
+   转发 m3u8 索引与 ts 视频切片。
+2. 保留完整题材分类筛选、60s 搜索缓存及 player_aaaa 精准解析。
 """
 import re
 import sys
 import json
 import time
 import base64
+import threading
 import requests
 from requests.adapters import HTTPAdapter
-from urllib.parse import quote, unquote, urljoin
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import quote, unquote, urljoin, urlparse, parse_qs
 from lxml import etree
 
 try:
@@ -28,6 +32,97 @@ try:
     from base.spider import Spider as BaseSpider
 except Exception:
     from spider import Spider as BaseSpider
+
+
+class _LocalRelayHandler(BaseHTTPRequestHandler):
+    """本地轻量 HTTP 中继处理器：剥离 HTTPS 证书校验并重写 m3u8 切片路径。"""
+    spider_ref = None
+
+    def log_message(self, format, *args):
+        # 静默控制台日志
+        return
+
+    def do_GET(self):
+        parsed = urlparse(self.path)
+        if parsed.path != "/stream":
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        qs = parse_qs(parsed.query)
+        target = qs.get("url", [""])[0]
+        ref = qs.get("ref", [""])[0]
+        sp = self.spider_ref
+
+        if not target or sp is None:
+            self.send_response(400)
+            self.end_headers()
+            return
+
+        req_headers = {"User-Agent": sp.ua}
+        if ref:
+            req_headers["Referer"] = ref
+
+        try:
+            r = sp._sess.get(
+                target,
+                headers=req_headers,
+                timeout=15,
+                verify=False,
+                stream=True,
+                allow_redirects=True,
+            )
+            ct = r.headers.get("Content-Type", "application/octet-stream")
+            final_url = r.url or target
+
+            # 若为 m3u8 播放列表，重写内部所有 ts 切片与子 m3u8 地址为本地代理 URL
+            if ".m3u8" in final_url.lower().split("?")[0] or "mpegurl" in ct.lower():
+                r.encoding = "utf-8"
+                text = r.text
+                r.close()
+                base_url = final_url.rsplit("/", 1)[0] + "/"
+                lines = []
+                for line in text.splitlines():
+                    s = line.strip()
+                    if s and not s.startswith("#"):
+                        abs_u = urljoin(base_url, s)
+                        lines.append(sp._wrap_local_proxy(abs_u, ref))
+                    elif s.startswith("#EXT-X-KEY") and 'URI="' in s:
+                        m_uri = re.search(r'URI="([^"]+)"', s)
+                        if m_uri:
+                            key_u = urljoin(base_url, m_uri.group(1))
+                            s = s.replace(m_uri.group(1), sp._wrap_local_proxy(key_u, ref))
+                        lines.append(s)
+                    else:
+                        lines.append(line)
+
+                body = "\n".join(lines).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/vnd.apple.mpegurl; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+            # 普通媒体切片 (.ts / .mp4 / .key)，流式透传字节
+            self.send_response(r.status_code)
+            self.send_header("Content-Type", ct)
+            if "Content-Length" in r.headers:
+                self.send_header("Content-Length", r.headers["Content-Length"])
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+
+            for chunk in r.iter_content(chunk_size=65536):
+                if chunk:
+                    self.wfile.write(chunk)
+            r.close()
+        except Exception:
+            try:
+                self.send_response(502)
+                self.end_headers()
+            except Exception:
+                pass
 
 
 class Spider(BaseSpider):
@@ -84,7 +179,7 @@ class Spider(BaseSpider):
         }
 
         self._sess = requests.Session()
-        adapter = HTTPAdapter(pool_connections=10, pool_maxsize=10, max_retries=0)
+        adapter = HTTPAdapter(pool_connections=16, pool_maxsize=16, max_retries=0)
         self._sess.mount("http://", adapter)
         self._sess.mount("https://", adapter)
         self._sess.headers.update(self.headers)
@@ -93,6 +188,59 @@ class Spider(BaseSpider):
         self._player_js_cache = {}
         self._http_ok_domains = set()
         self._http_fail_domains = set()
+
+        # 启动内置 127.0.0.1 本地 HTTP 中继服务
+        self._httpd = None
+        self._local_port = 0
+        self._start_local_server()
+
+    def _start_local_server(self):
+        try:
+            handler = type("BoundRelayHandler", (_LocalRelayHandler,), {"spider_ref": self})
+            self._httpd = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+            self._httpd.daemon_threads = True
+            self._local_port = self._httpd.server_address[1]
+            t = threading.Thread(target=self._httpd.serve_forever, daemon=True)
+            t.start()
+        except Exception:
+            self._httpd = None
+            self._local_port = 0
+
+    def _wrap_local_proxy(self, url, referer=""):
+        """将 HTTPS 媒体链接转换为纯 HTTP 或本地 127.0.0.1 HTTP 代理链接。"""
+        if not url:
+            return ""
+        if url.startswith("http://127.0.0.1"):
+            return url
+        if url.startswith("https://"):
+            try:
+                domain = url.split("/")[2]
+            except Exception:
+                domain = ""
+            http_url = "http://" + url[8:]
+            if domain and domain in self._http_ok_domains:
+                return http_url
+            if domain and domain not in self._http_fail_domains:
+                try:
+                    r = self._sess.get(
+                        http_url,
+                        headers={"User-Agent": self.ua, "Referer": referer or self.host + "/"},
+                        timeout=2.5,
+                        stream=True,
+                        allow_redirects=True,
+                    )
+                    if r.status_code in (200, 206):
+                        r.close()
+                        self._http_ok_domains.add(domain)
+                        return http_url
+                    r.close()
+                except Exception:
+                    pass
+                self._http_fail_domains.add(domain)
+
+        if self._local_port:
+            return f"http://127.0.0.1:{self._local_port}/stream?url={quote(url)}&ref={quote(referer or '')}"
+        return url
 
     # ---------- 基础工具 ----------
     def _fix(self, u):
@@ -192,44 +340,6 @@ class Spider(BaseSpider):
                 self._json_headers["Referer"] = h + "/"
                 return t
         return html
-
-    def _fix_ssl_url(self, url, referer=""):
-        """
-        绕过 Yumilo Windows 底层播放器 SSL 证书校验失败：
-        1. 若域名支持纯 http://，直接降级为 http://；
-        2. 若强制 https://，转交 localProxy 本地代理剥离 SSL 证书校验。
-        """
-        if not url or not url.startswith("https://"):
-            return url
-
-        try:
-            domain = url.split("/")[2]
-        except Exception:
-            return url
-
-        http_url = "http://" + url[8:]
-        if domain in self._http_ok_domains:
-            return http_url
-
-        if domain not in self._http_fail_domains:
-            try:
-                r = self._sess.get(
-                    http_url,
-                    headers={"User-Agent": self.ua, "Referer": referer or self.host + "/"},
-                    timeout=3,
-                    stream=True,
-                    allow_redirects=True,
-                )
-                if r.status_code in (200, 206):
-                    r.close()
-                    self._http_ok_domains.add(domain)
-                    return http_url
-                r.close()
-            except Exception:
-                pass
-            self._http_fail_domains.add(domain)
-
-        return f"proxy://do=hongguo&url={quote(url)}&ref={quote(referer or self.host + '/')}"
 
     # ---------- ID 解析 ----------
     def _tid(self, href):
@@ -667,7 +777,6 @@ class Spider(BaseSpider):
         return ""
 
     def _pick_best_header(self, url, referer=""):
-        """探测最佳 Referer，即使探测失败也返回默认 Header，绝不返回 None 误杀有效链接。"""
         default_hdr = {"User-Agent": self.ua, "Referer": referer or self.host + "/"}
         if not url or not url.startswith("http"):
             return default_hdr
@@ -706,64 +815,19 @@ class Spider(BaseSpider):
         if media_url:
             best_hdr = self._pick_best_header(media_url, target)
             is_direct = self.isVideoFormat(media_url)
-            safe_url = self._fix_ssl_url(media_url, best_hdr.get("Referer", ""))
+            # 通过内置 127.0.0.1 HTTP 代理或纯 http 链接输出，完全绕过 SSL 证书错误
+            safe_url = self._wrap_local_proxy(media_url, best_hdr.get("Referer", ""))
             return {
                 "parse": 0 if is_direct else 1,
                 "url": safe_url,
                 "header": best_hdr,
             }
 
-        # 兜底：若播放页被临时限制，回传原始播放页链接而非空字符串
         return {
             "parse": 1,
             "url": target,
             "header": {"User-Agent": self.ua, "Referer": self.host + "/"},
         }
-
-    def localProxy(self, param):
-        if not param or param.get("do") != "hongguo":
-            return None
-        target = unquote(param.get("url", ""))
-        ref = unquote(param.get("ref", self.host + "/"))
-        if not target:
-            return None
-
-        try:
-            r = self._sess.get(
-                target,
-                headers={"User-Agent": self.ua, "Referer": ref},
-                timeout=15,
-                verify=False,
-                stream=True,
-                allow_redirects=True,
-            )
-            ct = r.headers.get("Content-Type", "application/octet-stream")
-            if ".m3u8" in target.lower() or "mpegurl" in ct.lower():
-                r.encoding = "utf-8"
-                text = r.text
-                final_url = r.url or target
-                base_url = final_url.rsplit("/", 1)[0] + "/"
-                lines = []
-                for line in text.splitlines():
-                    s = line.strip()
-                    if s and not s.startswith("#"):
-                        abs_u = urljoin(base_url, s)
-                        lines.append(self._fix_ssl_url(abs_u, ref))
-                    elif s.startswith("#EXT-X-KEY") and 'URI="' in s:
-                        m_uri = re.search(r'URI="([^"]+)"', s)
-                        if m_uri:
-                            key_u = urljoin(base_url, m_uri.group(1))
-                            fixed_key = self._fix_ssl_url(key_u, ref)
-                            s = s.replace(m_uri.group(1), fixed_key)
-                        lines.append(s)
-                    else:
-                        lines.append(line)
-                body = "\n".join(lines).encode("utf-8")
-                return [200, "application/vnd.apple.mpegurl", body]
-
-            return [r.status_code, ct, r.raw]
-        except Exception:
-            return None
 
     def isVideoFormat(self, url):
         if not url:
@@ -777,11 +841,20 @@ class Spider(BaseSpider):
     def getDependence(self):
         return []
 
+    def localProxy(self, param):
+        return None
+
     def destroy(self):
         self._search_cache.clear()
         self._player_js_cache.clear()
         self._http_ok_domains.clear()
         self._http_fail_domains.clear()
+        if self._httpd:
+            try:
+                self._httpd.shutdown()
+                self._httpd.server_close()
+            except Exception:
+                pass
         try:
             self._sess.close()
         except Exception:
