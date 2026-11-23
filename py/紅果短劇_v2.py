@@ -467,8 +467,18 @@ class Spider(BaseSpider):
         # 顺便在简介头部附带第1集播放页的播放器快照，便于排查播放结构
         sample_p = play1_html or self._get(play1_url)
         m_pa = self._RE_PLAYER_JSON.search(sample_p or "")
-        pa_hint = f"[播放器参数] {m_pa.group(1)[:180]}\n" if m_pa else f"[播放页状态] len={len(sample_p or '')}, cf={self._is_cf(sample_p)}\n"
-
+        # 提取 player_aaaa 中的 from 与 url（跳过冗余的 vod_data）
+        sample_p = play1_html or self._get(play1_url)
+        m_from = re.search(r'"from"\s*:\s*"([^"]*)"', sample_p or "")
+        m_url = re.search(r'"url"\s*:\s*"([^"]*)"', sample_p or "")
+        m_next = re.search(r'"url_next"\s*:\s*"([^"]*)"', sample_p or "")
+        if m_url:
+            pa_hint = (
+                f"[播放参数] from={m_from.group(1) if m_from else ''} | "
+                f"url={m_url.group(1)[:180]}\n"
+            )
+        else:
+            pa_hint = f"[播放页状态] len={len(sample_p or '')}, cf={self._is_cf(sample_p)}\n"
         result["list"].append({
             "vod_id": num_vid,
             "vod_name": name,
