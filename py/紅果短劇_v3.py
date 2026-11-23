@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 红果短剧 (hongguo / www.hongguoapp.cn) —— TVBox/FongMi Spider
-分类与播放能力修复版（2026-11）：
-1. 修复无视频分类：扩展 homeContent 导航路由匹配（vodshow/vodtype/type/show），并内置常见短剧分类兜底。
-2. 修复详情页无剧集：兼容 /vodplay/、/vod/play/、/play/ 三种苹果CMS集数链接形态。
-3. 修复无法播放：新增苹果CMS player_aaaa 的 encrypt=1 (URL解码) 与 encrypt=2 (Base64解码) 自动解密逻辑。
+分类筛选与播放 SSL 证书绕过修复版（2026-11）：
+1. 修复“没有分类”：该站为纯短剧站（主分类 tid=51），新增短剧题材分类映射与 filters 筛选器，支持按题材翻页。
+2. 修复“只抓到立即免费播放”：过滤伪播放按钮，强化海螺(conch)播放列表容器解析，完整提取全集列表。
+3. 修复“与媒体服务器的安全连接失败”：内置 SSL 证书快速探测，若媒体服务器 HTTPS 证书异常，自动切换 HTTP 或走 localProxy 绕过证书校验。
 """
 import re
 import sys
@@ -38,6 +38,19 @@ class Spider(BaseSpider):
     _RE_M3U8 = re.compile(r'(?:["\']url["\']\s*:\s*["\']|)(https?[^"\'\s\\]+\.m3u8[^"\'\s\\]*)')
     _RE_MP4 = re.compile(r'(?:["\']url["\']\s*:\s*["\']|)(https?[^"\'\s\\]+\.mp4[^"\'\s\\]*)')
     _RE_IFRAME = re.compile(r'<iframe[^>]+src=["\']([^"\']+)["\']', re.I)
+
+    # 纯短剧站虚拟题材分类（通过 ajax/data 的 class 参数筛选）
+    _VIRTUAL_CATS = [
+        ("51", "全部短剧"),
+        ("51:都市", "都市"),
+        ("51:古装", "古装"),
+        ("51:逆袭", "逆袭"),
+        ("51:甜宠", "甜宠"),
+        ("51:战神", "战神"),
+        ("51:重生", "重生"),
+        ("51:总裁", "总裁"),
+        ("51:家庭", "家庭"),
+    ]
 
     def getName(self):
         return "红果"
@@ -78,6 +91,7 @@ class Spider(BaseSpider):
         self._sess.headers.update(self.headers)
 
         self._search_cache = {}
+        self._ssl_bad_domains = set()
 
     # ---------- 基础工具 ----------
     def _fix(self, u):
@@ -179,6 +193,57 @@ class Spider(BaseSpider):
                 self._json_headers["Referer"] = h + "/"
                 return t
         return html
+
+    def _fix_ssl_url(self, url, referer=""):
+        """
+        针对 ExoPlayer '与媒体服务器的安全连接失败，请检查证书或代理'：
+        探测目标 HTTPS 域名的 SSL 证书是否有效；若证书过期/自签导致 SSLError，
+        优先尝试降级为 http://，若 http 不通则转交 localProxy 代理流（verify=False）。
+        """
+        if not url or not url.startswith("https://"):
+            return url
+
+        try:
+            domain = url.split("/")[2]
+        except Exception:
+            return url
+
+        is_bad = domain in self._ssl_bad_domains
+        if not is_bad:
+            try:
+                # 严格验证 SSL 证书（verify=True），超时 3 秒
+                requests.head(
+                    url,
+                    headers={"User-Agent": self.ua, "Referer": referer or self.host + "/"},
+                    timeout=3,
+                    verify=True,
+                    allow_redirects=True,
+                )
+                return url
+            except requests.exceptions.SSLError:
+                self._ssl_bad_domains.add(domain)
+                is_bad = True
+            except Exception:
+                # 非 SSL 错误（如 405 Method Not Allowed 或超时），保持原链接
+                return url
+
+        if is_bad:
+            http_url = "http://" + url[8:]
+            try:
+                r = requests.head(
+                    http_url,
+                    headers={"User-Agent": self.ua, "Referer": referer or self.host + "/"},
+                    timeout=3,
+                    allow_redirects=True,
+                )
+                if r.status_code < 400:
+                    return http_url
+            except Exception:
+                pass
+            # 若目标服务器强制 HTTPS 且证书无效，走本地代理剥离 SSL 校验
+            return f"proxy://do=hongguo&url={quote(url)}&ref={quote(referer or self.host + '/')}"
+
+        return url
 
     # ---------- ID 解析 ----------
     def _tid(self, href):
@@ -287,7 +352,7 @@ class Spider(BaseSpider):
                     continue
         return out
 
-    # ---------- 主接口（修复分类抓取） ----------
+    # ---------- 主接口（修复分类与筛选） ----------
     def homeContent(self, filter):
         html = self._get(self.host + "/")
         cls = []
@@ -297,7 +362,6 @@ class Spider(BaseSpider):
         try:
             tree = etree.HTML(html or "")
             if tree is not None:
-                # 覆盖苹果CMS常见分类路由：vodshow / vodtype / type / show
                 for a in tree.xpath(
                     '//a[contains(@href,"/vodshow/") or contains(@href,"/vodtype/") '
                     'or contains(@href,"/type/") or contains(@href,"/show/id/")]'
@@ -314,24 +378,66 @@ class Spider(BaseSpider):
         except Exception:
             pass
 
-        # 若首页 HTML 未能提取出多分类（如被精简或动态渲染），补入兜底主分类
-        if not cls:
-            cls = [{"type_id": "51", "type_name": "短剧"}]
+        # 若站点为纯短剧站（仅提取到 0 或 1 个主分类），启用内置题材分类 Tab
+        if len(cls) <= 1:
+            cls = [{"type_id": cid, "type_name": cname} for cid, cname in self._VIRTUAL_CATS]
 
-        # 将“短剧”(51) 置于首位（若存在）
-        cls.sort(key=lambda x: 0 if x["type_id"] == "51" else 1)
+        filters = {
+            "51": [
+                {
+                    "key": "class",
+                    "name": "题材",
+                    "value": [
+                        {"n": "全部", "v": ""},
+                        {"n": "都市", "v": "都市"},
+                        {"n": "古装", "v": "古装"},
+                        {"n": "逆袭", "v": "逆袭"},
+                        {"n": "甜宠", "v": "甜宠"},
+                        {"n": "战神", "v": "战神"},
+                        {"n": "重生", "v": "重生"},
+                        {"n": "总裁", "v": "总裁"},
+                        {"n": "家庭", "v": "家庭"},
+                    ],
+                },
+                {
+                    "key": "by",
+                    "name": "排序",
+                    "value": [
+                        {"n": "最新", "v": "time"},
+                        {"n": "最热", "v": "hits"},
+                        {"n": "评分", "v": "score"},
+                    ],
+                },
+            ]
+        }
 
-        return {"class": cls, "list": self._cards(html), "filters": {}}
+        return {"class": cls, "list": self._cards(html), "filters": filters}
 
     def homeVideoContent(self):
         return {"list": self._cards(self._get(self.host + "/"))}
 
     def categoryContent(self, tid, pg, filter, extend):
         pg = int(pg or 1)
-        tid = str(tid or "51")
-        url = f"{self.host}/index.php/ajax/data?mid=1&limit=24&tid={quote(tid)}"
+        extend = extend or {}
+        raw_tid = str(tid or "51")
+
+        # 解析虚拟分类 "51:古装" -> tid="51", sub_class="古装"
+        sub_class = ""
+        if ":" in raw_tid:
+            real_tid, sub_class = raw_tid.split(":", 1)
+        else:
+            real_tid = raw_tid
+
+        v_class = extend.get("class") or sub_class
+        v_by = extend.get("by") or ""
+
+        url = f"{self.host}/index.php/ajax/data?mid=1&limit=24&tid={quote(real_tid)}"
         if pg > 1:
             url += f"&page={pg}"
+        if v_class:
+            url += f"&class={quote(v_class)}"
+        if v_by:
+            url += f"&by={quote(v_by)}"
 
         j = self._fetch_json(url)
         if j and j.get("list"):
@@ -361,12 +467,12 @@ class Spider(BaseSpider):
                 "list": items,
             }
 
-        # HTML 兜底（兼容多种翻页URL）
+        # HTML 兜底
         html, items = "", []
         candidates = [
-            f"{self.host}/vodshow/{tid}--------{pg}---.html" if pg > 1 else f"{self.host}/vodshow/{tid}-----------.html",
-            f"{self.host}/vodtype/{tid}-{pg}.html" if pg > 1 else f"{self.host}/vodtype/{tid}.html",
-            f"{self.host}/index.php/vod/show/id/{tid}/page/{pg}.html",
+            f"{self.host}/vodshow/{real_tid}--------{pg}---.html" if pg > 1 else f"{self.host}/vodshow/{real_tid}-----------.html",
+            f"{self.host}/vodtype/{real_tid}-{pg}.html" if pg > 1 else f"{self.host}/vodtype/{real_tid}.html",
+            f"{self.host}/index.php/vod/show/id/{real_tid}/page/{pg}.html",
         ]
         for u in candidates:
             html = self._get(u)
@@ -378,7 +484,7 @@ class Spider(BaseSpider):
         pc = max(ms + [pg]) if ms else pg
         return {"page": pg, "pagecount": pc, "limit": 24, "total": pc * 24, "list": items}
 
-    # ---------- 详情页（修复集数抓取） ----------
+    # ---------- 详情页（过滤伪按钮、提取完整分集） ----------
     def detailContent(self, ids):
         vid = str(ids[0]) if ids else ""
         result = {"list": []}
@@ -470,15 +576,28 @@ class Spider(BaseSpider):
                 )
             ).strip()[:2000]
 
-        # 兼容 /vodplay/、/vod/play/、/play/ 三种集数链接
+        # 优先从正规播放列表容器中提取分集，过滤掉“立即免费播放”等封面大按钮
         eps, seen_ep = [], set()
-        skip_btn = ("立即播放", "在线播放", "开始播放", "正片播放")
-        for a in tree.xpath(
+        fallback_btn = None
+
+        play_nodes = tree.xpath(
+            '//*[contains(@class,"hl-plays-list") or contains(@class,"playlist") '
+            'or contains(@class,"play-list") or contains(@id,"playlist")]'
             '//a[contains(@href,"/vodplay/") or contains(@href,"/vod/play/") or contains(@href,"/play/")]'
-        ):
+        )
+        if not play_nodes:
+            play_nodes = tree.xpath(
+                '//a[contains(@href,"/vodplay/") or contains(@href,"/vod/play/") or contains(@href,"/play/")]'
+            )
+
+        for a in play_nodes:
             t = "".join(a.xpath(".//text()")).strip()
             h = self._fix(a.get("href", "") or "")
-            if not t or not h or any(s in t for s in skip_btn):
+            if not t or not h:
+                continue
+            if "播放" in t and len(t) >= 4:
+                if not fallback_btn:
+                    fallback_btn = (t, h)
                 continue
             if h not in seen_ep:
                 seen_ep.add(h)
@@ -491,9 +610,19 @@ class Spider(BaseSpider):
             ):
                 t = m.group(2).strip()
                 h = self._fix(m.group(1))
-                if t and h not in seen_ep and not any(s in t for s in skip_btn):
+                if not t:
+                    continue
+                if "播放" in t and len(t) >= 4:
+                    if not fallback_btn:
+                        fallback_btn = (t, h)
+                    continue
+                if h not in seen_ep:
                     seen_ep.add(h)
                     eps.append(f"{t}${h}")
+
+        # 若整页确实只有一个“立即免费播放”按钮，则作为第1集保底
+        if not eps and fallback_btn:
+            eps.append(f"第1集${fallback_btn[1]}")
 
         result["list"].append({
             "vod_id": vid,
@@ -595,7 +724,7 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, page):
         return self.searchContent(key, quick, page)
 
-    # ---------- 播放（修复 encrypt=1/2 解密） ----------
+    # ---------- 播放（SSL 证书绕过与解密） ----------
     def _decode_player_url(self, raw_url, encrypt):
         if not raw_url:
             return ""
@@ -613,7 +742,6 @@ class Spider(BaseSpider):
             except Exception:
                 pass
         else:
-            # 即使 encrypt=0，部分站点也会对 URL 做百分号编码
             if "%3A%2F%2F" in u or "%2F" in u:
                 u = unquote(u)
         return u.replace("\\/", "/").strip()
@@ -646,26 +774,26 @@ class Spider(BaseSpider):
         else:
             page = f"{self.host}/vodplay/{pid}.html"
 
-        # 如果传入的 id 本身已经是直链视频，直接播放
         if self.isVideoFormat(page):
+            safe_url = self._fix_ssl_url(self._fix(page), self.host + "/")
             return {
                 "parse": 0,
-                "url": self._fix(page),
+                "url": safe_url,
                 "header": {"User-Agent": self.ua, "Referer": self.host + "/"},
             }
 
         html = self._get(page)
         if self._is_cf(html):
-            return {"parse": 1, "url": page}
+            return {"parse": 1, "url": self._fix_ssl_url(page, page)}
 
         url = self._playurl(html)
         if url and (url.startswith("http") or url.startswith("//")):
             fixed_url = self._fix(url)
-            # 若解出来的地址是直链视频格式，直接 parse=0 硬解；若是解析页链接则走 parse=1 嗅探
             is_direct = self.isVideoFormat(fixed_url)
+            safe_url = self._fix_ssl_url(fixed_url, page)
             return {
                 "parse": 0 if is_direct else 1,
-                "url": fixed_url,
+                "url": safe_url,
                 "header": {"User-Agent": self.ua, "Referer": page},
             }
 
@@ -676,17 +804,59 @@ class Spider(BaseSpider):
             url = self._playurl(fr_html)
             if url:
                 fixed_url = self._fix(url)
+                safe_url = self._fix_ssl_url(fixed_url, fr)
                 return {
                     "parse": 0 if self.isVideoFormat(fixed_url) else 1,
-                    "url": fixed_url,
+                    "url": safe_url,
                     "header": {"User-Agent": self.ua, "Referer": fr},
                 }
 
         return {
             "parse": 1,
-            "url": page,
+            "url": self._fix_ssl_url(page, page),
             "header": {"User-Agent": self.ua, "Referer": page},
         }
+
+    def localProxy(self, param):
+        """当媒体服务器 SSL 证书无效且不支持纯 HTTP 时，由本地代理忽略证书转发媒体流/M3U8。"""
+        if not param or param.get("do") != "hongguo":
+            return None
+        target = unquote(param.get("url", ""))
+        ref = unquote(param.get("ref", self.host + "/"))
+        if not target:
+            return None
+
+        try:
+            r = self._sess.get(
+                target,
+                headers={"User-Agent": self.ua, "Referer": ref},
+                timeout=15,
+                verify=False,
+                stream=True,
+                allow_redirects=True,
+            )
+            ct = r.headers.get("Content-Type", "application/octet-stream")
+            # 如果是 m3u8 索引文件，重写里面的相对路径或坏 SSL 的 https 链接
+            if ".m3u8" in target.lower() or "mpegurl" in ct.lower():
+                text = r.text
+                base_url = target.rsplit("/", 1)[0] + "/"
+                lines = []
+                for line in text.splitlines():
+                    s = line.strip()
+                    if s and not s.startswith("#"):
+                        if not s.startswith("http"):
+                            s = base_url + s.lstrip("/")
+                        if s.startswith("https://"):
+                            s = f"proxy://do=hongguo&url={quote(s)}&ref={quote(ref)}"
+                        lines.append(s)
+                    else:
+                        lines.append(line)
+                body = "\n".join(lines).encode("utf-8")
+                return [200, "application/vnd.apple.mpegurl", body]
+
+            return [r.status_code, ct, r.raw]
+        except Exception:
+            return None
 
     def isVideoFormat(self, url):
         u = (url or "").lower().split("?")[0]
@@ -695,14 +865,12 @@ class Spider(BaseSpider):
     def manualVideoCheck(self):
         return False
 
-    def localProxy(self, param):
-        return None
-
     def getDependence(self):
         return []
 
     def destroy(self):
         self._search_cache.clear()
+        self._ssl_bad_domains.clear()
         try:
             self._sess.close()
         except Exception:
