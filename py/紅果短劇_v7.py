@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows 1.0.5 完整诊断版
+红果短剧 (hongguo / www.hongguoapp.cn) —— Yumilo Windows 1.0.5 完整整合版
 （2026-11）：
-1. 在详情页【简介】最上方直接输出第一集播放页的 player_aaaa 关键字段（from / encrypt / url），
-   方便一眼确认播放器类型与实际播放参数格式。
-2. 内置 127.0.0.1 本地 HTTP 代理服务器，解决 Yumilo Windows 不支持 proxy:// 与 HTTPS 证书校验问题。
-3. 保留完整题材分类筛选、60s 搜索缓存及全集提取逻辑。
+1. 精准提取 player_aaaa 中的 from / encrypt / url（采用区块正则匹配，不受前方嵌套 vod_data 大括号截断影响）。
+2. 详情页【简介】最上方输出 [播放参数] from=... | enc=... | url=... 摘要，便于一眼核对播放器类型。
+3. 内置 127.0.0.1 本地 HTTP 代理服务器，绕过 Yumilo Windows 不支持 proxy:// 与媒体服务器 SSL 证书验证失败问题。
+4. 保留完整题材分类筛选、60s 搜索缓存及全集提取逻辑。
 """
 import re
 import sys
@@ -535,10 +535,10 @@ class Spider(BaseSpider):
         if not eps:
             eps = [f"全集${play1_url}"]
 
-        # 在简介顶部输出 player_aaaa 的 from / encrypt / url，便于一眼确认实际播放地址格式
+        # 直接从 player_aaaa 文本中提取 from / encrypt / url（不受 vod_data 嵌套大括号影响）
         sample_p = play1_html or self._get(play1_url)
         pa = self._parse_player_aaaa(sample_p or "")
-        if pa:
+        if pa.get("url") or pa.get("from"):
             diag_line = f"[播放参数] from={pa.get('from','')} | enc={pa.get('encrypt',0)} | url={pa.get('url','')}\n"
         else:
             diag_line = f"[播放页快照] len={len(sample_p or '')} | cf={self._is_cf(sample_p)}\n"
@@ -631,46 +631,25 @@ class Spider(BaseSpider):
 
     # ---------- 精准解析 player_aaaa 与 /static/player/{from}.js ----------
     def _parse_player_aaaa(self, html):
+        """采用区块正则直接提取 from / encrypt / url，规避前方嵌套 vod_data 大括号截断问题。"""
         if not html:
             return {}
-        m = re.search(r'player_[a-z0-9_]+\s*=\s*\{', html)
-        if not m:
-            return {}
-        start = m.end() - 1
-        depth = 0
-        in_str = False
-        esc = False
-        end = -1
-        for i in range(start, min(len(html), start + 15000)):
-            ch = html[i]
-            if in_str:
-                if esc:
-                    esc = False
-                elif ch == "\\":
-                    esc = True
-                elif ch == '"':
-                    in_str = False
-            else:
-                if ch == '"':
-                    in_str = True
-                elif ch == "{":
-                    depth += 1
-                elif ch == "}":
-                    depth -= 1
-                    if depth == 0:
-                        end = i + 1
-                        break
-        if end > start:
-            try:
-                return json.loads(html[start:end])
-            except Exception:
-                pass
+        m_block = re.search(r'player_[a-z0-9_]+\s*=\s*\{.*?</script>', html, re.S)
+        block = m_block.group(0) if m_block else html
 
         res = {}
-        for k in ("from", "url", "encrypt"):
-            mk = re.search(rf'"{k}"\s*:\s*"?([^",\}}]+)"?', html[start:start + 5000])
-            if mk:
-                res[k] = mk.group(1)
+        m_from = re.search(r'"from"\s*:\s*"([^"]*)"', block)
+        m_enc = re.search(r'"encrypt"\s*:\s*"?(\d+)"?', block)
+        m_url = re.search(r'"url"\s*:\s*"([^"]*)"', block)
+        if m_from:
+            res["from"] = m_from.group(1)
+        if m_enc:
+            try:
+                res["encrypt"] = int(m_enc.group(1))
+            except Exception:
+                res["encrypt"] = 0
+        if m_url:
+            res["url"] = m_url.group(1).replace("\\/", "/")
         return res
 
     def _decode_player_url(self, raw_url, encrypt=0):
