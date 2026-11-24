@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - 片卡海報提取與明文圖片修復版
+七七影視爬蟲外掛 (七七影視.py) - 串流直鏈剝離與片卡優化完整版
 站點: https://www.7749tv.cc/
 適用平台: TVBox / CatVod / FongMi
 """
@@ -36,7 +36,6 @@ class Spider(BaseSpider):
     base_url = "https://www.7749tv.cc"
     debug = False
     timeout = 12
-    # 若 piccdn.7749tv.cc 不支援 HTTPS 導致仍無圖，可將此項改為 True 啟用本地代理轉發 HTTP 圖片
     use_pic_proxy = False
 
     PLACEHOLDER_KEYS = ("lazy.jpg", "lazy.gif", "loading.gif", "nopic", "default.jpg", "placeholder")
@@ -120,7 +119,6 @@ class Spider(BaseSpider):
         elif not u.startswith(("http://", "https://")):
             u = f"{self.base_url.rstrip('/')}/{u}"
 
-        # Android 9+ TVBox 預設阻擋 http 明文圖片，將已知圖床升級為 https
         if u.startswith("http://"):
             if self.use_pic_proxy:
                 b64 = base64.urlsafe_b64encode(u.encode("utf-8")).decode("ascii")
@@ -132,7 +130,6 @@ class Spider(BaseSpider):
     def _extract_img_from_tag(self, img):
         if not img:
             return ""
-        # 同時支援標準 src 與延遲載入屬性，並過濾 lazy.jpg
         for attr in ("data-original", "data-src", "data-echo", "data-bg", "data-lazy-src", "src"):
             val = (img.get(attr) or "").strip()
             if val and not self._is_placeholder(val):
@@ -164,13 +161,11 @@ class Spider(BaseSpider):
         return ""
 
     def _find_card_container(self, a_tag):
-        """從 <a> 標籤往上找屬於單一影片卡片的容器（避免抓到整塊列表 ul/section）"""
         curr = a_tag
         for _ in range(4):
             parent = curr.parent
             if not parent or parent.name in ("body", "html", "ul", "section", "main"):
                 break
-            # 若父層已經包含多部不同影片的連結，停止往上找
             vod_links = set()
             for link in parent.select("a[href]"):
                 h = link.get("href") or ""
@@ -379,7 +374,6 @@ class Spider(BaseSpider):
         soup = BeautifulSoup(html, "html.parser")
         items, seen = [], set()
 
-        # 建立全頁片名 -> 圖片備援索引（透過 <img alt="片名封面"> 精準匹配）
         alt_pic_map = {}
         for img in soup.select("img"):
             alt_txt = re.sub(r"封[面麵]$", "", (img.get("alt") or "")).strip()
@@ -387,7 +381,6 @@ class Spider(BaseSpider):
             if alt_txt and pic_url and alt_txt not in alt_pic_map:
                 alt_pic_map[alt_txt] = pic_url
 
-        # 遍歷所有影片詳情/播放連結，再向上鎖定單片容器，避免遺漏分離式標題與圖片結構
         links = soup.select("a[href]")
         for a in links:
             try:
@@ -407,7 +400,6 @@ class Spider(BaseSpider):
 
                 card = self._find_card_container(a)
 
-                # 標題提取
                 name = (a.get("title") or "").strip()
                 if not name:
                     title_el = card.select_one(".module-item-title, .stui-vodlist__title, .myui-vodlist__title, .title, .name, h4, h3, .heading")
@@ -424,7 +416,6 @@ class Spider(BaseSpider):
                 if not name:
                     continue
 
-                # 圖片提取：1.單片容器 -> 2.連結自身 -> 3.全頁 alt 索引比對
                 pic = self._get_img_src(card) or self._get_img_src(a) or alt_pic_map.get(name, "")
 
                 seen.add(vod_id)
@@ -535,7 +526,7 @@ class Spider(BaseSpider):
         }
 
     # ----------------------------------------------------------
-    # 播放解析
+    # 播放解析（支援直接剝離 ?url= 串流直鏈，如 api.taiju.bid）
     # ----------------------------------------------------------
     @staticmethod
     def _decode_player_url(raw_url, encrypt_flag):
@@ -551,12 +542,41 @@ class Spider(BaseSpider):
             pass
         return u
 
+    @staticmethod
+    def _unwrap_stream_url(target_url):
+        """
+        剝離解析介面包裹的真實串流直鏈，例如：
+        https://api.taiju.bid/2020/?url=https://ukzyvod3.ukubf5.com/20260619/aykbznlw/index.m3u8
+        -> https://ukzyvod3.ukubf5.com/20260619/aykbznlw/index.m3u8
+        """
+        if not target_url:
+            return ""
+        u = target_url.strip().replace("&amp;", "&")
+        if u.startswith("//"):
+            u = "https:" + u
+
+        try:
+            parsed = urllib.parse.urlparse(u)
+            qs = urllib.parse.parse_qs(parsed.query)
+            for key in ("url", "v", "vid", "src", "link", "play"):
+                if key in qs and qs[key]:
+                    inner = urllib.parse.unquote(qs[key][0]).strip()
+                    if inner.startswith("//"):
+                        inner = "https:" + inner
+                    if inner.startswith(("http://", "https://")):
+                        return inner
+        except Exception:
+            pass
+        return u
+
     def playerContent(self, flag, id, vipFlags=None):
         play_path = str(id).split("$")[-1].strip()
         hdr = self._player_headers(referer=self.base_url + "/")
 
-        if play_path.startswith("http") and re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", play_path, re.I):
-            return {"parse": 0, "url": play_path, "header": hdr}
+        # 1. 若本身已帶直鏈或解析包裹網址，優先拆解判斷
+        unwrapped_init = self._unwrap_stream_url(play_path)
+        if unwrapped_init.startswith(("http://", "https://")) and re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", unwrapped_init, re.I):
+            return {"parse": 0, "url": unwrapped_init, "header": hdr}
 
         play_url = self._build_url(play_path)
         html = self._fetch(play_url)
@@ -564,6 +584,8 @@ class Spider(BaseSpider):
             return {"parse": 1, "url": play_url, "header": hdr}
 
         video_url = ""
+
+        # 2. 提取 player_aaaa 設定
         m = re.search(r"var\s+player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S) or \
             re.search(r"player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S)
         if m:
@@ -573,23 +595,26 @@ class Spider(BaseSpider):
             except Exception as e:
                 self._log("player_aaaa JSON 解析失敗:", e)
 
+        # 3. 提取 iframe src（常見 https://api.taiju.bid/2020/?url=https://.../index.m3u8）
         if not video_url:
             m_iframe = re.search(r'<iframe[^>]+src=["\']([^"\']+)["\']', html, re.I)
             if m_iframe:
                 video_url = m_iframe.group(1).strip()
 
+        # 4. 頁面全域正則直接匹配 m3u8 / mp4（兼容帶參數或轉義斜線 \/）
         if not video_url:
-            m_m3u8 = re.search(r'(https?://[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)', html, re.I)
+            clean_html = html.replace(r"\/", "/")
+            m_m3u8 = re.search(r'(https?://[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)', clean_html, re.I)
             if m_m3u8:
                 video_url = m_m3u8.group(1).strip()
 
         if video_url:
-            if video_url.startswith("//"):
-                video_url = "https:" + video_url
-            is_direct = bool(re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", video_url, re.I))
+            # 關鍵步驟：若提取出的是 api.taiju.bid/2020/?url=xxx.m3u8，直接剝出內部 .m3u8
+            final_url = self._unwrap_stream_url(video_url)
+            is_direct = bool(re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", final_url, re.I))
             return {
                 "parse": 0 if is_direct else 1,
-                "url": video_url,
+                "url": final_url,
                 "header": hdr,
             }
 
@@ -640,9 +665,6 @@ class Spider(BaseSpider):
             "total": len(items),
         }
 
-    # ----------------------------------------------------------
-    # 本地圖片代理（當圖床僅支援 HTTP 時啟用 use_pic_proxy = True）
-    # ----------------------------------------------------------
     def localProxy(self, param=''):
         try:
             params = param if isinstance(param, dict) else json.loads(param)
