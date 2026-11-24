@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - 修復列表「暫無內容」完整版
+七七影視爬蟲外掛 (七七影視.py) - 精準結構適配完整版
 站點: https://www.7749tv.cc/
 適用平台: TVBox / CatVod / FongMi / box_py
 """
@@ -42,7 +42,6 @@ class Spider(BaseSpider):
     use_pic_proxy = False
 
     PLACEHOLDER_KEYS = ("lazy.jpg", "lazy.gif", "loading.gif", "nopic", "default.jpg", "placeholder")
-    # 排除非影片詳情的導覽/功能路徑關鍵字
     EXCLUDE_HREF_KEYS = (
         "/sort-", "/vodtype/", "/vodshow/", "/search", "/topic", "/actor",
         "/director", "/gbook", "/user", "/label", "/rss", "/map", "javascript:", "#"
@@ -51,8 +50,8 @@ class Spider(BaseSpider):
     def __init__(self):
         self.session = requests.Session()
         self._cached_filter_mode = None
-        self._cached_detail_tpl = None
-        self._id_href_map = {}  # 紀錄 vod_id 對應的實際詳情/播放路徑
+        self._cached_detail_tpl = "/info-{vid}.html"
+        self._id_href_map = {}
 
     def _log(self, *args):
         if self.debug:
@@ -170,54 +169,27 @@ class Spider(BaseSpider):
                         return fixed
         return ""
 
-    def _find_card_container(self, a_tag):
-        curr = a_tag
-        for _ in range(4):
-            parent = curr.parent
-            if not parent or parent.name in ("body", "html", "ul", "section", "main"):
-                break
-            vod_links = set()
-            for link in parent.select("a[href]"):
-                h = link.get("href") or ""
-                vid = self._extract_vod_id(h)
-                if vid:
-                    vod_links.add(vid)
-            if len(vod_links) > 1:
-                break
-            curr = parent
-            if curr.name == "li" or curr.select_one("img"):
-                return curr
-        return curr
-
     @classmethod
     def _extract_vod_id(cls, href):
-        """
-        兼容所有常見蘋果CMS / 海洋CMS 影片連結格式：
-        1. /voddetail/12345.html, /detail/12345.html, /view/12345.html
-        2. /view-12345.html, /movie-12345.html, /vod-12345.html, /info-12345.html
-        3. /play-12345-0-1.html, /vodplay/12345-1-1.html
-        4. /12345.html
-        """
+        """精準提取 /info-55067.html 或其他詳情/播放路徑的影片 ID"""
         if not href:
             return ""
         low = href.lower().strip()
         if any(k in low for k in cls.EXCLUDE_HREF_KEYS):
             return ""
 
-        # 去掉網域前綴只比對路徑
         path = urllib.parse.urlparse(href).path
 
-        # 格式 A: /模組名/ID(.html) 或 /模組名/ID-1-1.html
+        # 優先匹配七七影視標準格式: /info-55067.html 或 /play-55067-0-1.html
+        m = re.search(r"/(?:info|view|movie|vod|detail|video|play|vodplay)-([0-9A-Za-z_]+?)(?:-\d+-\d+)?\.html$", path, re.I)
+        if m:
+            return m.group(1)
+
+        # 斜線格式備援: /voddetail/55067.html
         m = re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie|info|vod)/([0-9A-Za-z_]+)(?:-\d+-\d+)?(?:\.html)?$", path, re.I)
         if m:
             return m.group(1)
 
-        # 格式 B: /模組名-ID(.html) 或 /play-ID-0-1.html（海洋CMS 橫線偽靜態）
-        m = re.search(r"/(?:view|movie|info|vod|detail|video|play|vodplay)-([0-9A-Za-z_]+?)(?:-\d+-\d+)?\.html$", path, re.I)
-        if m:
-            return m.group(1)
-
-        # 格式 C: 根目錄純數字 /12345.html
         m = re.search(r"^/(\d+)\.html$", path)
         if m:
             return m.group(1)
@@ -334,7 +306,6 @@ class Spider(BaseSpider):
             "4": build_filter_group(anime_types),
         }
 
-        # 同時回傳首頁推薦列表，確保 box_py / TVBox 各版本首頁都能直接顯示片卡
         html = self._fetch("/")
         home_list = self._parse_items(html)
         return {"class": classes, "filters": filters, "list": home_list}
@@ -418,17 +389,21 @@ class Spider(BaseSpider):
         }
 
     def _parse_items(self, html):
+        """
+        精準適配結構：
+        <a href="/info-55067.html">
+          <div class="psize">
+            <img class="lazy" data-original="..." src="/statics/images/lazy.jpg" alt="奧本海默海報">
+            <label class="title">&nbsp;</label>
+          </div>
+          <p class="pname">奧本海默</p>
+          <p class="pstarring">...</p>
+        </a>
+        """
         if not html:
             return []
         soup = BeautifulSoup(html, "html.parser")
         items, seen = [], set()
-
-        alt_pic_map = {}
-        for img in soup.select("img"):
-            alt_txt = re.sub(r"封[面麵]$", "", (img.get("alt") or "")).strip()
-            pic_url = self._extract_img_from_tag(img)
-            if alt_txt and pic_url and alt_txt not in alt_pic_map:
-                alt_pic_map[alt_txt] = pic_url
 
         for a in soup.select("a[href]"):
             try:
@@ -437,33 +412,57 @@ class Spider(BaseSpider):
                 if not vod_id or vod_id in seen:
                     continue
 
-                card = self._find_card_container(a)
+                # 1. 優先讀取 <p class="pname">，避免被空字元的 <label class="title">&nbsp;</label> 干擾
+                name = ""
+                pname_el = a.select_one("p.pname, .pname")
+                if pname_el:
+                    name = pname_el.get_text(strip=True)
 
-                name = (a.get("title") or "").strip()
                 if not name:
-                    title_el = card.select_one(".module-item-title, .stui-vodlist__title, .myui-vodlist__title, .title, .name, h4, h3, .heading")
-                    name = title_el.get_text(strip=True) if title_el else ""
-                if not name:
-                    img = card.select_one("img") or a.select_one("img")
-                    name = (img.get("alt") or "").strip() if img else ""
-                if not name:
-                    txt = a.get_text(strip=True)
-                    if txt and len(txt) < 50 and not any(k in txt for k in ("立即播放", "詳情", "在线观看", "在線觀看")):
-                        name = txt
+                    name = (a.get("title") or "").strip()
 
-                name = re.sub(r"封[面麵]$", "", name).strip()
+                if not name:
+                    img = a.select_one("img")
+                    if img:
+                        name = re.sub(r"(?:海報|海报|封[面麵])$", "", (img.get("alt") or "")).strip()
+
+                if not name:
+                    for sel in (".module-item-title", ".stui-vodlist__title", ".myui-vodlist__title", "h4", "h3", ".name"):
+                        el = a.select_one(sel)
+                        if el and el.get_text(strip=True):
+                            name = el.get_text(strip=True)
+                            break
+
+                # 若 <a> 內無文字，嘗試從同一個 <li> 父容器找 .pname 或標題
+                if not name and a.parent and a.parent.name == "li":
+                    p_alt = a.parent.select_one("p.pname, .pname, h4, h3, a[title]")
+                    if p_alt:
+                        name = (p_alt.get("title") or p_alt.get_text(strip=True) or "").strip()
+
+                name = re.sub(r"(?:海報|海报|封[面麵])$", "", name).strip()
                 if not name:
                     continue
 
-                pic = self._get_img_src(card) or self._get_img_src(a) or alt_pic_map.get(name, "")
+                # 2. 圖片提取（優先 a 內部，其次同層 li）
+                pic = self._get_img_src(a)
+                if not pic and a.parent and a.parent.name == "li":
+                    pic = self._get_img_src(a.parent)
+
+                # 3. 副標題/更新狀態（優先取 <label class="title"> 的非空文字，否則取 <p class="pstarring">）
+                remarks = ""
+                lbl = a.select_one("label.title, .module-item-note, .pic-text, .remarks, .label, .pic-tag")
+                if lbl:
+                    lbl_txt = lbl.get_text(strip=True)
+                    if lbl_txt:
+                        remarks = lbl_txt
+                if not remarks:
+                    starring = a.select_one("p.pstarring, .pstarring")
+                    if starring:
+                        remarks = starring.get_text(strip=True)
 
                 seen.add(vod_id)
-                # 紀錄原始詳情連結（排除播放頁），供 detailContent 精準直達
                 if "play" not in href.lower():
                     self._id_href_map[vod_id] = href
-
-                remark_el = card.select_one(".module-item-note, .pic-text, .remarks, .label, .pic-tag, .tag, .text-right, span.note")
-                remarks = remark_el.get_text(strip=True) if remark_el else ""
 
                 items.append({
                     "vod_id": vod_id,
@@ -476,7 +475,7 @@ class Spider(BaseSpider):
         return items
 
     # ----------------------------------------------------------
-    # 詳情頁解析
+    # 詳情頁解析 (/info-{vid}.html)
     # ----------------------------------------------------------
     def detailContent(self, ids):
         if not ids:
@@ -484,12 +483,11 @@ class Spider(BaseSpider):
         vid = str(ids[0]).split(",")[0].strip()
 
         detail_tpls = [
+            "/info-{vid}.html",
             "/view-{vid}.html",
             "/movie-{vid}.html",
             "/voddetail/{vid}.html",
             "/detail/{vid}.html",
-            "/video/{vid}.html",
-            "/view/{vid}.html",
             "/{vid}.html",
         ]
         if self._cached_detail_tpl in detail_tpls:
@@ -515,11 +513,11 @@ class Spider(BaseSpider):
         name_el = soup.select_one(".module-info-heading h1, .stui-content__detail .title, .myui-content__detail .title, .video-info h1, h1, .page-title")
         vod_name = name_el.get_text(strip=True) if name_el else ""
 
-        pic_el = soup.select_one(".module-item-pic, .stui-content__thumb, .myui-content__thumb, .video-cover, .picture, .detail-pic, img")
+        pic_el = soup.select_one(".psize img, .module-item-pic, .stui-content__thumb, .myui-content__thumb, .video-cover, .picture, .detail-pic, img")
         vod_pic = self._get_img_src(pic_el) or self._get_img_src(soup)
 
         director = actor = ""
-        for tag in soup.select(".module-info-item, .info-item, .detail-info-item, .data, p"):
+        for tag in soup.select(".module-info-item, .info-item, .detail-info-item, .data, p, li"):
             txt = tag.get_text(" ", strip=True)
             if re.search(r"導\s*演|导\s*演", txt) and len(txt) < 120:
                 director = re.split(r"[:：]", txt, maxsplit=1)[-1].strip()
@@ -548,7 +546,7 @@ class Spider(BaseSpider):
                     play_urls.append("#".join(eps))
         else:
             eps, seen_hrefs = [], set()
-            for a in soup.select("a[href*='/vodplay/'], a[href*='/play-'], a[href*='/play/'], a[href*='/video/']"):
+            for a in soup.select("a[href*='/play-'], a[href*='/vodplay/'], a[href*='/play/'], a[href*='/video-'], a[href*='/video/']"):
                 ep_title = self._clean_tvbox_str(a.get_text(strip=True))
                 ep_href = (a.get("href") or "").strip()
                 if not ep_title or not ep_href or ep_href in seen_hrefs:
