@@ -10,12 +10,23 @@ from base.spider import Spider
 
 
 class Spider(Spider):
-    CAT_PATTERN = re.compile(r"^/(category|type|drama|movie|anime|variety|short|list|channel)/[a-zA-Z0-9_-]+/?$")
+    # 排除非分類的功能性路徑關鍵字
+    EXCLUDE_CAT_PATHS = re.compile(
+        r"^/(play|detail|vod|video|watch|v|show|search|login|register|user|api|pi|_next|static|about|privacy|terms|dmca|history|favorite)(/|$|\?)",
+        re.I,
+    )
+    # 影片詳情/播放路徑特徵（包含長字串 CUID 或純數字 ID）
     VOD_PATTERN = re.compile(r"/(play|drama|detail|vod|video|movie|watch|v|show)/([a-zA-Z0-9_-]{6,45})")
     CUID_PATTERN = re.compile(r"/([a-zA-Z0-9_-]{10,45})")
     M3U8_PATTERN = re.compile(r'(https?://[^\s"\'<>\\]+\.m3u8[^\s"\'<>\\]*)')
 
-    INVALID_TITLES = {"立即播放", "播放", "詳情", "更多", "查看詳情", "首頁", "電視劇", "電影", "動漫", "綜藝", "短劇", "LOGO", "logo"}
+    INVALID_TITLES = {
+        "立即播放", "播放", "詳情", "更多", "查看詳情", "LOGO", "logo",
+        "登入", "註冊", "搜尋", "歷史", "收藏", "排行榜", "最新", "熱門"
+    }
+    INVALID_CAT_NAMES = {
+        "首頁", "更多", "全部", "登入", "註冊", "搜尋", "歷史", "收藏", "留言", "求片", "APP", "下載", "排行榜"
+    }
 
     def getName(self):
         return "楓林網"
@@ -66,36 +77,67 @@ class Spider(Spider):
         return urllib.parse.urljoin(self.host + "/", path)
 
     def _format_pic(self, raw_pic):
-        """轉換圖片絕對路徑並附上 Referer 標頭參數，避免圖片破圖"""
         if not raw_pic or raw_pic.startswith("data:image"):
             return ""
         full_pic = self._abs_url(raw_pic.strip())
-        # TVBox 支援透過 @Referer= 處理圖片防盜鏈
         return f"{full_pic}@Referer={self.host}/"
 
     def homeContent(self, filter):
         classes = []
         seen_ids = set()
+        seen_names = set()
         html, _ = self._fetch_html(self.host + "/", timeout=8)
 
         if html:
             soup = BeautifulSoup(html, "html.parser")
-            for a in soup.find_all("a", href=True):
-                href = a.get("href", "").strip()
-                name = a.get_text(strip=True)
-                if self.CAT_PATTERN.match(href) and 1 < len(name) <= 8 and href not in seen_ids:
-                    seen_ids.add(href)
-                    classes.append({"type_id": href, "type_name": name})
+            # 優先從 header / nav 導覽列抓取，再掃描全頁其他分類連結
+            nav_areas = soup.find_all(["header", "nav"]) or [soup]
+            search_pools = nav_areas + [soup]
+
+            for pool in search_pools:
+                for a in pool.find_all("a", href=True):
+                    href = a.get("href", "").strip()
+                    name = a.get_text(strip=True)
+
+                    # 轉換站內完整網址為相對路徑以統一判斷
+                    if href.startswith(self.host):
+                        href = href[len(self.host):] or "/"
+
+                    if not href.startswith("/") or href == "/" or href.startswith("//"):
+                        continue
+                    if self.EXCLUDE_CAT_PATHS.match(href):
+                        continue
+                    # 排除單部影片詳情頁（通常 ID 長度 >= 12）
+                    if re.search(r"/[a-zA-Z0-9_-]{12,45}$", href.split("?")[0]):
+                        continue
+
+                    if 1 <= len(name) <= 10 and name not in self.INVALID_CAT_NAMES:
+                        if href not in seen_ids and name not in seen_names:
+                            seen_ids.add(href)
+                            seen_names.add(name)
+                            classes.append({"type_id": href, "type_name": name})
+
+        # 若動態抓取到的分類太少，補齊常見核心分類（含電視劇與細分地區劇集）
+        fallback_classes = [
+            {"type_id": "/drama", "type_name": "電視劇"},
+            {"type_id": "/movie", "type_name": "電影"},
+            {"type_id": "/anime", "type_name": "動漫"},
+            {"type_id": "/variety", "type_name": "綜藝"},
+            {"type_id": "/short", "type_name": "短劇"},
+            {"type_id": "/drama?area=kr", "type_name": "韓劇"},
+            {"type_id": "/drama?area=cn", "type_name": "陸劇"},
+            {"type_id": "/drama?area=us", "type_name": "美劇"},
+            {"type_id": "/drama?area=jp", "type_name": "日劇"},
+            {"type_id": "/drama?area=tw", "type_name": "台劇"},
+        ]
 
         if not classes:
-            classes = [
-                {"type_id": "/", "type_name": "首頁精選"},
-                {"type_id": "/drama", "type_name": "電視劇"},
-                {"type_id": "/movie", "type_name": "電影"},
-                {"type_id": "/anime", "type_name": "動漫"},
-                {"type_id": "/variety", "type_name": "綜藝"},
-                {"type_id": "/short", "type_name": "短劇"},
-            ]
+            classes = fallback_classes
+        else:
+            # 確保「電視劇」一定存在於列表中
+            if not any("劇" in c["type_name"] for c in classes):
+                classes.insert(0, {"type_id": "/drama", "type_name": "電視劇"})
+
         return {"class": classes}
 
     def homeVideoContent(self):
@@ -103,24 +145,40 @@ class Spider(Spider):
         return {"list": data.get("list", [])}
 
     def categoryContent(self, tid, pg, filter, extend):
-        base_url = self.host + "/" if tid == "/" else self._abs_url(tid)
-        sep = "&" if "?" in base_url else "?"
-        url = base_url if str(pg) == "1" else f"{base_url}{sep}page={pg}"
+        # 針對常見分類（特別是 /drama 電視劇），準備多組候選路徑以防網站使用 /type/drama 或 /category/drama
+        candidate_tids = [tid]
+        clean_tid = tid.strip("/")
+        if clean_tid and "/" not in clean_tid and "?" not in clean_tid:
+            candidate_tids.extend([
+                f"/type/{clean_tid}",
+                f"/category/{clean_tid}",
+                f"/list/{clean_tid}",
+                f"/channel/{clean_tid}",
+            ])
 
-        html, status = self._fetch_html(url, timeout=10)
-        videos = self._parse_videos(html)
+        videos = []
+        last_url = self.host + "/"
+        last_status = "200"
+
+        for current_tid in candidate_tids:
+            base_url = self.host + "/" if current_tid == "/" else self._abs_url(current_tid)
+            sep = "&" if "?" in base_url else "?"
+            url = base_url if str(pg) == "1" else f"{base_url}{sep}page={pg}"
+            last_url = url
+
+            html, status = self._fetch_html(url, timeout=10)
+            last_status = status
+            if html and status == "200":
+                videos = self._parse_videos(html)
+                if videos:
+                    break
 
         if not videos and str(pg) == "1":
-            page_title = "無回應"
-            if html:
-                soup = BeautifulSoup(html, "html.parser")
-                t = soup.find("title")
-                page_title = t.get_text(strip=True)[:30] if t else f"HTML長度:{len(html)}"
             videos.append({
-                "vod_id": url,
-                "vod_name": f"[狀態:{status}] {page_title}",
+                "vod_id": last_url,
+                "vod_name": f"[狀態:{last_status}] 分類無資料 ({tid})",
                 "vod_pic": "",
-                "vod_remarks": "點擊檢查網址",
+                "vod_remarks": "請檢查分類路徑",
             })
 
         return {
@@ -139,7 +197,7 @@ class Spider(Spider):
         videos = []
         seen_urls = set()
 
-        # 策略 1（最精準）：直接鎖定帶有 alt 且圖片路徑符合 /pi/ 或封面特徵的 <img> 卡片
+        # 策略 1：以帶有 alt 的海報 <img> 為核心定位卡片（精準對齊 <img src="/pi/..." alt="片名">）
         for img in soup.find_all("img", alt=True):
             title = img.get("alt", "").strip()
             raw_pic = (
@@ -152,10 +210,10 @@ class Spider(Spider):
 
             if not title or len(title) < 2 or title in self.INVALID_TITLES:
                 continue
-            if not raw_pic or ("/pi/" not in raw_pic and "upload" not in raw_pic and "pic" not in raw_pic):
+            if not raw_pic or raw_pic.startswith("data:image"):
                 continue
 
-            # 往上尋找包覆此圖片的 <a>，或同層級卡片容器內的 <a>
+            # 往上尋找包覆此圖片的 <a>，或同層卡片容器內的 <a>
             a = img.find_parent("a", href=True)
             if not a:
                 card = img.find_parent(["div", "li", "article"])
@@ -165,19 +223,24 @@ class Spider(Spider):
                 continue
 
             href = a.get("href", "").strip()
-            if not href or href == "/" or href.startswith("#"):
+            if not href or href == "/" or href.startswith("#") or self.EXCLUDE_CAT_PATHS.match(href):
                 continue
 
             full_url = self._abs_url(href)
             if full_url in seen_urls:
                 continue
 
-            # 尋找卡片容器內的集數/狀態徽章（例如：HD、更新至第10集）
+            # 提取集數或畫質狀態標籤
             container = a if a.find("img") else (img.find_parent(["div", "li", "article"]) or a)
             remarks = ""
-            for span in container.find_all(["span", "div", "p"], limit=8):
+            for span in container.find_all(["span", "div", "p"], limit=10):
                 txt = span.get_text(strip=True)
-                if txt and txt != title and len(txt) <= 16 and any(k in txt for k in ["集", "全", "HD", "BD", "更新", "完結", "期", "第", "分"]):
+                if (
+                    txt
+                    and txt != title
+                    and len(txt) <= 18
+                    and any(k in txt for k in ["集", "全", "HD", "BD", "更新", "完結", "期", "第", "分", "國語", "粵語", "中字"])
+                ):
                     remarks = txt
                     break
 
@@ -189,7 +252,7 @@ class Spider(Spider):
                 "vod_remarks": remarks,
             })
 
-        # 策略 2：若策略 1 無結果，退回傳統 <a> 標籤匹配
+        # 策略 2：傳統 <a> 標籤匹配兜底
         if not videos:
             for a in soup.find_all("a", href=self.VOD_PATTERN):
                 href = a.get("href", "").strip()
