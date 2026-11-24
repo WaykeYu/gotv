@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - 片卡圖片修復與效能優化版
+七七影視爬蟲外掛 (七七影視.py) - sort-{id}-p{page}.html 分類與篩選適配版
 站點: https://www.7749tv.cc/
 適用平台: TVBox / CatVod / FongMi
 """
@@ -37,12 +37,11 @@ class Spider(BaseSpider):
     debug = False
     timeout = 12
 
-    # 佔位圖關鍵字黑名單，避免抓到 lazy.jpg
     PLACEHOLDER_KEYS = ("lazy.jpg", "lazy.gif", "loading.gif", "nopic", "default.jpg", "placeholder")
 
     def __init__(self):
         self.session = requests.Session()
-        self._cached_cat_tpl = None
+        self._cached_filter_mode = None
         self._cached_detail_tpl = None
 
     def _log(self, *args):
@@ -119,8 +118,6 @@ class Spider(BaseSpider):
         elif not u.startswith(("http://", "https://")):
             u = f"{self.base_url.rstrip('/')}/{u}"
 
-        # 若圖片位於獨立 CDN (如 piccdn.7749tv.cc)，保留原始協定並避免錯誤 Referer 觸發防盜鏈
-        # 僅對同網域圖片附加 Referer
         if u and ".m3u8" not in u and "@Referer=" not in u:
             base_host = urllib.parse.urlparse(self.base_url).netloc
             pic_host = urllib.parse.urlparse(u).netloc
@@ -131,7 +128,6 @@ class Spider(BaseSpider):
     def _extract_img_from_tag(self, img):
         if not img:
             return ""
-        # 優先讀取 data-original，最後才讀取 src，並過濾 lazy.jpg
         for attr in ("data-original", "data-src", "data-echo", "data-bg", "data-lazy-src", "src"):
             val = (img.get(attr) or "").strip()
             if val and not self._is_placeholder(val):
@@ -143,19 +139,16 @@ class Spider(BaseSpider):
     def _get_img_src(self, el):
         if not el:
             return ""
-        # 1. 若本身就是 img
         if el.name == "img":
             res = self._extract_img_from_tag(el)
             if res:
                 return res
 
-        # 2. 優先尋找帶有 class="lazy" 的 img，再找一般 img
         for img in el.select("img.lazy, img"):
             res = self._extract_img_from_tag(img)
             if res:
                 return res
 
-        # 3. 檢查元素自身或子元素的 background-image 樣式
         targets = [el] + el.select("[style*='background']")
         for target in targets:
             style = target.get("style") or ""
@@ -187,16 +180,96 @@ class Spider(BaseSpider):
         return "七七影視"
 
     # ----------------------------------------------------------
-    # 首頁與分類
+    # 首頁與分類篩選器 (對應 /sort-{tid}-p{pg}.html)
     # ----------------------------------------------------------
     def homeContent(self, filter=False):
         classes = [
-            {"type_id": "dianying", "type_name": "電影"},
-            {"type_id": "dianshiju", "type_name": "連續劇"},
-            {"type_id": "zongyi", "type_name": "綜藝"},
-            {"type_id": "dongman", "type_name": "動漫"},
+            {"type_id": "1", "type_name": "電影"},
+            {"type_id": "2", "type_name": "連續劇"},
+            {"type_id": "3", "type_name": "綜藝"},
+            {"type_id": "4", "type_name": "動漫"},
         ]
-        return {"class": classes, "filters": {}}
+
+        # 通用篩選選項
+        area_opts = [
+            {"n": "全部", "v": ""},
+            {"n": "大陸", "v": "大陸"},
+            {"n": "香港", "v": "香港"},
+            {"n": "台灣", "v": "台灣"},
+            {"n": "美國", "v": "美國"},
+            {"n": "韓國", "v": "韓國"},
+            {"n": "日本", "v": "日本"},
+            {"n": "泰國", "v": "泰國"},
+            {"n": "英國", "v": "英國"},
+            {"n": "其他", "v": "其他"},
+        ]
+        year_opts = [{"n": "全部", "v": ""}] + [
+            {"n": str(y), "v": str(y)} for y in range(2026, 2014, -1)
+        ] + [{"n": "更早", "v": "更早"}]
+
+        sort_opts = [
+            {"n": "按時間", "v": "time"},
+            {"n": "按人氣", "v": "hit"},
+            {"n": "按評分", "v": "score"},
+        ]
+
+        movie_types = [
+            {"n": "全部", "v": ""},
+            {"n": "動作片", "v": "動作"},
+            {"n": "喜劇片", "v": "喜劇"},
+            {"n": "愛情片", "v": "愛情"},
+            {"n": "科幻片", "v": "科幻"},
+            {"n": "恐怖片", "v": "恐怖"},
+            {"n": "劇情片", "v": "劇情"},
+            {"n": "戰爭片", "v": "戰爭"},
+            {"n": "犯罪片", "v": "犯罪"},
+            {"n": "紀錄片", "v": "紀錄"},
+        ]
+        drama_types = [
+            {"n": "全部", "v": ""},
+            {"n": "國產劇", "v": "國產"},
+            {"n": "港台劇", "v": "港台"},
+            {"n": "日韓劇", "v": "日韓"},
+            {"n": "歐美劇", "v": "歐美"},
+            {"n": "泰劇", "v": "泰劇"},
+            {"n": "古裝", "v": "古裝"},
+            {"n": "懸疑", "v": "懸疑"},
+            {"n": "都市", "v": "都市"},
+        ]
+        variety_types = [
+            {"n": "全部", "v": ""},
+            {"n": "真人秀", "v": "真人秀"},
+            {"n": "脫口秀", "v": "脫口秀"},
+            {"n": "選秀", "v": "選秀"},
+            {"n": "音樂", "v": "音樂"},
+            {"n": "訪談", "v": "訪談"},
+        ]
+        anime_types = [
+            {"n": "全部", "v": ""},
+            {"n": "熱血", "v": "熱血"},
+            {"n": "戀愛", "v": "戀愛"},
+            {"n": "奇幻", "v": "奇幻"},
+            {"n": "冒險", "v": "冒險"},
+            {"n": "校園", "v": "校園"},
+            {"n": "機戰", "v": "機戰"},
+        ]
+
+        def build_filter_group(type_list):
+            return [
+                {"key": "class", "name": "類型", "value": type_list},
+                {"key": "area", "name": "地區", "value": area_opts},
+                {"key": "year", "name": "年份", "value": year_opts},
+                {"key": "by", "name": "排序", "value": sort_opts},
+            ]
+
+        filters = {
+            "1": build_filter_group(movie_types),
+            "2": build_filter_group(drama_types),
+            "3": build_filter_group(variety_types),
+            "4": build_filter_group(anime_types),
+        }
+
+        return {"class": classes, "filters": filters}
 
     def homeVideoContent(self):
         html = self._fetch("/")
@@ -206,37 +279,79 @@ class Spider(BaseSpider):
         page = int(pg) if pg else 1
         tid = str(tid).strip()
 
-        alias_map = {
-            "1": "dianying", "movie": "dianying",
-            "2": "dianshiju", "drama": "dianshiju",
-            "3": "zongyi", "show": "zongyi",
-            "4": "dongman", "anime": "dongman",
+        # 兼容外部傳入拼音或數字
+        reverse_alias = {
+            "dianying": "1", "movie": "1",
+            "dianshiju": "2", "drama": "2",
+            "zongyi": "3", "show": "3",
+            "dongman": "4", "anime": "4",
         }
-        alt_tid = alias_map.get(tid, tid)
+        tid = reverse_alias.get(tid, tid)
 
-        tpls = [
-            "/vodtype/{tid}-{page}.html",
-            "/vodshow/{tid}--------{page}---.html",
-            "/type/{tid}-{page}.html",
-            "/{tid}?page={page}",
-        ]
-        if self._cached_cat_tpl in tpls:
-            tpls.remove(self._cached_cat_tpl)
-            tpls.insert(0, self._cached_cat_tpl)
+        # 解析篩選條件
+        ext = {}
+        if extend:
+            if isinstance(extend, str):
+                try:
+                    ext = json.loads(extend)
+                except Exception:
+                    ext = {}
+            elif isinstance(extend, dict):
+                ext = extend
 
-        candidate_paths = []
-        for tpl in tpls:
-            for t in dict.fromkeys([tid, alt_tid]):
-                candidate_paths.append((tpl, tpl.format(tid=t, page=page)))
+        f_class = (ext.get("class") or "").strip()
+        f_area = (ext.get("area") or "").strip()
+        f_year = (ext.get("year") or "").strip()
+        f_by = (ext.get("by") or "").strip()
 
+        has_filter = any([f_class, f_area, f_year, f_by])
         items = []
-        for tpl, path in candidate_paths:
-            html = self._fetch(path)
-            items = self._parse_items(html)
-            if items:
-                self._cached_cat_tpl = tpl
-                self._log(f"命中分類路由: {path}, 取得 {len(items)} 筆")
-                break
+
+        if not has_filter:
+            # 基準路由：https://www.7749tv.cc/sort-1-p1.html
+            routes = [
+                f"/sort-{tid}-p{page}.html",
+                f"/sort-{tid}-{page}.html",
+            ]
+            for path in routes:
+                html = self._fetch(path)
+                items = self._parse_items(html)
+                if items:
+                    self._log(f"命中分類路由: {path}, 取得 {len(items)} 筆")
+                    break
+        else:
+            q_class = urllib.parse.quote(f_class)
+            q_area = urllib.parse.quote(f_area)
+            q_year = urllib.parse.quote(f_year)
+            q_by = urllib.parse.quote(f_by)
+
+            # 海洋CMS / 自定義 sort 篩選常見偽靜態與動態路由
+            filter_candidates = [
+                # 模式 1: SeaCMS 偽靜態篩選
+                ("seacms_rewrite", f"/search.php?searchtype=5&tid={tid}&jq={q_class}&area={q_area}&year={q_year}&order={q_by}&page={page}"),
+                # 模式 2: sort 多段式偽靜態 (/sort-{tid}-{class}-{area}-{year}--{by}-p{page}.html)
+                ("sort_multi", f"/sort-{tid}-{q_class}-{q_area}-{q_year}--{q_by}-p{page}.html"),
+                # 模式 3: sort 附帶 Query 參數
+                ("sort_query", f"/sort-{tid}-p{page}.html?class={q_class}&area={q_area}&year={q_year}&by={q_by}"),
+                # 模式 4: 蘋果CMS vodshow 備援
+                ("vodshow", f"/vodshow/{tid}-{q_area}-{q_by}-{q_class}-----{page}---{q_year}.html"),
+            ]
+
+            if self._cached_filter_mode:
+                filter_candidates.sort(key=lambda x: 0 if x[0] == self._cached_filter_mode else 1)
+
+            for mode, path in filter_candidates:
+                html = self._fetch(path)
+                items = self._parse_items(html)
+                if items:
+                    self._cached_filter_mode = mode
+                    self._log(f"命中篩選路由 [{mode}]: {path}, 取得 {len(items)} 筆")
+                    break
+
+            # 若篩選路由無結果，自動降級回基本分類頁避免空白
+            if not items:
+                html = self._fetch(f"/sort-{tid}-p{page}.html")
+                items = self._parse_items(html)
 
         pagecount = page + 1 if len(items) >= 18 else page
         return {
@@ -253,28 +368,33 @@ class Spider(BaseSpider):
         soup = BeautifulSoup(html, "html.parser")
         items, seen = [], set()
 
-        # 擴充常見蘋果CMS卡片容器選擇器（含 stui / myui / fed / mac 結構）
         candidates = soup.select(
             ".module-item, .video-item, .public-list-box, .vodlist_item, "
             ".myui-vodlist__box, .stui-vodlist__box, .stui-vodlist__item, "
             ".fed-list-item, .hl-list-item, .pack-ykpack, li.col-md-2, li.col-sm-3, li.col-xs-4"
         )
 
-        # 若未命中容器，改以含 img.lazy 或詳情連結的 <a> 為起點
         if not candidates:
             candidates = soup.select(
-                "a[href*='/detail/'], a[href*='/voddetail/'], a[href*='/video/'], a[href*='/vodplay/']"
+                "a[href*='/detail/'], a[href*='/voddetail/'], a[href*='/video/'], a[href*='/vodplay/'], a[href*='/view/'], a[href*='/movie/']"
             )
 
         for card in candidates:
             try:
                 a = card if card.name == "a" else card.select_one(
-                    "a[href*='/detail/'], a[href*='/voddetail/'], a[href*='/video/'], a[href*='/vodplay/'], a"
+                    "a[href*='/detail/'], a[href*='/voddetail/'], a[href*='/video/'], a[href*='/vodplay/'], a[href*='/view/'], a[href*='/movie/'], a"
                 )
                 if not a:
                     continue
                 href = a.get("href") or ""
-                m = re.search(r"/(?:detail|voddetail|video|show|vodplay)/([0-9A-Za-z_-]+)", href)
+                # 排除分類連結 (/sort-1-p1.html) 避免誤抓導覽列
+                if "/sort-" in href or "/vodtype/" in href:
+                    continue
+
+                m = re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie)/([0-9A-Za-z_-]+)", href)
+                if not m:
+                    # 兼容 /12345.html 或 /id-12345.html 格式
+                    m = re.search(r"/(?:id-)?(\d+)(?:-\d+-\d+)?\.html$", href)
                 if not m:
                     continue
 
@@ -282,7 +402,6 @@ class Spider(BaseSpider):
                 if not vod_id or vod_id in seen:
                     continue
 
-                # 標題提取（優先取乾淨文字，清除「封面/封麵」字樣）
                 name = (a.get("title") or "").strip()
                 if not name:
                     title_el = card.select_one(".module-item-title, .stui-vodlist__title, .myui-vodlist__title, .title, .name, h4, h3, .heading")
@@ -294,7 +413,6 @@ class Spider(BaseSpider):
                 if not name:
                     continue
 
-                # 圖片提取：依序從 card -> a -> 父層容器 (li/div) 尋找 img.lazy
                 pic = self._get_img_src(card)
                 if not pic and card is not a:
                     pic = self._get_img_src(a)
@@ -323,7 +441,14 @@ class Spider(BaseSpider):
             return {"list": []}
         vid = str(ids[0]).split(",")[0].strip()
 
-        detail_tpls = ["/voddetail/{vid}.html", "/detail/{vid}.html", "/video/{vid}.html"]
+        detail_tpls = [
+            "/voddetail/{vid}.html",
+            "/detail/{vid}.html",
+            "/video/{vid}.html",
+            "/view/{vid}.html",
+            "/movie/{vid}.html",
+            "/{vid}.html",
+        ]
         if self._cached_detail_tpl in detail_tpls:
             detail_tpls.remove(self._cached_detail_tpl)
             detail_tpls.insert(0, self._cached_detail_tpl)
@@ -375,7 +500,7 @@ class Spider(BaseSpider):
                     play_urls.append("#".join(eps))
         else:
             eps, seen_hrefs = [], set()
-            for a in soup.select("a[href*='/vodplay/'], a[href*='/play/']"):
+            for a in soup.select("a[href*='/vodplay/'], a[href*='/play/'], a[href*='/video/']"):
                 ep_title = self._clean_tvbox_str(a.get_text(strip=True))
                 ep_href = (a.get("href") or "").strip()
                 if not ep_title or not ep_href or ep_href in seen_hrefs:
@@ -487,6 +612,7 @@ class Spider(BaseSpider):
                     return {"list": items, "page": 1, "pagecount": 1, "limit": len(items), "total": len(items)}
 
         search_urls = [
+            f"/search.php?page={page}&searchword={kw}&searchtype=",
             f"/vodsearch/-------------.html?wd={kw}&page={page}",
             f"/vodsearch/{kw}----------{page}---.html",
             f"/search?wd={kw}&page={page}",
