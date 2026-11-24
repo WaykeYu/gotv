@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - 串流直鏈剝離與片卡優化完整版
+七七影視爬蟲外掛 (七七影視.py) - 修復列表「暫無內容」完整版
 站點: https://www.7749tv.cc/
-適用平台: TVBox / CatVod / FongMi
+適用平台: TVBox / CatVod / FongMi / box_py
 """
 import re
 import json
 import time
 import base64
 import urllib.parse
+import urllib3
 
 import requests
 from bs4 import BeautifulSoup
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 try:
     from base.spider import Spider as BaseSpider
@@ -39,11 +42,17 @@ class Spider(BaseSpider):
     use_pic_proxy = False
 
     PLACEHOLDER_KEYS = ("lazy.jpg", "lazy.gif", "loading.gif", "nopic", "default.jpg", "placeholder")
+    # 排除非影片詳情的導覽/功能路徑關鍵字
+    EXCLUDE_HREF_KEYS = (
+        "/sort-", "/vodtype/", "/vodshow/", "/search", "/topic", "/actor",
+        "/director", "/gbook", "/user", "/label", "/rss", "/map", "javascript:", "#"
+    )
 
     def __init__(self):
         self.session = requests.Session()
         self._cached_filter_mode = None
         self._cached_detail_tpl = None
+        self._id_href_map = {}  # 紀錄 vod_id 對應的實際詳情/播放路徑
 
     def _log(self, *args):
         if self.debug:
@@ -76,7 +85,8 @@ class Spider(BaseSpider):
                     url,
                     headers=self._web_headers(referer),
                     timeout=self.timeout,
-                    allow_redirects=True
+                    allow_redirects=True,
+                    verify=False,
                 )
                 if r.status_code == 200:
                     if not r.encoding or r.encoding.lower() in ("iso-8859-1", "ascii"):
@@ -169,14 +179,50 @@ class Spider(BaseSpider):
             vod_links = set()
             for link in parent.select("a[href]"):
                 h = link.get("href") or ""
-                if re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie)/|/\d+\.html", h):
-                    vod_links.add(h.split("-")[0])
+                vid = self._extract_vod_id(h)
+                if vid:
+                    vod_links.add(vid)
             if len(vod_links) > 1:
                 break
             curr = parent
             if curr.name == "li" or curr.select_one("img"):
                 return curr
         return curr
+
+    @classmethod
+    def _extract_vod_id(cls, href):
+        """
+        兼容所有常見蘋果CMS / 海洋CMS 影片連結格式：
+        1. /voddetail/12345.html, /detail/12345.html, /view/12345.html
+        2. /view-12345.html, /movie-12345.html, /vod-12345.html, /info-12345.html
+        3. /play-12345-0-1.html, /vodplay/12345-1-1.html
+        4. /12345.html
+        """
+        if not href:
+            return ""
+        low = href.lower().strip()
+        if any(k in low for k in cls.EXCLUDE_HREF_KEYS):
+            return ""
+
+        # 去掉網域前綴只比對路徑
+        path = urllib.parse.urlparse(href).path
+
+        # 格式 A: /模組名/ID(.html) 或 /模組名/ID-1-1.html
+        m = re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie|info|vod)/([0-9A-Za-z_]+)(?:-\d+-\d+)?(?:\.html)?$", path, re.I)
+        if m:
+            return m.group(1)
+
+        # 格式 B: /模組名-ID(.html) 或 /play-ID-0-1.html（海洋CMS 橫線偽靜態）
+        m = re.search(r"/(?:view|movie|info|vod|detail|video|play|vodplay)-([0-9A-Za-z_]+?)(?:-\d+-\d+)?\.html$", path, re.I)
+        if m:
+            return m.group(1)
+
+        # 格式 C: 根目錄純數字 /12345.html
+        m = re.search(r"^/(\d+)\.html$", path)
+        if m:
+            return m.group(1)
+
+        return ""
 
     @staticmethod
     def _clean_tvbox_str(s):
@@ -288,7 +334,10 @@ class Spider(BaseSpider):
             "4": build_filter_group(anime_types),
         }
 
-        return {"class": classes, "filters": filters}
+        # 同時回傳首頁推薦列表，確保 box_py / TVBox 各版本首頁都能直接顯示片卡
+        html = self._fetch("/")
+        home_list = self._parse_items(html)
+        return {"class": classes, "filters": filters, "list": home_list}
 
     def homeVideoContent(self):
         html = self._fetch("/")
@@ -381,20 +430,10 @@ class Spider(BaseSpider):
             if alt_txt and pic_url and alt_txt not in alt_pic_map:
                 alt_pic_map[alt_txt] = pic_url
 
-        links = soup.select("a[href]")
-        for a in links:
+        for a in soup.select("a[href]"):
             try:
                 href = (a.get("href") or "").strip()
-                if not href or "/sort-" in href or "/vodtype/" in href or href.startswith(("javascript", "#")):
-                    continue
-
-                m = re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie)/([0-9A-Za-z_-]+)", href)
-                if not m:
-                    m = re.search(r"/(?:id-)?(\d+)(?:-\d+-\d+)?\.html$", href)
-                if not m:
-                    continue
-
-                vod_id = m.group(1).replace(".html", "").split("-")[0]
+                vod_id = self._extract_vod_id(href)
                 if not vod_id or vod_id in seen:
                     continue
 
@@ -419,6 +458,10 @@ class Spider(BaseSpider):
                 pic = self._get_img_src(card) or self._get_img_src(a) or alt_pic_map.get(name, "")
 
                 seen.add(vod_id)
+                # 紀錄原始詳情連結（排除播放頁），供 detailContent 精準直達
+                if "play" not in href.lower():
+                    self._id_href_map[vod_id] = href
+
                 remark_el = card.select_one(".module-item-note, .pic-text, .remarks, .label, .pic-tag, .tag, .text-right, span.note")
                 remarks = remark_el.get_text(strip=True) if remark_el else ""
 
@@ -441,22 +484,28 @@ class Spider(BaseSpider):
         vid = str(ids[0]).split(",")[0].strip()
 
         detail_tpls = [
+            "/view-{vid}.html",
+            "/movie-{vid}.html",
             "/voddetail/{vid}.html",
             "/detail/{vid}.html",
             "/video/{vid}.html",
             "/view/{vid}.html",
-            "/movie/{vid}.html",
             "/{vid}.html",
         ]
         if self._cached_detail_tpl in detail_tpls:
             detail_tpls.remove(self._cached_detail_tpl)
             detail_tpls.insert(0, self._cached_detail_tpl)
 
+        candidate_paths = [tpl.format(vid=vid) for tpl in detail_tpls]
+        if vid in self._id_href_map:
+            candidate_paths.insert(0, self._id_href_map[vid])
+
         html = ""
-        for tpl in detail_tpls:
-            html = self._fetch(tpl.format(vid=vid))
+        for path in dict.fromkeys(candidate_paths):
+            html = self._fetch(path)
             if html and len(html) > 500:
-                self._cached_detail_tpl = tpl
+                if "{vid}" not in path and vid in path:
+                    self._cached_detail_tpl = path.replace(vid, "{vid}")
                 break
 
         if not html:
@@ -499,7 +548,7 @@ class Spider(BaseSpider):
                     play_urls.append("#".join(eps))
         else:
             eps, seen_hrefs = [], set()
-            for a in soup.select("a[href*='/vodplay/'], a[href*='/play/'], a[href*='/video/']"):
+            for a in soup.select("a[href*='/vodplay/'], a[href*='/play-'], a[href*='/play/'], a[href*='/video/']"):
                 ep_title = self._clean_tvbox_str(a.get_text(strip=True))
                 ep_href = (a.get("href") or "").strip()
                 if not ep_title or not ep_href or ep_href in seen_hrefs:
@@ -544,11 +593,6 @@ class Spider(BaseSpider):
 
     @staticmethod
     def _unwrap_stream_url(target_url):
-        """
-        剝離解析介面包裹的真實串流直鏈，例如：
-        https://api.taiju.bid/2020/?url=https://ukzyvod3.ukubf5.com/20260619/aykbznlw/index.m3u8
-        -> https://ukzyvod3.ukubf5.com/20260619/aykbznlw/index.m3u8
-        """
         if not target_url:
             return ""
         u = target_url.strip().replace("&amp;", "&")
@@ -573,7 +617,6 @@ class Spider(BaseSpider):
         play_path = str(id).split("$")[-1].strip()
         hdr = self._player_headers(referer=self.base_url + "/")
 
-        # 1. 若本身已帶直鏈或解析包裹網址，優先拆解判斷
         unwrapped_init = self._unwrap_stream_url(play_path)
         if unwrapped_init.startswith(("http://", "https://")) and re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", unwrapped_init, re.I):
             return {"parse": 0, "url": unwrapped_init, "header": hdr}
@@ -584,8 +627,6 @@ class Spider(BaseSpider):
             return {"parse": 1, "url": play_url, "header": hdr}
 
         video_url = ""
-
-        # 2. 提取 player_aaaa 設定
         m = re.search(r"var\s+player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S) or \
             re.search(r"player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S)
         if m:
@@ -595,13 +636,11 @@ class Spider(BaseSpider):
             except Exception as e:
                 self._log("player_aaaa JSON 解析失敗:", e)
 
-        # 3. 提取 iframe src（常見 https://api.taiju.bid/2020/?url=https://.../index.m3u8）
         if not video_url:
             m_iframe = re.search(r'<iframe[^>]+src=["\']([^"\']+)["\']', html, re.I)
             if m_iframe:
                 video_url = m_iframe.group(1).strip()
 
-        # 4. 頁面全域正則直接匹配 m3u8 / mp4（兼容帶參數或轉義斜線 \/）
         if not video_url:
             clean_html = html.replace(r"\/", "/")
             m_m3u8 = re.search(r'(https?://[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)', clean_html, re.I)
@@ -609,7 +648,6 @@ class Spider(BaseSpider):
                 video_url = m_m3u8.group(1).strip()
 
         if video_url:
-            # 關鍵步驟：若提取出的是 api.taiju.bid/2020/?url=xxx.m3u8，直接剝出內部 .m3u8
             final_url = self._unwrap_stream_url(video_url)
             is_direct = bool(re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", final_url, re.I))
             return {
@@ -670,7 +708,7 @@ class Spider(BaseSpider):
             params = param if isinstance(param, dict) else json.loads(param)
             if params.get("type") == "pic" and params.get("url"):
                 raw_url = base64.urlsafe_b64decode(params["url"]).decode("utf-8")
-                r = self.session.get(raw_url, headers=self._player_headers(), timeout=10)
+                r = self.session.get(raw_url, headers=self._player_headers(), timeout=10, verify=False)
                 if r.status_code == 200:
                     ctype = r.headers.get("Content-Type", "image/jpeg")
                     return [200, ctype, r.content]
