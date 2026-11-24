@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - 精準結構適配完整版
+七七影視爬蟲外掛 (七七影視.py) - 篩選修復與 Yumilo Windows SSL 憑證代理版
 站點: https://www.7749tv.cc/
-適用平台: TVBox / CatVod / FongMi / box_py
+適用平台: Yumilo / TVBox / CatVod / FongMi / box_py
 """
 import re
 import json
@@ -39,6 +39,9 @@ class Spider(BaseSpider):
     base_url = "https://www.7749tv.cc"
     debug = False
     timeout = 12
+    # 針對 Yumilo Windows 報錯「与媒体服务器的安全连接失败，请检查证书或代理」：
+    # 預設開啟本地代理轉發 M3U8（由 Python 忽略過期/自簽 SSL 憑證後轉交播放器）
+    use_stream_proxy = True
     use_pic_proxy = False
 
     PLACEHOLDER_KEYS = ("lazy.jpg", "lazy.gif", "loading.gif", "nopic", "default.jpg", "placeholder")
@@ -47,15 +50,28 @@ class Spider(BaseSpider):
         "/director", "/gbook", "/user", "/label", "/rss", "/map", "javascript:", "#"
     )
 
+    # 海洋CMS 後端資料庫常用的繁轉簡對照表（確保篩選條件精準命中）
+    T2S_MAP = str.maketrans({
+        "陸": "陆", "台": "台", "灣": "湾", "國": "国", "韓": "韩", "歐": "欧",
+        "動": "动", "劇": "剧", "喜": "喜", "愛": "爱", "恐": "恐", "戰": "战",
+        "紀": "纪", "錄": "录", "裝": "装", "懸": "悬", "脫": "脱", "選": "选",
+        "音": "音", "樂": "乐", "訪": "访", "談": "谈", "熱": "热", "戀": "恋",
+        "冒": "冒", "險": "险", "園": "园", "機": "机", "綜": "综", "藝": "艺",
+        "漫": "漫", "電": "电", "影": "影", "連": "连", "續": "续", "更": "更"
+    })
+
     def __init__(self):
         self.session = requests.Session()
-        self._cached_filter_mode = None
+        self._cached_filter_tpl = None
         self._cached_detail_tpl = "/info-{vid}.html"
         self._id_href_map = {}
 
     def _log(self, *args):
         if self.debug:
             print("[7749tv]", *args)
+
+    def _to_simplified(self, text):
+        return str(text).translate(self.T2S_MAP)
 
     def _web_headers(self, referer=None):
         return {
@@ -171,7 +187,6 @@ class Spider(BaseSpider):
 
     @classmethod
     def _extract_vod_id(cls, href):
-        """精準提取 /info-55067.html 或其他詳情/播放路徑的影片 ID"""
         if not href:
             return ""
         low = href.lower().strip()
@@ -180,12 +195,10 @@ class Spider(BaseSpider):
 
         path = urllib.parse.urlparse(href).path
 
-        # 優先匹配七七影視標準格式: /info-55067.html 或 /play-55067-0-1.html
         m = re.search(r"/(?:info|view|movie|vod|detail|video|play|vodplay)-([0-9A-Za-z_]+?)(?:-\d+-\d+)?\.html$", path, re.I)
         if m:
             return m.group(1)
 
-        # 斜線格式備援: /voddetail/55067.html
         m = re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie|info|vod)/([0-9A-Za-z_]+)(?:-\d+-\d+)?(?:\.html)?$", path, re.I)
         if m:
             return m.group(1)
@@ -211,6 +224,8 @@ class Spider(BaseSpider):
                         self.debug = bool(ext["debug"])
                     if "pic_proxy" in ext:
                         self.use_pic_proxy = bool(ext["pic_proxy"])
+                    if "stream_proxy" in ext:
+                        self.use_stream_proxy = bool(ext["stream_proxy"])
             except Exception as e:
                 self._log("init extend 解析失敗:", e)
 
@@ -218,7 +233,7 @@ class Spider(BaseSpider):
         return "七七影視"
 
     # ----------------------------------------------------------
-    # 首頁與分類篩選器 (對應 /sort-{tid}-p{pg}.html)
+    # 首頁與分類篩選器
     # ----------------------------------------------------------
     def homeContent(self, filter=False):
         classes = [
@@ -228,16 +243,17 @@ class Spider(BaseSpider):
             {"type_id": "4", "type_name": "動漫"},
         ]
 
+        # 顯示名稱(n)用繁體，傳遞值(v)使用後端資料庫匹配的簡體字
         area_opts = [
             {"n": "全部", "v": ""},
-            {"n": "大陸", "v": "大陸"},
+            {"n": "大陸", "v": "大陆"},
             {"n": "香港", "v": "香港"},
-            {"n": "台灣", "v": "台灣"},
-            {"n": "美國", "v": "美國"},
-            {"n": "韓國", "v": "韓國"},
+            {"n": "台灣", "v": "台湾"},
+            {"n": "美國", "v": "美国"},
+            {"n": "韓國", "v": "韩国"},
             {"n": "日本", "v": "日本"},
-            {"n": "泰國", "v": "泰國"},
-            {"n": "英國", "v": "英國"},
+            {"n": "泰國", "v": "泰国"},
+            {"n": "英國", "v": "英国"},
             {"n": "其他", "v": "其他"},
         ]
         year_opts = [{"n": "全部", "v": ""}] + [
@@ -252,43 +268,43 @@ class Spider(BaseSpider):
 
         movie_types = [
             {"n": "全部", "v": ""},
-            {"n": "動作片", "v": "動作"},
-            {"n": "喜劇片", "v": "喜劇"},
-            {"n": "愛情片", "v": "愛情"},
+            {"n": "動作片", "v": "动作"},
+            {"n": "喜劇片", "v": "喜剧"},
+            {"n": "愛情片", "v": "爱情"},
             {"n": "科幻片", "v": "科幻"},
             {"n": "恐怖片", "v": "恐怖"},
-            {"n": "劇情片", "v": "劇情"},
-            {"n": "戰爭片", "v": "戰爭"},
+            {"n": "劇情片", "v": "剧情"},
+            {"n": "戰爭片", "v": "战争"},
             {"n": "犯罪片", "v": "犯罪"},
-            {"n": "紀錄片", "v": "紀錄"},
+            {"n": "紀錄片", "v": "纪录"},
         ]
         drama_types = [
             {"n": "全部", "v": ""},
-            {"n": "國產劇", "v": "國產"},
+            {"n": "國產劇", "v": "国产"},
             {"n": "港台劇", "v": "港台"},
-            {"n": "日韓劇", "v": "日韓"},
-            {"n": "歐美劇", "v": "歐美"},
-            {"n": "泰劇", "v": "泰劇"},
-            {"n": "古裝", "v": "古裝"},
-            {"n": "懸疑", "v": "懸疑"},
+            {"n": "日韓劇", "v": "日韩"},
+            {"n": "歐美劇", "v": "欧美"},
+            {"n": "泰劇", "v": "泰剧"},
+            {"n": "古裝", "v": "古装"},
+            {"n": "懸疑", "v": "悬疑"},
             {"n": "都市", "v": "都市"},
         ]
         variety_types = [
             {"n": "全部", "v": ""},
             {"n": "真人秀", "v": "真人秀"},
-            {"n": "脫口秀", "v": "脫口秀"},
-            {"n": "選秀", "v": "選秀"},
-            {"n": "音樂", "v": "音樂"},
-            {"n": "訪談", "v": "訪談"},
+            {"n": "脫口秀", "v": "脱口秀"},
+            {"n": "選秀", "v": "选秀"},
+            {"n": "音樂", "v": "音乐"},
+            {"n": "訪談", "v": "访谈"},
         ]
         anime_types = [
             {"n": "全部", "v": ""},
-            {"n": "熱血", "v": "熱血"},
-            {"n": "戀愛", "v": "戀愛"},
+            {"n": "熱血", "v": "热血"},
+            {"n": "戀愛", "v": "恋爱"},
             {"n": "奇幻", "v": "奇幻"},
-            {"n": "冒險", "v": "冒險"},
-            {"n": "校園", "v": "校園"},
-            {"n": "機戰", "v": "機戰"},
+            {"n": "冒險", "v": "冒险"},
+            {"n": "校園", "v": "校园"},
+            {"n": "機戰", "v": "机战"},
         ]
 
         def build_filter_group(type_list):
@@ -314,6 +330,33 @@ class Spider(BaseSpider):
         html = self._fetch("/")
         return {"list": self._parse_items(html)}
 
+    def _detect_site_filter_template(self, tid):
+        """
+        從 /sort-{tid}-p1.html 頁面中的真實篩選超連結動態偵測網站的篩選網址結構
+        """
+        if self._cached_filter_tpl:
+            return self._cached_filter_tpl
+
+        html = self._fetch(f"/sort-{tid}-p1.html")
+        if not html:
+            return None
+
+        soup = BeautifulSoup(html, "html.parser")
+        for a in soup.select("a[href]"):
+            href = (a.get("href") or "").strip()
+            # 尋找包含篩選參數的連結（例如 search.php?searchtype=5 或 sort-1-...）
+            if "searchtype=5" in href or re.search(r"/sort-\d+-[^p]", href):
+                self._log("偵測到站內篩選連結範例:", href)
+                if "searchtype=5" in href:
+                    self._cached_filter_tpl = "seacms_search"
+                    return self._cached_filter_tpl
+                # 分析偽靜態橫線位置
+                m = re.match(r"^(/sort-\d+-(?:[^-]+-){3,8}p)\d+(\.html.*)$", href)
+                if m:
+                    self._cached_filter_tpl = "sort_dash"
+                    return self._cached_filter_tpl
+        return None
+
     def categoryContent(self, tid, pg, filter=False, extend=None):
         page = int(pg) if pg else 1
         tid = str(tid).strip()
@@ -326,18 +369,20 @@ class Spider(BaseSpider):
         }
         tid = reverse_alias.get(tid, tid)
 
+        # 兼容 TVBox / Yumilo 不同版本傳入 extend 的方式
         ext = {}
         if extend:
             if isinstance(extend, str):
                 try:
                     ext = json.loads(extend)
                 except Exception:
-                    ext = {}
+                    # 兼容 key=val&key2=val2 格式
+                    ext = dict(urllib.parse.parse_qsl(extend))
             elif isinstance(extend, dict):
                 ext = extend
 
-        f_class = (ext.get("class") or "").strip()
-        f_area = (ext.get("area") or "").strip()
+        f_class = self._to_simplified((ext.get("class") or "").strip())
+        f_area = self._to_simplified((ext.get("area") or "").strip())
         f_year = (ext.get("year") or "").strip()
         f_by = (ext.get("by") or "").strip()
 
@@ -349,35 +394,36 @@ class Spider(BaseSpider):
                 html = self._fetch(path)
                 items = self._parse_items(html)
                 if items:
-                    self._log(f"命中分類路由: {path}, 取得 {len(items)} 筆")
                     break
         else:
+            self._detect_site_filter_template(tid)
             q_class = urllib.parse.quote(f_class)
             q_area = urllib.parse.quote(f_area)
             q_year = urllib.parse.quote(f_year)
             q_by = urllib.parse.quote(f_by)
 
-            filter_candidates = [
-                ("seacms_rewrite", f"/search.php?searchtype=5&tid={tid}&jq={q_class}&area={q_area}&year={q_year}&order={q_by}&page={page}"),
-                ("sort_multi", f"/sort-{tid}-{q_class}-{q_area}-{q_year}--{q_by}-p{page}.html"),
-                ("sort_query", f"/sort-{tid}-p{page}.html?class={q_class}&area={q_area}&year={q_year}&by={q_by}"),
-                ("vodshow", f"/vodshow/{tid}-{q_area}-{q_by}-{q_class}-----{page}---{q_year}.html"),
+            # 海洋CMS 標準篩選接口與偽靜態規則
+            filter_routes = [
+                # 1. SeaCMS 動態篩選入口（最通用，不依賴偽靜態順序）
+                f"/search.php?searchtype=5&tid={tid}&jq={q_class}&area={q_area}&year={q_year}&order={q_by}&page={page}",
+                # 2. SeaCMS 常見偽靜態 6 槽位: /sort-{tid}-{jq}-{area}-{year}-{letter}-{order}-p{page}.html
+                f"/sort-{tid}-{q_class}-{q_area}-{q_year}--{q_by}-p{page}.html",
+                # 3. SeaCMS 常見偽靜態 7 槽位: /sort-{tid}-{jq}-{area}-{year}-{lang}-{letter}-{order}-p{page}.html
+                f"/sort-{tid}-{q_class}-{q_area}-{q_year}---{q_by}-p{page}.html",
+                # 4. 蘋果CMS 備援
+                f"/vodshow/{tid}-{q_area}-{q_by}-{q_class}-----{page}---{q_year}.html",
             ]
 
-            if self._cached_filter_mode:
-                filter_candidates.sort(key=lambda x: 0 if x[0] == self._cached_filter_mode else 1)
+            if self._cached_filter_tpl == "sort_dash":
+                # 將偽靜態路由提前
+                filter_routes = [filter_routes[1], filter_routes[2], filter_routes[0], filter_routes[3]]
 
-            for mode, path in filter_candidates:
+            for path in filter_routes:
                 html = self._fetch(path)
                 items = self._parse_items(html)
                 if items:
-                    self._cached_filter_mode = mode
-                    self._log(f"命中篩選路由 [{mode}]: {path}, 取得 {len(items)} 筆")
+                    self._log(f"篩選命中: {path} -> {len(items)} 筆")
                     break
-
-            if not items:
-                html = self._fetch(f"/sort-{tid}-p{page}.html")
-                items = self._parse_items(html)
 
         pagecount = page + 1 if len(items) >= 18 else page
         return {
@@ -389,17 +435,6 @@ class Spider(BaseSpider):
         }
 
     def _parse_items(self, html):
-        """
-        精準適配結構：
-        <a href="/info-55067.html">
-          <div class="psize">
-            <img class="lazy" data-original="..." src="/statics/images/lazy.jpg" alt="奧本海默海報">
-            <label class="title">&nbsp;</label>
-          </div>
-          <p class="pname">奧本海默</p>
-          <p class="pstarring">...</p>
-        </a>
-        """
         if not html:
             return []
         soup = BeautifulSoup(html, "html.parser")
@@ -412,7 +447,6 @@ class Spider(BaseSpider):
                 if not vod_id or vod_id in seen:
                     continue
 
-                # 1. 優先讀取 <p class="pname">，避免被空字元的 <label class="title">&nbsp;</label> 干擾
                 name = ""
                 pname_el = a.select_one("p.pname, .pname")
                 if pname_el:
@@ -433,7 +467,6 @@ class Spider(BaseSpider):
                             name = el.get_text(strip=True)
                             break
 
-                # 若 <a> 內無文字，嘗試從同一個 <li> 父容器找 .pname 或標題
                 if not name and a.parent and a.parent.name == "li":
                     p_alt = a.parent.select_one("p.pname, .pname, h4, h3, a[title]")
                     if p_alt:
@@ -443,12 +476,10 @@ class Spider(BaseSpider):
                 if not name:
                     continue
 
-                # 2. 圖片提取（優先 a 內部，其次同層 li）
                 pic = self._get_img_src(a)
                 if not pic and a.parent and a.parent.name == "li":
                     pic = self._get_img_src(a.parent)
 
-                # 3. 副標題/更新狀態（優先取 <label class="title"> 的非空文字，否則取 <p class="pstarring">）
                 remarks = ""
                 lbl = a.select_one("label.title, .module-item-note, .pic-text, .remarks, .label, .pic-tag")
                 if lbl:
@@ -573,7 +604,7 @@ class Spider(BaseSpider):
         }
 
     # ----------------------------------------------------------
-    # 播放解析（支援直接剝離 ?url= 串流直鏈，如 api.taiju.bid）
+    # 播放解析與本地 SSL 代理（解決 Yumilo 媒體伺服器安全連線失敗）
     # ----------------------------------------------------------
     @staticmethod
     def _decode_player_url(raw_url, encrypt_flag):
@@ -611,13 +642,22 @@ class Spider(BaseSpider):
             pass
         return u
 
+    def _wrap_stream_proxy(self, stream_url):
+        """将 HTTPS/HTTP 串流包裹為本地代理位址，由 Python 忽略 TLS 憑證錯誤後轉發"""
+        if not self.use_stream_proxy:
+            return stream_url
+        b64 = base64.urlsafe_b64encode(stream_url.encode("utf-8")).decode("ascii")
+        return f"http://127.0.0.1:9978/proxy?do=py&type=m3u8&url={b64}"
+
     def playerContent(self, flag, id, vipFlags=None):
         play_path = str(id).split("$")[-1].strip()
         hdr = self._player_headers(referer=self.base_url + "/")
 
         unwrapped_init = self._unwrap_stream_url(play_path)
         if unwrapped_init.startswith(("http://", "https://")) and re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", unwrapped_init, re.I):
-            return {"parse": 0, "url": unwrapped_init, "header": hdr}
+            is_m3u8 = ".m3u8" in unwrapped_init.lower()
+            out_url = self._wrap_stream_proxy(unwrapped_init) if is_m3u8 else unwrapped_init
+            return {"parse": 0, "url": out_url, "header": {} if is_m3u8 and self.use_stream_proxy else hdr}
 
         play_url = self._build_url(play_path)
         html = self._fetch(play_url)
@@ -647,7 +687,15 @@ class Spider(BaseSpider):
 
         if video_url:
             final_url = self._unwrap_stream_url(video_url)
+            is_m3u8 = bool(re.search(r"\.m3u8(?:\?|$)", final_url, re.I))
             is_direct = bool(re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", final_url, re.I))
+
+            if is_m3u8 and self.use_stream_proxy:
+                return {
+                    "parse": 0,
+                    "url": self._wrap_stream_proxy(final_url),
+                    "header": {},
+                }
             return {
                 "parse": 0 if is_direct else 1,
                 "url": final_url,
@@ -701,17 +749,66 @@ class Spider(BaseSpider):
             "total": len(items),
         }
 
+    # ----------------------------------------------------------
+    # 本地代理：支援圖片與 M3U8/TS 切片轉發（繞過 Windows SSL 憑證失敗）
+    # ----------------------------------------------------------
     def localProxy(self, param=''):
         try:
             params = param if isinstance(param, dict) else json.loads(param)
-            if params.get("type") == "pic" and params.get("url"):
-                raw_url = base64.urlsafe_b64decode(params["url"]).decode("utf-8")
+            ptype = params.get("type", "")
+            b64_url = params.get("url", "")
+            if not b64_url:
+                return [404, "text/plain", b""]
+
+            # 補齊可能被截斷的 base64 padding
+            padded = b64_url + "=" * (-len(b64_url) % 4)
+            raw_url = base64.urlsafe_b64decode(padded).decode("utf-8")
+
+            if ptype == "pic":
                 r = self.session.get(raw_url, headers=self._player_headers(), timeout=10, verify=False)
                 if r.status_code == 200:
-                    ctype = r.headers.get("Content-Type", "image/jpeg")
+                    return [200, r.headers.get("Content-Type", "image/jpeg"), r.content]
+
+            elif ptype == "m3u8":
+                r = self.session.get(raw_url, headers=self._player_headers(), timeout=12, verify=False)
+                if r.status_code != 200:
+                    return [r.status_code, "text/plain", b""]
+
+                r.encoding = "utf-8"
+                final_base = r.url  # 跟隨 302 重定向後的實際基準網址
+                lines = []
+                for line in r.text.splitlines():
+                    s = line.strip()
+                    if not s:
+                        lines.append(line)
+                        continue
+                    if s.startswith("#"):
+                        # 處理 #EXT-X-KEY 或 #EXT-X-MAP 中的 URI="..."
+                        if 'URI="' in s:
+                            def _repl_uri(m):
+                                abs_u = urllib.parse.urljoin(final_base, m.group(1))
+                                enc_u = base64.urlsafe_b64encode(abs_u.encode("utf-8")).decode("ascii")
+                                return f'URI="http://127.0.0.1:9978/proxy?do=py&type=ts&url={enc_u}"'
+                            s = re.sub(r'URI="([^"]+)"', _repl_uri, s)
+                        lines.append(s)
+                    else:
+                        abs_u = urllib.parse.urljoin(final_base, s)
+                        # 若是嵌套的子 m3u8 清單，繼續走 m3u8 代理；若是 ts/mp4 切片則走 ts 代理
+                        sub_type = "m3u8" if ".m3u8" in abs_u.lower() else "ts"
+                        enc_u = base64.urlsafe_b64encode(abs_u.encode("utf-8")).decode("ascii")
+                        lines.append(f"http://127.0.0.1:9978/proxy?do=py&type={sub_type}&url={enc_u}")
+
+                content = "\n".join(lines).encode("utf-8")
+                return [200, "application/vnd.apple.mpegurl", content]
+
+            elif ptype == "ts":
+                r = self.session.get(raw_url, headers=self._player_headers(), timeout=15, verify=False)
+                if r.status_code == 200:
+                    ctype = r.headers.get("Content-Type", "video/mp2t")
                     return [200, ctype, r.content]
+
         except Exception as e:
-            self._log("localProxy 圖片代理異常:", e)
+            self._log("localProxy 異常:", e)
         return [404, "text/plain", b""]
 
     def destroy(self):
