@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - 篩選修復與 Yumilo Windows SSL 憑證代理版
+七七影視爬蟲外掛 (七七影視.py) - Yumilo Windows 動態代理與完整播放修復版
 站點: https://www.7749tv.cc/
-適用平台: Yumilo / TVBox / CatVod / FongMi / box_py
+適用平台: Yumilo Windows / TVBox / CatVod / FongMi / box_py
 """
 import re
 import json
@@ -31,6 +31,7 @@ except ImportError:
         def localProxy(self, param=''): return {}
         def isVideoFormat(self, url): return False
         def manualVideoCheck(self): return False
+        def getProxyUrl(self, local=True): return ""
         def destroy(self): pass
 
 
@@ -39,8 +40,6 @@ class Spider(BaseSpider):
     base_url = "https://www.7749tv.cc"
     debug = False
     timeout = 12
-    # 針對 Yumilo Windows 報錯「与媒体服务器的安全连接失败，请检查证书或代理」：
-    # 預設開啟本地代理轉發 M3U8（由 Python 忽略過期/自簽 SSL 憑證後轉交播放器）
     use_stream_proxy = True
     use_pic_proxy = False
 
@@ -50,7 +49,6 @@ class Spider(BaseSpider):
         "/director", "/gbook", "/user", "/label", "/rss", "/map", "javascript:", "#"
     )
 
-    # 海洋CMS 後端資料庫常用的繁轉簡對照表（確保篩選條件精準命中）
     T2S_MAP = str.maketrans({
         "陸": "陆", "台": "台", "灣": "湾", "國": "国", "韓": "韩", "歐": "欧",
         "動": "动", "劇": "剧", "喜": "喜", "愛": "爱", "恐": "恐", "戰": "战",
@@ -72,6 +70,26 @@ class Spider(BaseSpider):
 
     def _to_simplified(self, text):
         return str(text).translate(self.T2S_MAP)
+
+    def _proxy_base(self):
+        """動態取得 Yumilo / TVBox 實際分配的本地代理網址，避免埠號寫死導致連線失敗"""
+        for call in (lambda: self.getProxyUrl(True), lambda: self.getProxyUrl()):
+            try:
+                u = call()
+                if u and isinstance(u, str) and u.startswith("http"):
+                    return u
+            except Exception:
+                pass
+        return ""
+
+    def _build_proxy_url(self, media_type, target_url):
+        base = self._proxy_base()
+        if not base:
+            # 若執行環境未提供代理埠號，直接回傳原始網址避免連到無效的 127.0.0.1:9978
+            return target_url
+        b64 = base64.urlsafe_b64encode(target_url.encode("utf-8")).decode("ascii")
+        sep = "&" if "?" in base else "?"
+        return f"{base}{sep}type={media_type}&url={b64}"
 
     def _web_headers(self, referer=None):
         return {
@@ -145,9 +163,8 @@ class Spider(BaseSpider):
             u = f"{self.base_url.rstrip('/')}/{u}"
 
         if u.startswith("http://"):
-            if self.use_pic_proxy:
-                b64 = base64.urlsafe_b64encode(u.encode("utf-8")).decode("ascii")
-                return f"http://127.0.0.1:9978/proxy?do=py&type=pic&url={b64}"
+            if self.use_pic_proxy and self._proxy_base():
+                return self._build_proxy_url("pic", u)
             u = "https://" + u[7:]
 
         return u
@@ -243,7 +260,6 @@ class Spider(BaseSpider):
             {"type_id": "4", "type_name": "動漫"},
         ]
 
-        # 顯示名稱(n)用繁體，傳遞值(v)使用後端資料庫匹配的簡體字
         area_opts = [
             {"n": "全部", "v": ""},
             {"n": "大陸", "v": "大陆"},
@@ -330,33 +346,6 @@ class Spider(BaseSpider):
         html = self._fetch("/")
         return {"list": self._parse_items(html)}
 
-    def _detect_site_filter_template(self, tid):
-        """
-        從 /sort-{tid}-p1.html 頁面中的真實篩選超連結動態偵測網站的篩選網址結構
-        """
-        if self._cached_filter_tpl:
-            return self._cached_filter_tpl
-
-        html = self._fetch(f"/sort-{tid}-p1.html")
-        if not html:
-            return None
-
-        soup = BeautifulSoup(html, "html.parser")
-        for a in soup.select("a[href]"):
-            href = (a.get("href") or "").strip()
-            # 尋找包含篩選參數的連結（例如 search.php?searchtype=5 或 sort-1-...）
-            if "searchtype=5" in href or re.search(r"/sort-\d+-[^p]", href):
-                self._log("偵測到站內篩選連結範例:", href)
-                if "searchtype=5" in href:
-                    self._cached_filter_tpl = "seacms_search"
-                    return self._cached_filter_tpl
-                # 分析偽靜態橫線位置
-                m = re.match(r"^(/sort-\d+-(?:[^-]+-){3,8}p)\d+(\.html.*)$", href)
-                if m:
-                    self._cached_filter_tpl = "sort_dash"
-                    return self._cached_filter_tpl
-        return None
-
     def categoryContent(self, tid, pg, filter=False, extend=None):
         page = int(pg) if pg else 1
         tid = str(tid).strip()
@@ -369,14 +358,12 @@ class Spider(BaseSpider):
         }
         tid = reverse_alias.get(tid, tid)
 
-        # 兼容 TVBox / Yumilo 不同版本傳入 extend 的方式
         ext = {}
         if extend:
             if isinstance(extend, str):
                 try:
                     ext = json.loads(extend)
                 except Exception:
-                    # 兼容 key=val&key2=val2 格式
                     ext = dict(urllib.parse.parse_qsl(extend))
             elif isinstance(extend, dict):
                 ext = extend
@@ -396,33 +383,22 @@ class Spider(BaseSpider):
                 if items:
                     break
         else:
-            self._detect_site_filter_template(tid)
             q_class = urllib.parse.quote(f_class)
             q_area = urllib.parse.quote(f_area)
             q_year = urllib.parse.quote(f_year)
             q_by = urllib.parse.quote(f_by)
 
-            # 海洋CMS 標準篩選接口與偽靜態規則
             filter_routes = [
-                # 1. SeaCMS 動態篩選入口（最通用，不依賴偽靜態順序）
                 f"/search.php?searchtype=5&tid={tid}&jq={q_class}&area={q_area}&year={q_year}&order={q_by}&page={page}",
-                # 2. SeaCMS 常見偽靜態 6 槽位: /sort-{tid}-{jq}-{area}-{year}-{letter}-{order}-p{page}.html
                 f"/sort-{tid}-{q_class}-{q_area}-{q_year}--{q_by}-p{page}.html",
-                # 3. SeaCMS 常見偽靜態 7 槽位: /sort-{tid}-{jq}-{area}-{year}-{lang}-{letter}-{order}-p{page}.html
                 f"/sort-{tid}-{q_class}-{q_area}-{q_year}---{q_by}-p{page}.html",
-                # 4. 蘋果CMS 備援
                 f"/vodshow/{tid}-{q_area}-{q_by}-{q_class}-----{page}---{q_year}.html",
             ]
-
-            if self._cached_filter_tpl == "sort_dash":
-                # 將偽靜態路由提前
-                filter_routes = [filter_routes[1], filter_routes[2], filter_routes[0], filter_routes[3]]
 
             for path in filter_routes:
                 html = self._fetch(path)
                 items = self._parse_items(html)
                 if items:
-                    self._log(f"篩選命中: {path} -> {len(items)} 筆")
                     break
 
         pagecount = page + 1 if len(items) >= 18 else page
@@ -576,19 +552,27 @@ class Spider(BaseSpider):
                     play_from.append(src_name)
                     play_urls.append("#".join(eps))
         else:
-            eps, seen_hrefs = [], set()
+            # 依播放線路分組收集所有分集連結（例如 /play-55067-0-1.html 的中間段代表線路索引）
+            grouped = {}
             for a in soup.select("a[href*='/play-'], a[href*='/vodplay/'], a[href*='/play/'], a[href*='/video-'], a[href*='/video/']"):
                 ep_title = self._clean_tvbox_str(a.get_text(strip=True))
                 ep_href = (a.get("href") or "").strip()
-                if not ep_title or not ep_href or ep_href in seen_hrefs:
+                if not ep_title or not ep_href or ep_href.startswith("javascript"):
                     continue
-                if any(k in ep_title for k in ("立即播放", "在線觀看", "在线观看")):
+                if any(k in ep_title for k in ("立即播放", "在線觀看", "在线观看", "倒序", "正序")):
                     continue
-                seen_hrefs.add(ep_href)
-                eps.append(f"{ep_title}${ep_href}")
-            if eps:
-                play_from.append("預設播放")
-                play_urls.append("#".join(eps))
+
+                m_line = re.search(r"/(?:play|vodplay)[-/]\d+[-/](\d+)[-/]\d+", ep_href)
+                line_key = f"線路{int(m_line.group(1)) + 1}" if m_line else "預設播放"
+                grouped.setdefault(line_key, [])
+                entry = f"{ep_title}${ep_href}"
+                if entry not in grouped[line_key]:
+                    grouped[line_key].append(entry)
+
+            for line_name, eps in grouped.items():
+                if eps:
+                    play_from.append(line_name)
+                    play_urls.append("#".join(eps))
 
         return {
             "list": [{
@@ -604,10 +588,10 @@ class Spider(BaseSpider):
         }
 
     # ----------------------------------------------------------
-    # 播放解析與本地 SSL 代理（解決 Yumilo 媒體伺服器安全連線失敗）
+    # 播放解析與動態代理（解決 Yumilo Windows SSL 憑證失敗與連續劇變數）
     # ----------------------------------------------------------
     @staticmethod
-    def _decode_player_url(raw_url, encrypt_flag):
+    def _decode_player_url(raw_url, encrypt_flag="0"):
         u = str(raw_url).strip()
         enc = str(encrypt_flag or "0").strip()
         try:
@@ -643,11 +627,9 @@ class Spider(BaseSpider):
         return u
 
     def _wrap_stream_proxy(self, stream_url):
-        """将 HTTPS/HTTP 串流包裹為本地代理位址，由 Python 忽略 TLS 憑證錯誤後轉發"""
         if not self.use_stream_proxy:
             return stream_url
-        b64 = base64.urlsafe_b64encode(stream_url.encode("utf-8")).decode("ascii")
-        return f"http://127.0.0.1:9978/proxy?do=py&type=m3u8&url={b64}"
+        return self._build_proxy_url("m3u8", stream_url)
 
     def playerContent(self, flag, id, vipFlags=None):
         play_path = str(id).split("$")[-1].strip()
@@ -657,7 +639,7 @@ class Spider(BaseSpider):
         if unwrapped_init.startswith(("http://", "https://")) and re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", unwrapped_init, re.I):
             is_m3u8 = ".m3u8" in unwrapped_init.lower()
             out_url = self._wrap_stream_proxy(unwrapped_init) if is_m3u8 else unwrapped_init
-            return {"parse": 0, "url": out_url, "header": {} if is_m3u8 and self.use_stream_proxy else hdr}
+            return {"parse": 0, "url": out_url, "header": {} if out_url != unwrapped_init else hdr}
 
         play_url = self._build_url(play_path)
         html = self._fetch(play_url)
@@ -665,20 +647,30 @@ class Spider(BaseSpider):
             return {"parse": 1, "url": play_url, "header": hdr}
 
         video_url = ""
-        m = re.search(r"var\s+player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S) or \
-            re.search(r"player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S)
-        if m:
-            try:
-                p_cfg = json.loads(m.group(1))
-                video_url = self._decode_player_url(p_cfg.get("url", ""), p_cfg.get("encrypt", "0"))
-            except Exception as e:
-                self._log("player_aaaa JSON 解析失敗:", e)
 
+        # 1. 海洋CMS 常見變數: var now="https://..."; 或 var now=unescape("...");
+        m_now = re.search(r'\bvar\s+now\s*=\s*(?:unescape\s*\(\s*)?["\']([^"\']+)["\']', html)
+        if m_now:
+            video_url = urllib.parse.unquote(m_now.group(1).strip())
+
+        # 2. 蘋果CMS 變數: player_aaaa = {...}
+        if not video_url:
+            m = re.search(r"var\s+player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S) or \
+                re.search(r"player_aaaa\s*=\s*(\{.*?\})\s*(?:;|</script>)", html, re.S)
+            if m:
+                try:
+                    p_cfg = json.loads(m.group(1))
+                    video_url = self._decode_player_url(p_cfg.get("url", ""), p_cfg.get("encrypt", "0"))
+                except Exception as e:
+                    self._log("player_aaaa JSON 解析失敗:", e)
+
+        # 3. iframe src 提取（如 https://api.taiju.bid/2020/?url=https://.../index.m3u8）
         if not video_url:
             m_iframe = re.search(r'<iframe[^>]+src=["\']([^"\']+)["\']', html, re.I)
             if m_iframe:
                 video_url = m_iframe.group(1).strip()
 
+        # 4. 全域匹配 .m3u8 / .mp4 直鏈
         if not video_url:
             clean_html = html.replace(r"\/", "/")
             m_m3u8 = re.search(r'(https?://[^\s"\'<>\\]+\.(?:m3u8|mp4)[^\s"\'<>\\]*)', clean_html, re.I)
@@ -691,10 +683,11 @@ class Spider(BaseSpider):
             is_direct = bool(re.search(r"\.(?:m3u8|mp4|flv)(?:\?|$)", final_url, re.I))
 
             if is_m3u8 and self.use_stream_proxy:
+                proxied = self._wrap_stream_proxy(final_url)
                 return {
                     "parse": 0,
-                    "url": self._wrap_stream_proxy(final_url),
-                    "header": {},
+                    "url": proxied,
+                    "header": {} if proxied != final_url else hdr,
                 }
             return {
                 "parse": 0 if is_direct else 1,
@@ -750,7 +743,7 @@ class Spider(BaseSpider):
         }
 
     # ----------------------------------------------------------
-    # 本地代理：支援圖片與 M3U8/TS 切片轉發（繞過 Windows SSL 憑證失敗）
+    # 本地代理（動態適配 Yumilo Windows 代理埠號）
     # ----------------------------------------------------------
     def localProxy(self, param=''):
         try:
@@ -760,7 +753,6 @@ class Spider(BaseSpider):
             if not b64_url:
                 return [404, "text/plain", b""]
 
-            # 補齊可能被截斷的 base64 padding
             padded = b64_url + "=" * (-len(b64_url) % 4)
             raw_url = base64.urlsafe_b64decode(padded).decode("utf-8")
 
@@ -775,7 +767,7 @@ class Spider(BaseSpider):
                     return [r.status_code, "text/plain", b""]
 
                 r.encoding = "utf-8"
-                final_base = r.url  # 跟隨 302 重定向後的實際基準網址
+                final_base = r.url
                 lines = []
                 for line in r.text.splitlines():
                     s = line.strip()
@@ -783,20 +775,16 @@ class Spider(BaseSpider):
                         lines.append(line)
                         continue
                     if s.startswith("#"):
-                        # 處理 #EXT-X-KEY 或 #EXT-X-MAP 中的 URI="..."
                         if 'URI="' in s:
                             def _repl_uri(m):
                                 abs_u = urllib.parse.urljoin(final_base, m.group(1))
-                                enc_u = base64.urlsafe_b64encode(abs_u.encode("utf-8")).decode("ascii")
-                                return f'URI="http://127.0.0.1:9978/proxy?do=py&type=ts&url={enc_u}"'
+                                return f'URI="{self._build_proxy_url("ts", abs_u)}"'
                             s = re.sub(r'URI="([^"]+)"', _repl_uri, s)
                         lines.append(s)
                     else:
                         abs_u = urllib.parse.urljoin(final_base, s)
-                        # 若是嵌套的子 m3u8 清單，繼續走 m3u8 代理；若是 ts/mp4 切片則走 ts 代理
                         sub_type = "m3u8" if ".m3u8" in abs_u.lower() else "ts"
-                        enc_u = base64.urlsafe_b64encode(abs_u.encode("utf-8")).decode("ascii")
-                        lines.append(f"http://127.0.0.1:9978/proxy?do=py&type={sub_type}&url={enc_u}")
+                        lines.append(self._build_proxy_url(sub_type, abs_u))
 
                 content = "\n".join(lines).encode("utf-8")
                 return [200, "application/vnd.apple.mpegurl", content]
