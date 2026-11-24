@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-七七影視爬蟲外掛 (七七影視.py) - sort-{id}-p{page}.html 分類與篩選適配版
+七七影視爬蟲外掛 (七七影視.py) - 片卡海報提取與明文圖片修復版
 站點: https://www.7749tv.cc/
 適用平台: TVBox / CatVod / FongMi
 """
@@ -36,6 +36,8 @@ class Spider(BaseSpider):
     base_url = "https://www.7749tv.cc"
     debug = False
     timeout = 12
+    # 若 piccdn.7749tv.cc 不支援 HTTPS 導致仍無圖，可將此項改為 True 啟用本地代理轉發 HTTP 圖片
+    use_pic_proxy = False
 
     PLACEHOLDER_KEYS = ("lazy.jpg", "lazy.gif", "loading.gif", "nopic", "default.jpg", "placeholder")
 
@@ -118,16 +120,19 @@ class Spider(BaseSpider):
         elif not u.startswith(("http://", "https://")):
             u = f"{self.base_url.rstrip('/')}/{u}"
 
-        if u and ".m3u8" not in u and "@Referer=" not in u:
-            base_host = urllib.parse.urlparse(self.base_url).netloc
-            pic_host = urllib.parse.urlparse(u).netloc
-            if base_host and pic_host == base_host:
-                u = f"{u}@Referer={self.base_url}/"
+        # Android 9+ TVBox 預設阻擋 http 明文圖片，將已知圖床升級為 https
+        if u.startswith("http://"):
+            if self.use_pic_proxy:
+                b64 = base64.urlsafe_b64encode(u.encode("utf-8")).decode("ascii")
+                return f"http://127.0.0.1:9978/proxy?do=py&type=pic&url={b64}"
+            u = "https://" + u[7:]
+
         return u
 
     def _extract_img_from_tag(self, img):
         if not img:
             return ""
+        # 同時支援標準 src 與延遲載入屬性，並過濾 lazy.jpg
         for attr in ("data-original", "data-src", "data-echo", "data-bg", "data-lazy-src", "src"):
             val = (img.get(attr) or "").strip()
             if val and not self._is_placeholder(val):
@@ -140,11 +145,9 @@ class Spider(BaseSpider):
         if not el:
             return ""
         if el.name == "img":
-            res = self._extract_img_from_tag(el)
-            if res:
-                return res
+            return self._extract_img_from_tag(el)
 
-        for img in el.select("img.lazy, img"):
+        for img in el.select("img"):
             res = self._extract_img_from_tag(img)
             if res:
                 return res
@@ -160,6 +163,26 @@ class Spider(BaseSpider):
                         return fixed
         return ""
 
+    def _find_card_container(self, a_tag):
+        """從 <a> 標籤往上找屬於單一影片卡片的容器（避免抓到整塊列表 ul/section）"""
+        curr = a_tag
+        for _ in range(4):
+            parent = curr.parent
+            if not parent or parent.name in ("body", "html", "ul", "section", "main"):
+                break
+            # 若父層已經包含多部不同影片的連結，停止往上找
+            vod_links = set()
+            for link in parent.select("a[href]"):
+                h = link.get("href") or ""
+                if re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie)/|/\d+\.html", h):
+                    vod_links.add(h.split("-")[0])
+            if len(vod_links) > 1:
+                break
+            curr = parent
+            if curr.name == "li" or curr.select_one("img"):
+                return curr
+        return curr
+
     @staticmethod
     def _clean_tvbox_str(s):
         return re.sub(r'[$#\r\n\t]+', ' ', str(s)).strip()
@@ -173,6 +196,8 @@ class Spider(BaseSpider):
                         self.base_url = ext["host"].rstrip("/")
                     if "debug" in ext:
                         self.debug = bool(ext["debug"])
+                    if "pic_proxy" in ext:
+                        self.use_pic_proxy = bool(ext["pic_proxy"])
             except Exception as e:
                 self._log("init extend 解析失敗:", e)
 
@@ -190,7 +215,6 @@ class Spider(BaseSpider):
             {"type_id": "4", "type_name": "動漫"},
         ]
 
-        # 通用篩選選項
         area_opts = [
             {"n": "全部", "v": ""},
             {"n": "大陸", "v": "大陸"},
@@ -279,7 +303,6 @@ class Spider(BaseSpider):
         page = int(pg) if pg else 1
         tid = str(tid).strip()
 
-        # 兼容外部傳入拼音或數字
         reverse_alias = {
             "dianying": "1", "movie": "1",
             "dianshiju": "2", "drama": "2",
@@ -288,7 +311,6 @@ class Spider(BaseSpider):
         }
         tid = reverse_alias.get(tid, tid)
 
-        # 解析篩選條件
         ext = {}
         if extend:
             if isinstance(extend, str):
@@ -308,12 +330,7 @@ class Spider(BaseSpider):
         items = []
 
         if not has_filter:
-            # 基準路由：https://www.7749tv.cc/sort-1-p1.html
-            routes = [
-                f"/sort-{tid}-p{page}.html",
-                f"/sort-{tid}-{page}.html",
-            ]
-            for path in routes:
+            for path in (f"/sort-{tid}-p{page}.html", f"/sort-{tid}-{page}.html"):
                 html = self._fetch(path)
                 items = self._parse_items(html)
                 if items:
@@ -325,15 +342,10 @@ class Spider(BaseSpider):
             q_year = urllib.parse.quote(f_year)
             q_by = urllib.parse.quote(f_by)
 
-            # 海洋CMS / 自定義 sort 篩選常見偽靜態與動態路由
             filter_candidates = [
-                # 模式 1: SeaCMS 偽靜態篩選
                 ("seacms_rewrite", f"/search.php?searchtype=5&tid={tid}&jq={q_class}&area={q_area}&year={q_year}&order={q_by}&page={page}"),
-                # 模式 2: sort 多段式偽靜態 (/sort-{tid}-{class}-{area}-{year}--{by}-p{page}.html)
                 ("sort_multi", f"/sort-{tid}-{q_class}-{q_area}-{q_year}--{q_by}-p{page}.html"),
-                # 模式 3: sort 附帶 Query 參數
                 ("sort_query", f"/sort-{tid}-p{page}.html?class={q_class}&area={q_area}&year={q_year}&by={q_by}"),
-                # 模式 4: 蘋果CMS vodshow 備援
                 ("vodshow", f"/vodshow/{tid}-{q_area}-{q_by}-{q_class}-----{page}---{q_year}.html"),
             ]
 
@@ -348,7 +360,6 @@ class Spider(BaseSpider):
                     self._log(f"命中篩選路由 [{mode}]: {path}, 取得 {len(items)} 筆")
                     break
 
-            # 若篩選路由無結果，自動降級回基本分類頁避免空白
             if not items:
                 html = self._fetch(f"/sort-{tid}-p{page}.html")
                 items = self._parse_items(html)
@@ -368,32 +379,24 @@ class Spider(BaseSpider):
         soup = BeautifulSoup(html, "html.parser")
         items, seen = [], set()
 
-        candidates = soup.select(
-            ".module-item, .video-item, .public-list-box, .vodlist_item, "
-            ".myui-vodlist__box, .stui-vodlist__box, .stui-vodlist__item, "
-            ".fed-list-item, .hl-list-item, .pack-ykpack, li.col-md-2, li.col-sm-3, li.col-xs-4"
-        )
+        # 建立全頁片名 -> 圖片備援索引（透過 <img alt="片名封面"> 精準匹配）
+        alt_pic_map = {}
+        for img in soup.select("img"):
+            alt_txt = re.sub(r"封[面麵]$", "", (img.get("alt") or "")).strip()
+            pic_url = self._extract_img_from_tag(img)
+            if alt_txt and pic_url and alt_txt not in alt_pic_map:
+                alt_pic_map[alt_txt] = pic_url
 
-        if not candidates:
-            candidates = soup.select(
-                "a[href*='/detail/'], a[href*='/voddetail/'], a[href*='/video/'], a[href*='/vodplay/'], a[href*='/view/'], a[href*='/movie/']"
-            )
-
-        for card in candidates:
+        # 遍歷所有影片詳情/播放連結，再向上鎖定單片容器，避免遺漏分離式標題與圖片結構
+        links = soup.select("a[href]")
+        for a in links:
             try:
-                a = card if card.name == "a" else card.select_one(
-                    "a[href*='/detail/'], a[href*='/voddetail/'], a[href*='/video/'], a[href*='/vodplay/'], a[href*='/view/'], a[href*='/movie/'], a"
-                )
-                if not a:
-                    continue
-                href = a.get("href") or ""
-                # 排除分類連結 (/sort-1-p1.html) 避免誤抓導覽列
-                if "/sort-" in href or "/vodtype/" in href:
+                href = (a.get("href") or "").strip()
+                if not href or "/sort-" in href or "/vodtype/" in href or href.startswith(("javascript", "#")):
                     continue
 
                 m = re.search(r"/(?:detail|voddetail|video|show|vodplay|view|movie)/([0-9A-Za-z_-]+)", href)
                 if not m:
-                    # 兼容 /12345.html 或 /id-12345.html 格式
                     m = re.search(r"/(?:id-)?(\d+)(?:-\d+-\d+)?\.html$", href)
                 if not m:
                     continue
@@ -402,6 +405,9 @@ class Spider(BaseSpider):
                 if not vod_id or vod_id in seen:
                     continue
 
+                card = self._find_card_container(a)
+
+                # 標題提取
                 name = (a.get("title") or "").strip()
                 if not name:
                     title_el = card.select_one(".module-item-title, .stui-vodlist__title, .myui-vodlist__title, .title, .name, h4, h3, .heading")
@@ -409,18 +415,20 @@ class Spider(BaseSpider):
                 if not name:
                     img = card.select_one("img") or a.select_one("img")
                     name = (img.get("alt") or "").strip() if img else ""
+                if not name:
+                    txt = a.get_text(strip=True)
+                    if txt and len(txt) < 50 and not any(k in txt for k in ("立即播放", "詳情", "在线观看", "在線觀看")):
+                        name = txt
+
                 name = re.sub(r"封[面麵]$", "", name).strip()
                 if not name:
                     continue
 
-                pic = self._get_img_src(card)
-                if not pic and card is not a:
-                    pic = self._get_img_src(a)
-                if not pic and card.parent:
-                    pic = self._get_img_src(card.parent)
+                # 圖片提取：1.單片容器 -> 2.連結自身 -> 3.全頁 alt 索引比對
+                pic = self._get_img_src(card) or self._get_img_src(a) or alt_pic_map.get(name, "")
 
                 seen.add(vod_id)
-                remark_el = card.select_one(".module-item-note, .pic-text, .remarks, .label, .pic-tag, .tag, .text-right")
+                remark_el = card.select_one(".module-item-note, .pic-text, .remarks, .label, .pic-tag, .tag, .text-right, span.note")
                 remarks = remark_el.get_text(strip=True) if remark_el else ""
 
                 items.append({
@@ -467,7 +475,7 @@ class Spider(BaseSpider):
         name_el = soup.select_one(".module-info-heading h1, .stui-content__detail .title, .myui-content__detail .title, .video-info h1, h1, .page-title")
         vod_name = name_el.get_text(strip=True) if name_el else ""
 
-        pic_el = soup.select_one(".module-item-pic, .stui-content__thumb, .myui-content__thumb, .video-cover, .picture, .detail-pic, img.lazy")
+        pic_el = soup.select_one(".module-item-pic, .stui-content__thumb, .myui-content__thumb, .video-cover, .picture, .detail-pic, img")
         vod_pic = self._get_img_src(pic_el) or self._get_img_src(soup)
 
         director = actor = ""
@@ -631,6 +639,22 @@ class Spider(BaseSpider):
             "limit": 20,
             "total": len(items),
         }
+
+    # ----------------------------------------------------------
+    # 本地圖片代理（當圖床僅支援 HTTP 時啟用 use_pic_proxy = True）
+    # ----------------------------------------------------------
+    def localProxy(self, param=''):
+        try:
+            params = param if isinstance(param, dict) else json.loads(param)
+            if params.get("type") == "pic" and params.get("url"):
+                raw_url = base64.urlsafe_b64decode(params["url"]).decode("utf-8")
+                r = self.session.get(raw_url, headers=self._player_headers(), timeout=10)
+                if r.status_code == 200:
+                    ctype = r.headers.get("Content-Type", "image/jpeg")
+                    return [200, ctype, r.content]
+        except Exception as e:
+            self._log("localProxy 圖片代理異常:", e)
+        return [404, "text/plain", b""]
 
     def destroy(self):
         try:
