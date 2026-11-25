@@ -1,10 +1,6 @@
 {
-  "js/lx-music.js": {
-    "first_fail_date": "2026-11-24",
-    "last_fail_date": "2026-11-24"
-  },
-  "collect/黑料资源站<18+>.json": {
-    "first_fail_date": "2026-11-24",
-    "last_fail_date": "2026-11-24"
+  "collect/快车资源.json": {
+    "first_fail_date": "2026-11-25",
+    "last_fail_date": "2026-11-25"
   }
 }
