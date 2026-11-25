@@ -2,8 +2,28 @@
   "spider": "./drpy.min.js;md5;auto",
   "sites": [
     {
+      "key": "js_cilixiong",
+      "name": "[JS] cilixiong (58ms)",
+      "type": 3,
+      "api": "./js/cilixiong.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.cilixiong.com"
+    },
+    {
+      "key": "js_欧乐影院",
+      "name": "[JS] 欧乐影院 (69ms)",
+      "type": 3,
+      "api": "./js/欧乐影院.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.oleol.com"
+    },
+    {
       "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (95ms)",
+      "name": "[JSON] pronlulu (77ms)",
       "type": 3,
       "api": "./js/ss/pronlulu.json",
       "searchable": 1,
@@ -13,7 +33,7 @@
     },
     {
       "key": "js_注视影视",
-      "name": "[JS] 注视影视 (127ms)",
+      "name": "[JS] 注视影视 (102ms)",
       "type": 3,
       "api": "./js/注视影视.js",
       "searchable": 1,
@@ -22,28 +42,8 @@
       "ext": "https://gaze.run"
     },
     {
-      "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (144ms)",
-      "type": 3,
-      "api": "./js/欧乐影院.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.oleol.com"
-    },
-    {
-      "key": "js_cilixiong",
-      "name": "[JS] cilixiong (164ms)",
-      "type": 3,
-      "api": "./js/cilixiong.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.cilixiong.com"
-    },
-    {
       "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (807ms)",
+      "name": "[JS] 嘀嗒影视 (450ms)",
       "type": 3,
       "api": "./js/嘀嗒影视.js",
       "searchable": 1,
@@ -53,7 +53,7 @@
     },
     {
       "key": "js_B站",
-      "name": "[JS] B站 (820ms)",
+      "name": "[JS] B站 (877ms)",
       "type": 3,
       "api": "./js/B站.js",
       "searchable": 1,
@@ -63,7 +63,7 @@
     },
     {
       "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (1411ms)",
+      "name": "[JS] xp天堂 (1221ms)",
       "type": 3,
       "api": "./js/ss/xp天堂.js",
       "searchable": 1,
@@ -72,24 +72,24 @@
       "ext": "https://attack.bjidvlyog.com"
     },
     {
-      "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (2153ms)",
-      "type": 3,
-      "api": "./js/xiaosa/XBPQ/农民影视.json",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://vip.wwgz.cn:5200/vod-list-id-{cateId}-pg-{catePg}-order--by-time-class-0-year-{year}-letter--area-{area}-lang-.html"
-    },
-    {
       "key": "js_央视频",
-      "name": "[JS] 央视频 (2277ms)",
+      "name": "[JS] 央视频 (1359ms)",
       "type": 3,
       "api": "./js/央视频.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "ext": "https://m.yangshipin.cn"
+    },
+    {
+      "key": "json_农民影视",
+      "name": "[JSON] 农民影视 (1714ms)",
+      "type": 3,
+      "api": "./js/xiaosa/XBPQ/农民影视.json",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://vip.wwgz.cn:5200/vod-list-id-{cateId}-pg-{catePg}-order--by-time-class-0-year-{year}-letter--area-{area}-lang-.html"
     }
   ]
 }
