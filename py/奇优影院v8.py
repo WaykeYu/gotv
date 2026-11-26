@@ -228,7 +228,6 @@ class Spider(Spider):
             "User-Agent": self.headers["User-Agent"],
             "Referer": play_page_url,
         }
-        # 媒體串流請求頭：不帶網站 Referer，避免第三方切片 CDN (如 bfvvs.com) 防盜鏈拒絕連線
         media_headers = {
             "User-Agent": self.headers["User-Agent"],
         }
@@ -270,9 +269,11 @@ class Spider(Spider):
                         continue
 
             if stream_url:
-                # 若為 https 串流，透過本地代理 (localProxy) 忽略 SSL 憑證驗證轉發，徹底解決「与媒体服务器的安全连接失败」
-                if stream_url.startswith("https://") and ".m3u8" in stream_url:
-                    proxy_url = f"{self.getProxyUrl()}&url={quote(stream_url, safe='')}"
+                if ".m3u8" in stream_url:
+                    proxy_url = (
+                        f"{self.getProxyUrl()}&url={quote(stream_url, safe='')}"
+                        f"&ref={quote(play_page_url, safe='')}"
+                    )
                     return {
                         "parse": 0,
                         "playUrl": "",
@@ -293,53 +294,71 @@ class Spider(Spider):
             return {"parse": 1, "playUrl": "", "url": play_page_url, "header": page_headers}
 
     def localProxy(self, param):
-        """本地代理：以 verify=False 忽略媒體伺服器過期/無效的 SSL 憑證，並自動展開嵌套 m3u8 與切片路徑"""
+        """本地代理：自動嘗試多種 Referer 策略拉取 m3u8，並使用跳轉後真實網址展開切片"""
         target_url = unquote(param.get("url", ""))
+        ref_url = unquote(param.get("ref", ""))
         if not target_url:
             return [404, "text/plain", b"Missing url"]
 
-        req_headers = {
-            "User-Agent": self.headers["User-Agent"],
-        }
+        parsed_target = urlparse(target_url)
+        target_origin = f"{parsed_target.scheme}://{parsed_target.netloc}/"
 
-        try:
-            rsp = requests.get(target_url, headers=req_headers, verify=False, timeout=15)
-            content_type = rsp.headers.get("Content-Type", "application/vnd.apple.mpegurl")
+        header_candidates = [
+            {"User-Agent": self.headers["User-Agent"]},
+            {"User-Agent": self.headers["User-Agent"], "Referer": target_origin, "Origin": target_origin.rstrip("/")},
+        ]
+        if ref_url:
+            header_candidates.append({"User-Agent": self.headers["User-Agent"], "Referer": ref_url})
 
-            # 若為 m3u8 索引檔，將內部的相對路徑或子 m3u8 / ts 切片路徑轉換為完整且經過代理的網址
-            if ".m3u8" in target_url or "mpegurl" in content_type.lower() or rsp.text.lstrip().startswith("#EXTM3U"):
-                lines = []
-                for line in rsp.text.splitlines():
-                    stripped = line.strip()
-                    if not stripped:
-                        lines.append(line)
-                    elif stripped.startswith("#"):
-                        # 處理 #EXT-X-KEY:METHOD=AES-128,URI="key.key" 中的加密金鑰路徑
-                        if 'URI="' in stripped:
-                            def _replace_uri(m):
-                                full_key_url = urljoin(target_url, m.group(1))
-                                proxied_key = f"{self.getProxyUrl()}&url={quote(full_key_url, safe='')}"
-                                return f'URI="{proxied_key}"'
-                            stripped = re.sub(r'URI="([^"]+)"', _replace_uri, stripped)
-                        lines.append(stripped)
+        rsp = None
+        for h in header_candidates:
+            try:
+                r = requests.get(target_url, headers=h, verify=False, timeout=12, allow_redirects=True)
+                if r.status_code == 200 and len(r.content) > 0:
+                    if ".m3u8" in target_url:
+                        if "#EXTM3U" in r.text:
+                            rsp = r
+                            break
                     else:
-                        # 媒體行（子 m3u8 或 .ts 切片）
-                        abs_url = urljoin(target_url, stripped)
-                        if ".m3u8" in abs_url:
-                            # 子 m3u8 繼續走本地代理
-                            lines.append(f"{self.getProxyUrl()}&url={quote(abs_url, safe='')}")
-                        else:
-                            # ts 切片改為 http 嘗試或走代理，確保全部忽略憑證
-                            lines.append(f"{self.getProxyUrl()}&url={quote(abs_url, safe='')}")
+                        rsp = r
+                        break
+            except Exception:
+                continue
 
-                body = "\n".join(lines).encode("utf-8")
-                return [200, "application/vnd.apple.mpegurl", body]
+        if rsp is None:
+            return [502, "text/plain", f"Proxy fetch failed for {target_url}".encode("utf-8")]
 
-            # 若為 TS 切片或金鑰檔，直接回傳二進位串流
-            return [rsp.status_code, content_type, rsp.content]
+        final_base_url = rsp.url
+        content_type = rsp.headers.get("Content-Type", "application/vnd.apple.mpegurl")
 
-        except Exception as e:
-            return [502, "text/plain", str(e).encode("utf-8")]
+        if ".m3u8" in target_url or "mpegurl" in content_type.lower() or rsp.text.lstrip().startswith("#EXTM3U"):
+            lines = []
+            for line in rsp.text.splitlines():
+                stripped = line.strip()
+                if not stripped:
+                    lines.append(line)
+                elif stripped.startswith("#"):
+                    if 'URI="' in stripped:
+                        def _replace_uri(m):
+                            full_key_url = urljoin(final_base_url, m.group(1))
+                            proxied_key = (
+                                f"{self.getProxyUrl()}&url={quote(full_key_url, safe='')}"
+                                f"&ref={quote(ref_url, safe='')}"
+                            )
+                            return f'URI="{proxied_key}"'
+                        stripped = re.sub(r'URI="([^"]+)"', _replace_uri, stripped)
+                    lines.append(stripped)
+                else:
+                    abs_url = urljoin(final_base_url, stripped)
+                    lines.append(
+                        f"{self.getProxyUrl()}&url={quote(abs_url, safe='')}"
+                        f"&ref={quote(ref_url, safe='')}"
+                    )
+
+            body = "\n".join(lines).encode("utf-8")
+            return [200, "application/vnd.apple.mpegurl", body]
+
+        return [rsp.status_code, content_type, rsp.content]
 
     def _find_stream_in_text(self, text):
         if not text:
