@@ -1,5 +1,6 @@
 # coding=utf-8
 #!/usr/bin/python
+import base64
 import json
 import re
 import sys
@@ -227,68 +228,89 @@ class Spider(Spider):
             rsp = self.fetch(play_page_url, headers=req_headers)
             _, raw_html = self.parse_html(rsp.content, return_content=True)
 
-            # 將 JS 常見的轉義斜線 \/ 還原為 /，方便統一正則匹配
-            html_content = raw_html.replace(r"\/", "/")
+            # 1. 先從播放頁本體嘗試提取真實串流
+            stream_url = self._find_stream_in_text(raw_html)
+            if stream_url:
+                return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
 
-            # 1. 優先提取 /player/aliplayer.html?url=... 裡的真實影片串流
-            ali_match = re.search(r'/player/aliplayer\.html\?[^"\'\s<>]+', html_content)
-            if ali_match:
-                qs = parse_qs(urlparse(ali_match.group(0)).query)
-                if "url" in qs and qs["url"][0]:
-                    real_url = unquote(qs["url"][0])
-                    return {"parse": 0, "playUrl": "", "url": real_url, "header": req_headers}
+            # 2. 【核心關鍵】追蹤海洋CMS 播放頁載入的站內動態資料 JS（如 /upload/playdata/...js）
+            # 排除 jquery / bootstrap / stui 等常見前端框架檔，只抓資料腳本
+            ignore_js = ("jquery", "bootstrap", "stui", "swiper", "layer", "lazyload", "tj", "tongji")
+            script_srcs = re.findall(r'<script[^>]*src=[\'"]([^\'"]+\.js[^\'"]*)[\'"]', raw_html, re.IGNORECASE)
 
-            # 2. 提取 JS 變數中的播放位址 (海洋CMS 常見: var now="...", var url="...", player_data={...})
-            js_patterns = [
-                r'var\s+(?:now|url|playurl|video_url)\s*=\s*[\'"]([^\'"]+\.(?:m3u8|mp4)[^\'"]*)[\'"]',
-                r'"url"\s*:\s*[\'"](https?://[^\'"]+\.(?:m3u8|mp4)[^\'"]*)[\'"]',
-                r'aliplayer\.html\?url=[\'"]?\s*\+\s*[\'"]([^\'"]+)[\'"]',
-            ]
-            for pat in js_patterns:
-                m = re.search(pat, html_content, re.IGNORECASE)
-                if m:
-                    real_url = unquote(m.group(1))
-                    return {"parse": 0, "playUrl": "", "url": real_url, "header": req_headers}
+            for src in script_srcs:
+                if any(k in src.lower() for k in ignore_js):
+                    continue
+                full_js_url = urljoin(play_page_url, src)
+                try:
+                    js_rsp = self.fetch(full_js_url, headers=req_headers)
+                    js_content = js_rsp.content.decode('utf-8', errors='replace')
+                    stream_url = self._find_stream_in_text(js_content)
+                    if stream_url:
+                        return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
+                except Exception:
+                    continue
 
-            # 3. 追蹤頁面中的 iframe 播放器或外部 player JS 檔案
-            for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', html_content):
-                if "url=" in iframe_src:
-                    qs = parse_qs(urlparse(iframe_src).query)
-                    if "url" in qs and qs["url"][0]:
-                        return {"parse": 0, "playUrl": "", "url": unquote(qs["url"][0]), "header": req_headers}
+            # 3. 追蹤頁面中的 iframe 播放器
+            for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', raw_html, re.IGNORECASE):
+                stream_url = self._find_stream_in_text(iframe_src)
+                if stream_url:
+                    return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
 
                 full_iframe = urljoin(play_page_url, iframe_src)
                 try:
                     iframe_rsp = self.fetch(full_iframe, headers=req_headers)
-                    iframe_text = iframe_rsp.text.replace(r"\/", "/")
-                    m3u8_match = re.search(r'https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*', iframe_text)
-                    if m3u8_match:
-                        return {"parse": 0, "playUrl": "", "url": unquote(m3u8_match.group(0)), "header": req_headers}
+                    stream_url = self._find_stream_in_text(iframe_rsp.text)
+                    if stream_url:
+                        return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
                 except Exception:
                     continue
 
-            # 4. 追蹤海洋CMS 動態生成的播放資料 JS (常見為 /upload/playdata/...js)
-            for js_src in re.findall(r'<script[^>]*src=[\'"]([^\'"]*playdata[^\'"]*\.js[^\'"]*)[\'"]', html_content):
-                full_js = urljoin(play_page_url, js_src)
-                try:
-                    js_rsp = self.fetch(full_js, headers=req_headers)
-                    js_text = unquote(js_rsp.text.replace(r"\/", "/"))
-                    m3u8_match = re.search(r'https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*', js_text)
-                    if m3u8_match:
-                        return {"parse": 0, "playUrl": "", "url": m3u8_match.group(0), "header": req_headers}
-                except Exception:
-                    continue
-
-            # 5. 全文直接搜尋任何 m3u8 或 mp4 串流網址
-            m3u8_match = re.search(r'https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*', html_content)
-            if m3u8_match:
-                return {"parse": 0, "playUrl": "", "url": unquote(m3u8_match.group(0)), "header": req_headers}
-
-            # 6. 若全部未命中，回傳 parse: 0 並帶入原始頁面嘗試播放器內建嗅探（避免無解析接口直接報錯）
-            return {"parse": 0, "playUrl": "", "url": play_page_url, "header": req_headers}
+            # 若仍未抓到，交由播放器內建嗅探
+            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
 
         except Exception:
-            return {"parse": 0, "playUrl": "", "url": play_page_url, "header": req_headers}
+            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
+
+    def _find_stream_in_text(self, text):
+        """通用串流提取器：支援反斜線轉義、URL編碼、JS unescape 與 Base64 解碼"""
+        if not text:
+            return ""
+
+        # A. 處理 JS unescape('%68%74%74%70...') 編碼區塊
+        for unesc_match in re.findall(r'unescape\([\'"]([^\'"]+)[\'"]\)', text):
+            decoded = unquote(unesc_match)
+            res = self._find_stream_in_text(decoded)
+            if res:
+                return res
+
+        # B. 處理 Base64 編碼區塊 (常見 atob('aHR0c...'))
+        for b64_match in re.findall(r'atob\([\'"]([A-Za-z0-9+/=]+)[\'"]\)', text):
+            try:
+                decoded = base64.b64decode(b64_match).decode('utf-8', errors='ignore')
+                res = self._find_stream_in_text(decoded)
+                if res:
+                    return res
+            except Exception:
+                pass
+
+        # 還原轉義斜線與 URL 編碼
+        cleaned = unquote(text.replace(r"\/", "/"))
+
+        # C. 精準匹配 /player/aliplayer.html?url=https://...m3u8
+        ali_match = re.search(r'/player/aliplayer\.html\?[^"\'\s<>]+', cleaned)
+        if ali_match:
+            qs = parse_qs(urlparse(ali_match.group(0)).query)
+            if "url" in qs and qs["url"][0]:
+                return unquote(qs["url"][0]).strip()
+
+        # D. 直接匹配任意 http(s)://...m3u8 或 .mp4 串流網址（排除 aliplayer 本身外殼）
+        for m in re.finditer(r'https?://[^\s"\'<>\\$#]+\.(?:m3u8|mp4)(?:\?[^\s"\'<>\\$#]*)?', cleaned, re.IGNORECASE):
+            candidate = m.group(0).strip()
+            if "aliplayer.html" not in candidate:
+                return candidate
+
+        return ""
 
     # ================= 片卡解析與輔助工具 =================
 
