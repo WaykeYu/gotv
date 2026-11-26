@@ -882,6 +882,15 @@
       "ext": "https://vres.zyxpedu.com"
     },
     {
+      "key": "pianku_py",
+      "name": "片庫(PY)",
+      "type": 3,
+      "api": "./py/片庫.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
       "key": "py_py_电影猎手",
       "name": "[PY] py_电影猎手 (121957ms)",
       "type": 3,
