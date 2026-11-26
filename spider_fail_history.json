@@ -1,9 +1,5 @@
 {
-  "js/xiaosa/XBPQ/雪糕影视.json": {
-    "first_fail_date": "2026-11-26",
-    "last_fail_date": "2026-11-26"
-  },
-  "js/s/雪糕影视.json": {
+  "py/麦田影院.py": {
     "first_fail_date": "2026-11-26",
     "last_fail_date": "2026-11-26"
   }
