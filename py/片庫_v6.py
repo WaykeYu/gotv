@@ -23,7 +23,8 @@ class Spider(Spider):
         'Accept-Language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7',
     }
 
-    show_template = '/vodshow/{tid}-{area}-{by}-{class}-----{pg}---{year}.html'
+    # 預設篩選路由模板 (會在 homeContent 自動修正為網站真實前綴)
+    show_prefix = '/vodshow/'
 
     def getName(self):
         return '片庫'
@@ -47,6 +48,7 @@ class Spider(Spider):
         except Exception:
             pass
 
+        # 1. 分類完整
         classes = self._parse_classes(html) if html else []
         if not classes:
             classes = [
@@ -59,7 +61,23 @@ class Spider(Spider):
             ]
         result['class'] = classes
 
+        # 2. 篩選條件 (自動從網站抓取真實篩選結構與簡體參數值)
         filters = {}
+        for idx, cls in enumerate(classes):
+            cid = cls['type_id']
+            site_filters = self._scrape_filters_from_site(cid)
+            if site_filters:
+                filters[cid] = site_filters
+            elif idx > 0 and classes[0]['type_id'] in filters:
+                filters[cid] = filters[classes[0]['type_id']]
+            else:
+                filters[cid] = self._get_default_filters()
+
+        result['filters'] = filters
+        result['list'] = self._parse_vod_list(html) if html else []
+        return result
+
+    def _get_default_filters(self):
         years = [
             {'n': '全部', 'v': ''},
             {'n': '2026', 'v': '2026'},
@@ -87,7 +105,7 @@ class Spider(Spider):
             {'n': '按人氣', 'v': 'hits'},
             {'n': '按評分', 'v': 'score'},
         ]
-        default_cates = [
+        cates = [
             {'n': '全部', 'v': ''},
             {'n': '動作', 'v': '动作'},
             {'n': '喜劇', 'v': '喜剧'},
@@ -99,19 +117,74 @@ class Spider(Spider):
             {'n': '犯罪', 'v': '犯罪'},
             {'n': '懸疑', 'v': '悬疑'},
         ]
-        fallback_filter_list = [
-            {'key': 'class', 'name': '類型', 'value': default_cates},
+        return [
+            {'key': 'class', 'name': '類型', 'value': cates},
             {'key': 'area', 'name': '地區', 'value': areas},
             {'key': 'year', 'name': '年份', 'value': years},
             {'key': 'by', 'name': '排序', 'value': sorts},
         ]
 
-        for cls in classes:
-            filters[cls['type_id']] = fallback_filter_list
+    def _scrape_filters_from_site(self, tid):
+        try:
+            for prefix in ['/vodshow/', '/show/']:
+                u = f'{self.host}{prefix}{tid}-----------.html'
+                rsp = requests.get(u, headers=self.headers, timeout=8)
+                if rsp.status_code == 200 and f'{prefix}{tid}-' in rsp.text:
+                    self.show_prefix = prefix
+                    rsp.encoding = 'utf-8'
+                    soup = BeautifulSoup(rsp.text, 'html.parser')
 
-        result['filters'] = filters
-        result['list'] = self._parse_vod_list(html) if html else []
-        return result
+                    groups_data = {'class': [], 'area': [], 'year': [], 'by': []}
+                    seen_vals = {'class': set(), 'area': set(), 'year': set(), 'by': set()}
+
+                    for a in soup.find_all(
+                        'a', href=re.compile(re.escape(prefix) + str(tid) + r'-')
+                    ):
+                        txt = a.get_text(strip=True)
+                        href = a.get('href', '')
+                        if not txt or len(txt) > 10 or txt in ['全部', '不限']:
+                            continue
+                        seg = href.split('/')[-1].replace('.html', '').split('-')
+                        if len(seg) >= 12:
+                            # seg[1]=area, seg[2]=by, seg[3]=class, seg[11]=year
+                            if seg[1] and seg[1] not in seen_vals['area']:
+                                seen_vals['area'].add(seg[1])
+                                groups_data['area'].append(
+                                    {'n': txt, 'v': urllib.parse.unquote(seg[1])}
+                                )
+                            elif seg[3] and seg[3] not in seen_vals['class']:
+                                seen_vals['class'].add(seg[3])
+                                groups_data['class'].append(
+                                    {'n': txt, 'v': urllib.parse.unquote(seg[3])}
+                                )
+                            elif seg[11] and seg[11] not in seen_vals['year']:
+                                seen_vals['year'].add(seg[11])
+                                groups_data['year'].append(
+                                    {'n': txt, 'v': urllib.parse.unquote(seg[11])}
+                                )
+                            elif (
+                                seg[2] in ['time', 'hits', 'score']
+                                and seg[2] not in seen_vals['by']
+                            ):
+                                seen_vals['by'].add(seg[2])
+                                groups_data['by'].append({'n': txt, 'v': seg[2]})
+
+                    res = []
+                    name_map = [
+                        ('class', '類型'),
+                        ('area', '地區'),
+                        ('year', '年份'),
+                        ('by', '排序'),
+                    ]
+                    for k, label in name_map:
+                        if groups_data[k]:
+                            opts = [{'n': '全部', 'v': ''}] + groups_data[k]
+                            res.append({'key': k, 'name': label, 'value': opts})
+                    if res:
+                        return res
+        except Exception:
+            pass
+        return []
 
     def homeVideoContent(self):
         return {'list': []}
@@ -132,18 +205,28 @@ class Spider(Spider):
                 else f'{self.host}/vodtype/{tid}.html'
             )
         else:
-            url = f'{self.host}/vodshow/{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html'
+            url = f'{self.host}{self.show_prefix}{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html'
 
         vod_list = []
         try:
             rsp = requests.get(url, headers=self.headers, timeout=12)
             rsp.encoding = 'utf-8'
             vod_list = self._parse_vod_list(rsp.text)
-            if not vod_list and not has_filter:
-                alt_url = f'{self.host}/vodshow/{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html'
-                rsp = requests.get(alt_url, headers=self.headers, timeout=12)
-                rsp.encoding = 'utf-8'
-                vod_list = self._parse_vod_list(rsp.text)
+
+            # 若 /vodtype/ 不存在或無結果，自動嘗試另一種前綴路由
+            if not vod_list:
+                alt_prefix = '/show/' if self.show_prefix == '/vodshow/' else '/vodshow/'
+                for try_url in [
+                    f'{self.host}{self.show_prefix}{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html',
+                    f'{self.host}{alt_prefix}{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html',
+                ]:
+                    if try_url == url:
+                        continue
+                    rsp = requests.get(try_url, headers=self.headers, timeout=12)
+                    rsp.encoding = 'utf-8'
+                    vod_list = self._parse_vod_list(rsp.text)
+                    if vod_list:
+                        break
         except Exception:
             vod_list = []
 
@@ -191,18 +274,19 @@ class Spider(Spider):
         play_from = []
         play_url = []
 
+        # 精準提取多線路名稱與對應集數列表
         tabs = soup.select(
             '.module-tab-items-box .module-tab-item, .nav-tabs li, .play-tab li, .stui-vodlist__head h3'
         )
         lists = soup.select(
-            '.module-play-list-content, .stui-content__playlist, .myui-content__list'
+            '.module-play-list-content, .stui-content__playlist, .myui-content__list, .module-play-list'
         )
 
         if tabs and lists and len(tabs) == len(lists):
             for tab, plist in zip(tabs, lists):
                 tab_name = tab.get_text(strip=True)
                 ep_links = []
-                for a in plist.find_all('a'):
+                for a in plist.find_all('a', href=True):
                     ep_name = a.get_text(strip=True)
                     ep_href = a.get('href', '')
                     if (
@@ -214,75 +298,41 @@ class Spider(Spider):
                 if ep_links:
                     play_from.append(tab_name)
                     play_url.append('#'.join(ep_links))
+        elif lists:
+            for idx, plist in enumerate(lists, 1):
+                ep_links = []
+                for a in plist.find_all('a', href=True):
+                    ep_name = a.get_text(strip=True)
+                    ep_href = a.get('href', '')
+                    if (
+                        ep_name
+                        and ep_href
+                        and not ep_href.startswith('javascript')
+                    ):
+                        ep_links.append(f'{ep_name}${ep_href}')
+                if ep_links:
+                    play_from.append(f'線路{idx}')
+                    play_url.append('#'.join(ep_links))
 
         if not play_url:
-            ep_links = []
-            seen_ep = set()
-            for a in soup.find_all('a', href=True):
+            # 依線路編號 (-1-1, -2-1) 自動分組
+            grouped = {}
+            for a in soup.find_all('a', href=re.compile(r'/vodplay/\d+-\d+-\d+\.html')):
                 ep_href = a.get('href', '').strip()
                 ep_name = a.get_text(strip=True)
-                if (
-                    ep_name
-                    and ep_href
-                    and ep_href not in seen_ep
-                    and not ep_href.startswith('javascript')
-                    and any(
-                        k in ep_href.lower() for k in ['play', '/p/', 'nid=']
-                    )
-                    and len(ep_name) <= 25
-                ):
-                    seen_ep.add(ep_href)
-                    ep_links.append(f'{ep_name}${ep_href}')
-            if ep_links:
-                play_from.append('預設線路')
-                play_url.append('#'.join(ep_links))
-
-        # --- 畫面診斷資訊：預先測試第一集的播放頁結構並顯示在簡介最上方 ---
-        debug_info = f'[診斷] 詳情頁={url} | 線路數={len(play_from)}'
-        if play_url:
-            first_ep = play_url[0].split('#')[0]
-            first_href = first_ep.split('$')[-1] if '$' in first_ep else ''
-            debug_info += f' | 首集連結={first_href}'
-            if first_href:
-                test_play_url = (
-                    f'{self.host}{first_href}'
-                    if not first_href.startswith('http')
-                    else first_href
-                )
-                try:
-                    p_rsp = requests.get(
-                        test_play_url, headers=self.headers, timeout=8
-                    )
-                    p_rsp.encoding = 'utf-8'
-                    m = re.search(
-                        r'(?:player_aaaa|player_data)\s*=\s*(\{.*?\})\s*[;<]',
-                        p_rsp.text,
-                        re.S,
-                    )
-                    if m:
-                        debug_info += f' | player_aaaa={m.group(1)[:180]}'
-                    else:
-                        # 檢查是否有 iframe 或 m3u8 關鍵字
-                        iframes = [
-                            i.get('src')
-                            for i in BeautifulSoup(
-                                p_rsp.text, 'html.parser'
-                            ).find_all('iframe', src=True)
-                        ]
-                        debug_info += (
-                            f' | 無player_aaaa, 狀態碼={p_rsp.status_code},'
-                            f' iframes={iframes[:2]}'
-                        )
-                except Exception as e:
-                    debug_info += f' | 請求播放頁異常={e}'
-
-        full_desc = f'{debug_info}\n\n{desc}'
+                m_sid = re.search(r'/vodplay/\d+-(\d+)-\d+\.html', ep_href)
+                sid = m_sid.group(1) if m_sid else '1'
+                if ep_name and len(ep_name) <= 25:
+                    grouped.setdefault(sid, []).append(f'{ep_name}${ep_href}')
+            for sid, links in grouped.items():
+                play_from.append(f'線路{sid}')
+                play_url.append('#'.join(links))
 
         vod = {
             'vod_id': vid,
             'vod_name': title,
             'vod_pic': pic,
-            'vod_content': full_desc,
+            'vod_content': desc,
             'vod_play_from': '$$$'.join(play_from),
             'vod_play_url': '$$$'.join(play_url),
         }
@@ -314,62 +364,65 @@ class Spider(Spider):
             f'{self.host}{id}' if not id.startswith('http') else id
         )
 
+        raw_url = ''
+        player_from = ''
+
         try:
             rsp = requests.get(play_page_url, headers=self.headers, timeout=12)
             rsp.encoding = 'utf-8'
             html = rsp.text
 
+            # 1. 提取 player_aaaa 變數 (處理跳脫斜線 \/ )
             m = re.search(
                 r'(?:player_aaaa|player_data)\s*=\s*(\{.*?\})\s*[;<]',
                 html,
                 re.S,
             )
             if m:
-                try:
-                    data = json.loads(m.group(1))
-                    raw_url = data.get('url', '')
-                    encrypt = data.get('encrypt', 0)
-                    player_from = data.get('from', '')
+                data = json.loads(m.group(1))
+                raw_url = data.get('url', '').replace('\\/', '/')
+                encrypt = data.get('encrypt', 0)
+                player_from = data.get('from', '')
 
-                    if encrypt == 1:
-                        raw_url = urllib.parse.unquote(raw_url)
-                    elif encrypt == 2:
-                        raw_url = urllib.parse.unquote(
-                            base64.b64decode(raw_url).decode('utf-8')
-                        )
+                if encrypt == 1:
+                    raw_url = urllib.parse.unquote(raw_url)
+                elif encrypt == 2:
+                    raw_url = urllib.parse.unquote(
+                        base64.b64decode(raw_url).decode('utf-8')
+                    )
 
-                    if '.m3u8' in raw_url or '.mp4' in raw_url:
-                        return self._build_video_response(raw_url)
+                # A. 如果已經是直鏈 (.m3u8 / .mp4)
+                if '.m3u8' in raw_url or '.mp4' in raw_url:
+                    return self._build_video_response(raw_url)
 
-                    if raw_url.startswith('http'):
-                        sub_url = self._fetch_and_extract(
-                            raw_url, referer=play_page_url
-                        )
-                        if sub_url:
-                            return self._build_video_response(sub_url)
+                # B. 核心修復：無論 raw_url 是否為 http (如 v.qq.com)，優先讀取網站的 /static/player/{from}.js 尋找其內建解析接口！
+                if raw_url and player_from:
+                    stream_from_js = self._resolve_via_player_js(
+                        player_from, raw_url, play_page_url
+                    )
+                    if stream_from_js:
+                        return self._build_video_response(stream_from_js)
 
-                    if raw_url and player_from:
-                        js_url = f'{self.host}/static/player/{player_from}.js'
-                        js_rsp = requests.get(
-                            js_url, headers=self.headers, timeout=8
-                        )
-                        if js_rsp.status_code == 200:
-                            jx_m = re.search(
-                                r'src=["\'](https?://[^"\']+?url=)["\']',
-                                js_rsp.text,
-                            )
-                            if jx_m:
-                                full_jx = jx_m.group(1) + urllib.parse.quote(
-                                    raw_url
-                                )
-                                sub_url = self._fetch_and_extract(
-                                    full_jx, referer=play_page_url
-                                )
-                                if sub_url:
-                                    return self._build_video_response(sub_url)
-                except Exception:
-                    pass
+                # C. 若沒有 player_from，但 raw_url 是第三方解析器網址 (非官方視頻網站)
+                official_domains = [
+                    'v.qq.com',
+                    'iqiyi.com',
+                    'youku.com',
+                    'mgtv.com',
+                    'bilibili.com',
+                    'sohu.com',
+                    'le.com',
+                ]
+                if raw_url.startswith('http') and not any(
+                    d in raw_url for d in official_domains
+                ):
+                    sub_url = self._fetch_and_extract(
+                        raw_url, referer=play_page_url
+                    )
+                    if sub_url:
+                        return self._build_video_response(sub_url)
 
+            # 2. 檢查播放頁內是否有隱藏 iframe 或直鏈
             direct_url = self._extract_stream_from_html(
                 html, base_referer=play_page_url
             )
@@ -379,13 +432,44 @@ class Spider(Spider):
         except Exception:
             pass
 
+        # 3. 終極兜底：如果站內解析器全數無法在後端解出，將真實的官採連結 (如 v.qq.com) 加上 jx: 1 交給 Yumilo 設定的「首選解析接口」播放！
+        target_for_jx = raw_url if raw_url.startswith('http') else play_page_url
         return {
             'parse': 1,
-            'jx': 0,
+            'jx': 1 if raw_url.startswith('http') else 0,
             'playUrl': '',
-            'url': play_page_url,
+            'url': target_for_jx,
             'header': json.dumps(self.headers),
         }
+
+    def _resolve_via_player_js(self, player_from, video_url, referer):
+        """讀取 MacCMS /static/player/{from}.js 並呼叫其內建解析接口"""
+        js_candidates = [
+            f'{self.host}/static/player/{player_from}.js',
+            f'{self.host}/static/js/playerconfig.js',
+        ]
+        for js_url in js_candidates:
+            try:
+                js_rsp = requests.get(js_url, headers=self.headers, timeout=8)
+                if js_rsp.status_code != 200:
+                    continue
+                js_text = js_rsp.text.replace('\\/', '/')
+
+                # 從 JS 中尋找解析接口前綴 (例如: src="https://jx.xxx.com/?url=" 或 "parse":"https://...")
+                jx_urls = re.findall(
+                    r'(https?://[^\s"\'<>]+?(?:url=|vid=|id=|v=))', js_text
+                )
+                for jx_base in jx_urls:
+                    # 排除自身網域的無效跳轉
+                    if self.host in jx_base and 'url=' not in jx_base:
+                        continue
+                    full_jx = jx_base + urllib.parse.quote(video_url, safe='')
+                    extracted = self._fetch_and_extract(full_jx, referer=referer)
+                    if extracted:
+                        return extracted
+            except Exception:
+                continue
+        return ''
 
     def _fetch_and_extract(self, target_url, referer=''):
         try:
@@ -394,6 +478,23 @@ class Spider(Spider):
                 h['Referer'] = referer
             rsp = requests.get(target_url, headers=h, timeout=10)
             rsp.encoding = 'utf-8'
+            # 若回傳的是 JSON 格式 (許多解析接口直接回傳 {"code":200,"url":"https://...m3u8"})
+            try:
+                jdata = rsp.json()
+                for k in ['url', 'data', 'vurl', 'playurl']:
+                    val = jdata.get(k)
+                    if isinstance(val, str) and (
+                        '.m3u8' in val or '.mp4' in val
+                    ):
+                        return val
+                    elif isinstance(val, dict) and isinstance(
+                        val.get('url'), str
+                    ):
+                        if '.m3u8' in val['url'] or '.mp4' in val['url']:
+                            return val['url']
+            except Exception:
+                pass
+
             return self._extract_stream_from_html(
                 rsp.text, base_referer=target_url
             )
