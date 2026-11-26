@@ -2,7 +2,7 @@
 #!/usr/bin/python
 import re
 import sys
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, quote, urljoin, urlparse
 from lxml import etree
 
 sys.path.append('..')
@@ -12,8 +12,7 @@ from base.spider import Spider
 class Spider(Spider):
 
     def __init__(self):
-        # 請確認這裡是你瀏覽器能打開「重回被杀的前一刻」的那個最新網域
-        self.host = "https://www.qiyoudy5.com"
+        self.host = "https://www.qivod.com"
         self.headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -70,13 +69,14 @@ class Spider(Spider):
     def categoryContent(self, tid, pg, filter, extend):
         order = extend.get('by', 'time') if extend else 'time'
         
-        # 針對奇優影院常見的幾種分類路由自動嘗試（你提供的詳情頁是 /vod-detail-id-135654.html，對應分類極可能是第二種）
+        # 針對 qivod.com (海洋CMS) 的分類網址與排序路由
         candidate_urls = [
             f"{self.host}/vod-type-id-{tid}-pg-{pg}.html",
             f"{self.host}/list/{tid}_{pg}.html?order={order}",
             f"{self.host}/type/{tid}-{pg}.html",
-            f"{self.host}/vodtype/{tid}-{pg}.html",
         ]
+        if order == "hit":
+            candidate_urls.insert(0, f"{self.host}/vod-type-id-{tid}-pg-{pg}-order-hit.html")
 
         last_debug = "未發起請求"
 
@@ -95,21 +95,28 @@ class Spider(Spider):
 
                 videos = self.extract_cards_with_fallback(root)
                 if videos:
+                    # 解析最大總頁數，確保支援無限往下滑動翻頁
+                    page_numbers = []
+                    for link in root.xpath("//ul[contains(@class,'stui-page')]//a/@href"):
+                        m = re.search(r'(?:pg-|_)(\d+)\.html', link)
+                        if m:
+                            page_numbers.append(int(m.group(1)))
+                    total_page = max(page_numbers) if page_numbers else 999
+
                     return {
                         'list': videos,
                         'page': int(pg),
-                        'pagecount': 999,
-                        'limit': 90,
-                        'total': 999999,
+                        'pagecount': total_page,
+                        'limit': len(videos),
+                        'total': total_page * len(videos),
                     }
 
                 page_title = self.get_first(root.xpath("//title/text()")).strip() or "無標題"
                 last_debug = f"狀態:{status} 標題:{page_title[:15]} 長度:{len(html_text)}"
             except Exception as e:
-                last_debug = f"異常:{str(e)[:30]}"
+                last_debug = f"異常:{str(e)[:35]}"
                 continue
 
-        # 若所有分類網址都抓不到片卡，直接把原因顯示在修狗TV畫面上！
         return {
             'list': [
                 self._debug_card("診斷：抓不到片卡", last_debug),
@@ -217,6 +224,7 @@ class Spider(Spider):
 
     def searchContent(self, key, quick, page='1'):
         try:
+            # 1. 優先嘗試海洋CMS標準 POST search.php
             url = f"{self.host}/search.php"
             post_data = {'searchword': key}
             headers = {
@@ -226,9 +234,17 @@ class Spider(Spider):
             }
             rsp = self.post(url, data=post_data, headers=headers)
             root = self.parse_html(rsp.content)
-            if root is None:
-                return {'list': []}
-            return {'list': self.extract_cards_with_fallback(root)}
+            videos = self.extract_cards_with_fallback(root) if root is not None else []
+
+            # 2. 若 POST 無結果，自動改用 GET 偽靜態搜尋路由備援
+            if not videos:
+                get_url = f"{self.host}/vod-search-pg-{page}-wd-{quote(key)}.html"
+                rsp_get = self.fetch(get_url, headers=self.headers)
+                root_get = self.parse_html(rsp_get.content)
+                if root_get is not None:
+                    videos = self.extract_cards_with_fallback(root_get)
+
+            return {'list': videos}
         except Exception:
             return {'list': []}
 
