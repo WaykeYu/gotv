@@ -236,57 +236,42 @@ class Spider(Spider):
             rsp = self.fetch(play_page_url, headers=page_headers)
             _, raw_html = self.parse_html(rsp.content, return_content=True)
 
-            stream_url = self._find_stream_in_text(raw_html)
+            # 收集頁面上與所有外部 JS / iframe 中的全部候選串流網址
+            candidates = []
+            self._collect_streams_in_text(raw_html, candidates)
 
-            if not stream_url:
-                ignore_js = ("jquery", "bootstrap", "stui", "swiper", "layer", "lazyload", "tj", "tongji")
-                script_srcs = re.findall(r'<script[^>]*src=[\'"]([^\'"]+\.js[^\'"]*)[\'"]', raw_html, re.IGNORECASE)
-                for src in script_srcs:
-                    if any(k in src.lower() for k in ignore_js):
-                        continue
-                    full_js_url = urljoin(play_page_url, src)
-                    try:
-                        js_rsp = self.fetch(full_js_url, headers=page_headers)
-                        js_content = js_rsp.content.decode('utf-8', errors='replace')
-                        stream_url = self._find_stream_in_text(js_content)
-                        if stream_url:
-                            break
-                    except Exception:
-                        continue
+            ignore_js = ("jquery", "bootstrap", "stui", "swiper", "layer", "lazyload", "tj", "tongji")
+            script_srcs = re.findall(r'<script[^>]*src=[\'"]([^\'"]+\.js[^\'"]*)[\'"]', raw_html, re.IGNORECASE)
+            for src in script_srcs:
+                if any(k in src.lower() for k in ignore_js):
+                    continue
+                try:
+                    js_rsp = self.fetch(urljoin(play_page_url, src), headers=page_headers)
+                    self._collect_streams_in_text(js_rsp.content.decode('utf-8', errors='replace'), candidates)
+                except Exception:
+                    continue
 
-            if not stream_url:
-                for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', raw_html, re.IGNORECASE):
-                    stream_url = self._find_stream_in_text(iframe_src)
-                    if stream_url:
-                        break
-                    full_iframe = urljoin(play_page_url, iframe_src)
-                    try:
-                        iframe_rsp = self.fetch(full_iframe, headers=page_headers)
-                        stream_url = self._find_stream_in_text(iframe_rsp.text)
-                        if stream_url:
-                            break
-                    except Exception:
-                        continue
+            for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', raw_html, re.IGNORECASE):
+                self._collect_streams_in_text(iframe_src, candidates)
+                try:
+                    iframe_rsp = self.fetch(urljoin(play_page_url, iframe_src), headers=page_headers)
+                    self._collect_streams_in_text(iframe_rsp.text, candidates)
+                except Exception:
+                    continue
 
-            if stream_url:
+            # 逐一驗證候選串流：優先挑選 Python 本地代理能直接拿到 #EXTM3U 的有效網址
+            for stream_url in candidates:
                 if ".m3u8" in stream_url:
-                    proxy_url = (
-                        f"{self.getProxyUrl()}&url={quote(stream_url, safe='')}"
-                        f"&ref={quote(play_page_url, safe='')}"
-                    )
-                    return {
-                        "parse": 0,
-                        "playUrl": "",
-                        "url": proxy_url,
-                        "header": media_headers,
-                    }
+                    if self._check_m3u8_reachable(stream_url, play_page_url):
+                        proxy_url = (
+                            f"{self.getProxyUrl()}&url={quote(stream_url, safe='')}"
+                            f"&ref={quote(play_page_url, safe='')}"
+                        )
+                        return {"parse": 0, "playUrl": "", "url": proxy_url, "header": media_headers}
 
-                return {
-                    "parse": 0,
-                    "playUrl": "",
-                    "url": stream_url,
-                    "header": media_headers,
-                }
+            # 若 Python 端探測全數被 CDN 擋下（例如 TLS 指紋限制），直接把第一個抓到的真實網址交給播放器核心直連
+            if candidates:
+                return {"parse": 0, "playUrl": "", "url": candidates[0], "header": media_headers}
 
             return {"parse": 1, "playUrl": "", "url": play_page_url, "header": page_headers}
 
@@ -310,7 +295,6 @@ class Spider(Spider):
         if ref_url:
             header_candidates.append({"User-Agent": self.headers["User-Agent"], "Referer": ref_url})
 
-        # 同時測試「預設網路」與「強制繞過系統代理直連」兩種模式
         proxy_modes = [None, {"http": None, "https": None}]
 
         rsp = None
@@ -347,7 +331,6 @@ class Spider(Spider):
                 break
 
         if rsp is None:
-            # 回傳真實狀態與目標網址，方便在「复制错误信息」中直接看到原因
             err_msg = f"[{last_status}] URL: {target_url} | Body: {last_snippet}"
             return [502, "text/plain", err_msg.encode("utf-8")]
 
@@ -383,39 +366,53 @@ class Spider(Spider):
 
         return [rsp.status_code, content_type, rsp.content]
 
-    def _find_stream_in_text(self, text):
+    def _check_m3u8_reachable(self, target_url, ref_url):
+        """快速檢查目標 m3u8 是否能正常回傳 #EXTM3U"""
+        parsed = urlparse(target_url)
+        origin = f"{parsed.scheme}://{parsed.netloc}/"
+        headers_list = [
+            {"User-Agent": self.headers["User-Agent"]},
+            {"User-Agent": self.headers["User-Agent"], "Referer": origin},
+            {"User-Agent": self.headers["User-Agent"], "Referer": ref_url},
+        ]
+        for p_mode in [None, {"http": None, "https": None}]:
+            for h in headers_list:
+                try:
+                    r = requests.get(target_url, headers=h, proxies=p_mode, verify=False, timeout=6)
+                    if r.status_code == 200 and "#EXTM3U" in r.text:
+                        return True
+                except Exception:
+                    continue
+        return False
+
+    def _collect_streams_in_text(self, text, candidates):
+        """將文本中所有解碼後的 m3u8 / mp4 網址依序加入 candidates 列表（去重）"""
         if not text:
-            return ""
+            return
 
         for unesc_match in re.findall(r'unescape\([\'"]([^\'"]+)[\'"]\)', text):
-            decoded = unquote(unesc_match)
-            res = self._find_stream_in_text(decoded)
-            if res:
-                return res
+            self._collect_streams_in_text(unquote(unesc_match), candidates)
 
         for b64_match in re.findall(r'atob\([\'"]([A-Za-z0-9+/=]+)[\'"]\)', text):
             try:
                 decoded = base64.b64decode(b64_match).decode('utf-8', errors='ignore')
-                res = self._find_stream_in_text(decoded)
-                if res:
-                    return res
+                self._collect_streams_in_text(decoded, candidates)
             except Exception:
                 pass
 
         cleaned = unquote(text.replace(r"\/", "/"))
 
-        ali_match = re.search(r'/player/aliplayer\.html\?[^"\'\s<>]+', cleaned)
-        if ali_match:
+        for ali_match in re.finditer(r'/player/aliplayer\.html\?[^"\'\s<>]+', cleaned):
             qs = parse_qs(urlparse(ali_match.group(0)).query)
             if "url" in qs and qs["url"][0]:
-                return unquote(qs["url"][0]).strip()
+                u = unquote(qs["url"][0]).strip()
+                if u not in candidates:
+                    candidates.append(u)
 
         for m in re.finditer(r'https?://[^\s"\'<>\\$#]+\.(?:m3u8|mp4)(?:\?[^\s"\'<>\\$#]*)?', cleaned, re.IGNORECASE):
-            candidate = m.group(0).strip()
-            if "aliplayer.html" not in candidate:
-                return candidate
-
-        return ""
+            u = m.group(0).strip()
+            if "aliplayer.html" not in u and u not in candidates:
+                candidates.append(u)
 
     # ================= 片卡解析與輔助工具 =================
 
