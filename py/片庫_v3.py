@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 import json
+import os
 import re
 import sys
 import urllib.parse
@@ -25,6 +26,16 @@ class Spider(Spider):
 
     show_prefix = '/vodshow/'
 
+    def _log(self, msg):
+        try:
+            log_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), 'pianku_debug.log'
+            )
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(str(msg) + '\n')
+        except Exception:
+            pass
+
     def getName(self):
         return '片庫'
 
@@ -44,8 +55,8 @@ class Spider(Spider):
             rsp = requests.get(self.host, headers=self.headers, timeout=12)
             rsp.encoding = 'utf-8'
             html = rsp.text
-        except Exception:
-            pass
+        except Exception as e:
+            self._log(f'homeContent error: {e}')
 
         classes = self._parse_classes(html) if html else []
         if not classes:
@@ -204,26 +215,34 @@ class Spider(Spider):
                 for a in plist.find_all('a'):
                     ep_name = a.get_text(strip=True)
                     ep_href = a.get('href', '')
-                    if ep_name and ep_href:
+                    if ep_name and ep_href and not ep_href.startswith('javascript'):
                         ep_links.append(f'{ep_name}${ep_href}')
                 if ep_links:
                     play_from.append(tab_name)
                     play_url.append('#'.join(ep_links))
-        else:
-            play_from.append('預設線路')
+
+        # 若上方標準容器沒抓到任何線路，全面掃描所有播放連結 (包含 /play/、/vodplay/、/v/ 等)
+        if not play_url:
             ep_links = []
-            for a in soup.find_all('a', href=re.compile(r'play', re.I)):
+            seen_ep = set()
+            for a in soup.find_all('a', href=True):
+                ep_href = a.get('href', '').strip()
                 ep_name = a.get_text(strip=True)
-                ep_href = a.get('href', '')
                 if (
                     ep_name
                     and ep_href
-                    and ep_href.endswith('.html')
-                    and len(ep_name) < 20
+                    and ep_href not in seen_ep
+                    and not ep_href.startswith('javascript')
+                    and any(k in ep_href.lower() for k in ['play', '/p/', 'nid='])
+                    and len(ep_name) <= 25
                 ):
+                    seen_ep.add(ep_href)
                     ep_links.append(f'{ep_name}${ep_href}')
-            play_url.append('#'.join(ep_links))
+            if ep_links:
+                play_from.append('預設線路')
+                play_url.append('#'.join(ep_links))
 
+        self._log(f'detailContent url={url}, play_from={play_from}, count={len(play_url)}')
         vod = {
             'vod_id': vid,
             'vod_name': title,
@@ -253,7 +272,8 @@ class Spider(Spider):
         return {'list': []}
 
     def playerContent(self, flag, id, vipFlags):
-        # 1. 若詳情頁直接帶入的就是 .m3u8 / .mp4 直鏈
+        self._log(f'=== playerContent start: flag={flag}, id={id} ===')
+
         if '.m3u8' in id or '.mp4' in id:
             return self._build_video_response(id)
 
@@ -266,108 +286,151 @@ class Spider(Spider):
             rsp.encoding = 'utf-8'
             html = rsp.text
 
-            # 2. 優先在當前播放頁尋找真實串流網址
-            real_url = self._extract_stream_url(html)
-            if real_url:
-                return self._build_video_response(real_url)
+            # 1. 提取 player_aaaa / player_data
+            m = re.search(
+                r'(?:player_aaaa|player_data)\s*=\s*(\{.*?\})\s*[;<]',
+                html,
+                re.S,
+            )
+            if m:
+                raw_json = m.group(1)
+                self._log(f'player_aaaa found: {raw_json[:300]}')
+                try:
+                    data = json.loads(raw_json)
+                    raw_url = data.get('url', '')
+                    encrypt = data.get('encrypt', 0)
+                    player_from = data.get('from', '')
 
-            # 3. 檢查是否有嵌套播放器 iframe (常見於 sviptq / lirose 解析頁)
-            soup = BeautifulSoup(html, 'html.parser')
-            for iframe in soup.find_all('iframe', src=True):
-                iframe_src = iframe.get('src', '').strip()
-                if not iframe_src or iframe_src.startswith('javascript'):
-                    continue
-                if iframe_src.startswith('//'):
-                    iframe_src = 'https:' + iframe_src
-                elif iframe_src.startswith('/'):
-                    iframe_src = self.host + iframe_src
+                    if encrypt == 1:
+                        raw_url = urllib.parse.unquote(raw_url)
+                    elif encrypt == 2:
+                        raw_url = urllib.parse.unquote(
+                            base64.b64decode(raw_url).decode('utf-8')
+                        )
 
-                # 若 iframe src 參數本身已包含 url=https://...m3u8
-                parsed_qs = urllib.parse.parse_qs(
-                    urllib.parse.urlparse(iframe_src).query
-                )
-                for q_val in parsed_qs.values():
-                    if q_val and ('.m3u8' in q_val[0] or '.mp4' in q_val[0]):
-                        return self._build_video_response(q_val[0])
+                    self._log(
+                        f'decoded url={raw_url}, from={player_from}, encrypt={encrypt}'
+                    )
 
-                # 請求 iframe 內部頁面提取串流
-                sub_headers = dict(self.headers)
-                sub_headers['Referer'] = play_page_url
-                sub_rsp = requests.get(
-                    iframe_src, headers=sub_headers, timeout=10
-                )
-                sub_rsp.encoding = 'utf-8'
-                sub_url = self._extract_stream_url(sub_rsp.text)
-                if sub_url:
-                    return self._build_video_response(sub_url)
+                    # 如果直接是影片直鏈
+                    if '.m3u8' in raw_url or '.mp4' in raw_url:
+                        return self._build_video_response(raw_url)
 
-        except Exception:
-            pass
+                    # 如果是解析器網址，請求該解析器頁面
+                    if raw_url.startswith('http'):
+                        sub_url = self._fetch_and_extract(
+                            raw_url, referer=play_page_url
+                        )
+                        if sub_url:
+                            return self._build_video_response(sub_url)
 
-        # 4. 最後手段：交給 Yumilo 內建 WebView 嗅探器自動攔截網路請求中的 .m3u8
+                    # 如果 raw_url 是一串加密字串 (非 http 開頭)，嘗試讀取該網站對應的播放器配置 /static/player/{from}.js
+                    if raw_url and player_from:
+                        js_url = f'{self.host}/static/player/{player_from}.js'
+                        js_rsp = requests.get(
+                            js_url, headers=self.headers, timeout=8
+                        )
+                        if js_rsp.status_code == 200:
+                            self._log(
+                                f'player js ({js_url}): {js_rsp.text[:300]}'
+                            )
+                            # 尋找播放器 JS 裡的解析接口網址 (如 src="https://.../?url=")
+                            jx_m = re.search(
+                                r'src=["\'](https?://[^"\']+?url=)["\']',
+                                js_rsp.text,
+                            )
+                            if jx_m:
+                                full_jx = jx_m.group(1) + urllib.parse.quote(
+                                    raw_url
+                                )
+                                sub_url = self._fetch_and_extract(
+                                    full_jx, referer=play_page_url
+                                )
+                                if sub_url:
+                                    return self._build_video_response(sub_url)
+                except Exception as e:
+                    self._log(f'player_aaaa parse error: {e}')
+
+            # 2. 直接在播放頁尋找 .m3u8 / .mp4 或 iframe
+            direct_url = self._extract_stream_from_html(
+                html, base_referer=play_page_url
+            )
+            if direct_url:
+                return self._build_video_response(direct_url)
+
+        except Exception as e:
+            self._log(f'playerContent exception: {e}')
+
+        self._log('playerContent failed to extract stream, fallback to parse=1')
         return {
             'parse': 1,
-            'jx': 0,  # 關閉外部無效的 JSON 解析接口，改用瀏覽器嗅探
+            'jx': 0,
             'playUrl': '',
             'url': play_page_url,
             'header': json.dumps(self.headers),
         }
 
-    def _extract_stream_url(self, html):
-        # A. 匹配 MacCMS player_aaaa 或 player_data 變數 (放寬大括號匹配)
-        m = re.search(
-            r'(?:player_aaaa|player_data)\s*=\s*(\{.*?\})\s*[;<]', html, re.S
-        )
-        if m:
-            try:
-                data = json.loads(m.group(1))
-                raw_url = data.get('url', '')
-                encrypt = data.get('encrypt', 0)
-                if encrypt == 1:
-                    raw_url = urllib.parse.unquote(raw_url)
-                elif encrypt == 2:
-                    raw_url = urllib.parse.unquote(
-                        base64.b64decode(raw_url).decode('utf-8')
-                    )
-                if raw_url and ('.m3u8' in raw_url or '.mp4' in raw_url):
-                    return raw_url
-                # 若 player_aaaa 裡放的是解析器網址，繼續往下或追蹤該網址
-                if raw_url.startswith('http'):
-                    sub_rsp = requests.get(
-                        raw_url, headers=self.headers, timeout=10
-                    )
-                    found = self._regex_find_m3u8(sub_rsp.text)
-                    if found:
-                        return found
-            except Exception:
-                pass
+    def _fetch_and_extract(self, target_url, referer=''):
+        try:
+            h = dict(self.headers)
+            if referer:
+                h['Referer'] = referer
+            rsp = requests.get(target_url, headers=h, timeout=10)
+            rsp.encoding = 'utf-8'
+            return self._extract_stream_from_html(
+                rsp.text, base_referer=target_url
+            )
+        except Exception as e:
+            self._log(f'_fetch_and_extract error ({target_url}): {e}')
+            return ''
 
-        # B. 直接從 HTML / JS 腳本正則提取帶參數的 .m3u8 (支援 @、&、= 等字元)
-        return self._regex_find_m3u8(html)
+    def _extract_stream_from_html(self, html, base_referer=''):
+        # A. 正則直接提取 .m3u8 / .mp4
+        found = self._regex_find_m3u8(html)
+        if found:
+            return found
+
+        # B. 追蹤內部 iframe
+        soup = BeautifulSoup(html, 'html.parser')
+        for iframe in soup.find_all('iframe', src=True):
+            src = iframe.get('src', '').strip()
+            if not src or src.startswith('javascript'):
+                continue
+            if src.startswith('//'):
+                src = 'https:' + src
+            elif src.startswith('/'):
+                src = self.host + src
+
+            parsed_qs = urllib.parse.parse_qs(
+                urllib.parse.urlparse(src).query
+            )
+            for q_val in parsed_qs.values():
+                if q_val and ('.m3u8' in q_val[0] or '.mp4' in q_val[0]):
+                    return q_val[0]
+
+            sub_found = self._fetch_and_extract(src, referer=base_referer)
+            if sub_found:
+                return sub_found
+
+        return ''
 
     def _regex_find_m3u8(self, text):
-        # 處理跳脫斜線 \/
         clean_text = text.replace('\\/', '/')
-        # 匹配引號內的完整 .m3u8 網址 (支援 sviptq.com 網址中的 @lirose_tv 等參數)
         patterns = [
             r'["\'](https?://[^"\'\s<>]+\.m3u8[^"\'\s<>]*)["\']',
             r'["\'](https?://[^"\'\s<>]+\.mp4[^"\'\s<>]*)["\']',
             r'(https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*)',
         ]
         for pat in patterns:
-            matches = re.findall(pat, clean_text)
-            for url in matches:
-                # 排除解析器自身的參數前綴 (如 https://jx.xxx/?url=https://...)
+            for url in re.findall(pat, clean_text):
                 if 'url=http' in url:
                     real = url.split('url=', 1)[1]
                     return urllib.parse.unquote(real)
                 return url
 
-        # C. 嘗試尋找 Base64 編碼的 m3u8 網址 (常見格式: "url":"aHR0cHM6...")
-        b64_matches = re.findall(
+        for b64_str in re.findall(
             r'["\'](aHR0c[A-Za-z0-9+/=]{20,})["\']', clean_text
-        )
-        for b64_str in b64_matches:
+        ):
             try:
                 decoded = base64.b64decode(b64_str).decode('utf-8')
                 if '.m3u8' in decoded or '.mp4' in decoded:
@@ -377,6 +440,7 @@ class Spider(Spider):
         return ''
 
     def _build_video_response(self, stream_url):
+        self._log(f'SUCCESS stream_url={stream_url}')
         return {
             'parse': 0,
             'playUrl': '',
