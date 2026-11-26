@@ -28,6 +28,7 @@ class Spider(Spider):
     RE_PLINE = re.compile(r'data-prefix="([^"]+)"\s+data-name="([^"]+)"')
     RE_AREA = re.compile(r"地区：([^\s]+)")
     RE_YEAR = re.compile(r"年份：(\d+)")
+    RE_KEY_URI = re.compile(r'URI="([^"]+)"')
 
     FALLBACK_LINES = [
         ("自营", "https://svip.qlplayer.cyou/?url="),
@@ -40,6 +41,9 @@ class Spider(Spider):
         ("冰豆", "https://bd.jx.cn/?url="),
     ]
 
+    # 容易在 Windows 端觸發 TLS/SSL 憑證握手失敗的 CDN 網域關鍵字
+    SSL_BYPASS_DOMAINS = ("wsyzym3u8.com", "yzzy", "heimuertv.com")
+
     def getName(self):
         return "片库4K"
 
@@ -47,8 +51,8 @@ class Spider(Spider):
         self.host = "https://4k01.pianku.online"
         self.headers = {
             "User-Agent": (
-                "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 "
-                "Chrome/120.0 Mobile Safari/537.36"
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
             ),
             "Referer": f"{self.host}/",
         }
@@ -113,7 +117,7 @@ class Spider(Spider):
         except Exception:
             return None
 
-    # ==================== 解析輔助方法 ====================
+    # ==================== 解析與播放標頭輔助方法 ====================
 
     def _parse_lines(self):
         now = time.time()
@@ -134,7 +138,7 @@ class Spider(Spider):
         return self.FALLBACK_LINES
 
     def _extract_player_url(self, html):
-        """直接從已取得的播放頁 HTML 中提取 player_aaaa.url，避免重複請求"""
+        """直接從已取得的播放頁 HTML 中提取 player_aaaa.url，避免重複網路請求"""
         if not html:
             return ""
         m = self.RE_PLAYER_DATA.search(html)
@@ -145,6 +149,45 @@ class Spider(Spider):
             return (data.get("url") or "").replace("\\/", "/")
         except Exception:
             return ""
+
+    def _build_play_headers(self, target_url):
+        """根據目標播放網址動態產生完整瀏覽器請求標頭"""
+        parsed = urlparse(target_url)
+        origin = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else self.host
+        return {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            ),
+            "Referer": f"{origin}/",
+            "Origin": origin,
+            "Accept": "*/*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        }
+
+    def _get_proxy_base(self):
+        """優先透過基底類別動態取得本地代理網址，失敗時退回預設 9978 埠"""
+        try:
+            if hasattr(self, "getProxyUrl"):
+                base = self.getProxyUrl()
+                if base:
+                    return base
+        except Exception:
+            pass
+        return "http://127.0.0.1:9978/proxy?do=py"
+
+    def _build_proxy_url(self, media_type, target_url):
+        base = self._get_proxy_base()
+        sep = "&" if "?" in base else "?"
+        return f"{base}{sep}type={media_type}&url={quote(target_url, safe='')}"
+
+    def _wrap_proxy_if_needed(self, video_url):
+        """若目標 CDN 容易觸發 Windows 端 TLS/憑證錯誤，改走本地 localProxy 轉發"""
+        netloc = urlparse(video_url).netloc.lower()
+        if any(d in netloc for d in self.SSL_BYPASS_DOMAINS):
+            media_type = "m3u8" if ".m3u8" in video_url.lower() else "ts"
+            return self._build_proxy_url(media_type, video_url)
+        return video_url
 
     def _cards(self, html):
         tree = self._html(html)
@@ -229,7 +272,6 @@ class Spider(Spider):
         except Exception:
             return None
 
-        # 預先計算調色盤亮度表
         lum = [
             (pal[i] * 299 + pal[i + 1] * 587 + pal[i + 2] * 114) // 1000
             for i in range(0, len(pal), 3)
@@ -267,7 +309,6 @@ class Spider(Spider):
             rows.append(line)
             prev = line
 
-        # 計算每列上下區塊的亮度差總和，並使用滑動視窗找最大能量區間
         th = h // 3
         offset = 2 * th
         col = [
@@ -379,7 +420,6 @@ class Spider(Spider):
             )[0]
             first_play_url = self._fix(first_href)
 
-            # 只請求一次播放頁，同時供「選集結構解析」與「外鏈偵測」使用
             play_html = self._get(first_play_url) if first_play_url else None
             play_tree = self._html(play_html)
 
@@ -416,7 +456,6 @@ class Spider(Spider):
             eps_list = canon.split("#")
             first_ep_url = eps_list[0].split("$", 1)[1] if "$" in eps_list[0] else first_play_url
 
-            # 若第一集就是剛抓過的 first_play_url，直接複用 play_html，省去一次 HTTP 請求
             target_html = play_html if first_ep_url == first_play_url else self._get(first_ep_url)
             outer = self._extract_player_url(target_html)
 
@@ -482,11 +521,9 @@ class Spider(Spider):
 
     def playerContent(self, flag, id, vipFlags):
         url = self._fix(id)
-        header_str = json.dumps(self.headers)
         lines_list = self._parse_lines()
         plines = dict(lines_list)
 
-        # 動態比對線路前綴網域，取代原本硬編碼的域名列表
         known_line_hosts = {urlparse(prefix).netloc for _, prefix in lines_list if prefix}
         parsed_url = urlparse(url)
         host_domain = urlparse(self.host).netloc
@@ -501,24 +538,43 @@ class Spider(Spider):
                     "parse": 1,
                     "jx": 1,
                     "url": plines[flag] + quote(outer, safe=""),
-                    "header": header_str,
+                    "header": json.dumps(self._build_play_headers(outer)),
                 }
 
         if "/player/?url=" in url or (parsed_url.netloc and parsed_url.netloc in known_line_hosts):
-            return {"parse": 1, "jx": 1, "url": url, "header": header_str}
+            return {
+                "parse": 1,
+                "jx": 1,
+                "url": url,
+                "header": json.dumps(self._build_play_headers(url)),
+            }
 
         html = self._get(url)
         if html:
             u = self._extract_player_url(html)
             if u.startswith("http"):
                 is_direct = bool(self.RE_VIDEO_EXT.search(u))
-                return {"parse": 0 if is_direct else 1, "url": u, "header": header_str}
+                final_url = self._wrap_proxy_if_needed(u) if is_direct else u
+                return {
+                    "parse": 0 if is_direct else 1,
+                    "url": final_url,
+                    "header": json.dumps(self._build_play_headers(u)),
+                }
 
             m = self.RE_M3U8_URL.search(html)
             if m:
-                return {"parse": 0, "url": m.group(1), "header": header_str}
+                u = m.group(1)
+                return {
+                    "parse": 0,
+                    "url": self._wrap_proxy_if_needed(u),
+                    "header": json.dumps(self._build_play_headers(u)),
+                }
 
-        return {"parse": 1, "url": url, "header": header_str}
+        return {
+            "parse": 1,
+            "url": url,
+            "header": json.dumps(self._build_play_headers(url)),
+        }
 
     def isVideoFormat(self, url):
         return bool(self.RE_VIDEO_EXT.search(url or ""))
@@ -527,7 +583,61 @@ class Spider(Spider):
         return False
 
     def localProxy(self, param):
-        return None
+        """接管 m3u8 請求並忽略 SSL 憑證驗證，同時將內部的切片與金鑰重寫為本地代理路徑"""
+        target_url = unquote(param.get("url", ""))
+        if not target_url.startswith("http"):
+            return None
+
+        req_type = param.get("type", "m3u8")
+        headers = self._build_play_headers(target_url)
+
+        try:
+            if self._sess is not None:
+                resp = self._sess.get(target_url, headers=headers, timeout=15, verify=False)
+            else:
+                resp = self.fetch(target_url, headers=headers, timeout=15, verify=False)
+
+            if req_type == "m3u8":
+                base_url = target_url.rsplit("/", 1)[0] + "/"
+                parsed_target = urlparse(target_url)
+                root_url = f"{parsed_target.scheme}://{parsed_target.netloc}"
+                lines = []
+
+                for line in resp.text.splitlines():
+                    s = line.strip()
+                    if not s:
+                        lines.append(line)
+                        continue
+
+                    if s.startswith("#EXT-X-KEY") and 'URI="' in s:
+                        def _repl_key(m):
+                            k_url = m.group(1)
+                            if not k_url.startswith("http"):
+                                k_url = (root_url + k_url) if k_url.startswith("/") else (base_url + k_url)
+                            return f'URI="{self._build_proxy_url("ts", k_url)}"'
+
+                        line = self.RE_KEY_URI.sub(_repl_key, line)
+                    elif not s.startswith("#"):
+                        if s.startswith("http"):
+                            seg_url = s
+                        elif s.startswith("/"):
+                            seg_url = root_url + s
+                        else:
+                            seg_url = base_url + s
+
+                        # 若為多碼率主清單（子項仍為 .m3u8），遞迴維持 type=m3u8
+                        sub_type = "m3u8" if ".m3u8" in seg_url.lower() else "ts"
+                        line = self._build_proxy_url(sub_type, seg_url)
+
+                    lines.append(line)
+
+                content = "\n".join(lines).encode("utf-8")
+                return [200, "application/vnd.apple.mpegurl", content]
+
+            content_type = resp.headers.get("Content-Type", "video/mp2t")
+            return [200, content_type, resp.content]
+        except Exception:
+            return None
 
     def destroy(self):
         if self._sess is not None:
