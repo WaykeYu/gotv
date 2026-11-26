@@ -33,7 +33,7 @@ class Spider:
            "(KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36")
 
     def __init__(self):
-        self.host = "https://rysp.tv"
+        self.host = "https://www.rytv.tv/"
         self.ua = self._UA
         self.headers = {
             "User-Agent": self.ua,
