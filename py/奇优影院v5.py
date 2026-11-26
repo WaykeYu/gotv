@@ -1,8 +1,9 @@
 # coding=utf-8
 #!/usr/bin/python
+import json
 import re
 import sys
-from urllib.parse import parse_qs, quote, urljoin, urlparse
+from urllib.parse import parse_qs, quote, unquote, urljoin, urlparse
 from lxml import etree
 
 sys.path.append('..')
@@ -53,23 +54,15 @@ class Spider(Spider):
     def homeVideoContent(self):
         try:
             rsp = self.fetch(f"{self.host}/", headers=self.headers)
-            root, html_text = self.parse_html(rsp.content, return_content=True)
+            root = self.parse_html(rsp.content)
             if root is None:
-                return {'list': [self._debug_card("首頁HTML解析失敗", self.host)]}
-
-            videos = self.extract_cards_with_fallback(root)
-            if not videos:
-                page_title = self.get_first(root.xpath("//title/text()")).strip() or "無標題"
-                status = getattr(rsp, "status_code", "未知")
-                return {'list': [self._debug_card(f"首頁無片卡({status})", f"{page_title} | {self.host}")]}
-            return {'list': videos}
-        except Exception as e:
-            return {'list': [self._debug_card("首頁請求異常", str(e))]}
+                return {'list': []}
+            return {'list': self.extract_cards_with_fallback(root)}
+        except Exception:
+            return {'list': []}
 
     def categoryContent(self, tid, pg, filter, extend):
         order = extend.get('by', 'time') if extend else 'time'
-        
-        # 針對 qivod.com (海洋CMS) 的分類網址與排序路由
         candidate_urls = [
             f"{self.host}/vod-type-id-{tid}-pg-{pg}.html",
             f"{self.host}/list/{tid}_{pg}.html?order={order}",
@@ -78,24 +71,17 @@ class Spider(Spider):
         if order == "hit":
             candidate_urls.insert(0, f"{self.host}/vod-type-id-{tid}-pg-{pg}-order-hit.html")
 
-        last_debug = "未發起請求"
-
         for url in candidate_urls:
             try:
                 rsp = self.fetch(url, headers=self.headers)
-                status = getattr(rsp, "status_code", 0)
-                if status and int(status) >= 400:
-                    last_debug = f"HTTP {status} -> {url}"
+                if getattr(rsp, "status_code", 0) >= 400:
                     continue
-
-                root, html_text = self.parse_html(rsp.content, return_content=True)
+                root = self.parse_html(rsp.content)
                 if root is None:
-                    last_debug = f"DOM解析空 -> {url}"
                     continue
 
                 videos = self.extract_cards_with_fallback(root)
                 if videos:
-                    # 解析最大總頁數，確保支援無限往下滑動翻頁
                     page_numbers = []
                     for link in root.xpath("//ul[contains(@class,'stui-page')]//a/@href"):
                         m = re.search(r'(?:pg-|_)(\d+)\.html', link)
@@ -110,30 +96,14 @@ class Spider(Spider):
                         'limit': len(videos),
                         'total': total_page * len(videos),
                     }
-
-                page_title = self.get_first(root.xpath("//title/text()")).strip() or "無標題"
-                last_debug = f"狀態:{status} 標題:{page_title[:15]} 長度:{len(html_text)}"
-            except Exception as e:
-                last_debug = f"異常:{str(e)[:35]}"
+            except Exception:
                 continue
 
-        return {
-            'list': [
-                self._debug_card("診斷：抓不到片卡", last_debug),
-                self._debug_card("目前設定網域", self.host),
-            ],
-            'page': int(pg),
-            'pagecount': 1,
-            'limit': 90,
-            'total': 2,
-        }
+        return {'list': [], 'page': int(pg), 'pagecount': 1, 'limit': 90, 'total': 0}
 
     def detailContent(self, array):
         try:
             tid = array[0]
-            if tid.startswith("debug"):
-                return {'list': []}
-
             url = urljoin(self.host, tid)
             rsp = self.fetch(url, headers=self.headers)
             root = self.parse_html(rsp.content)
@@ -224,7 +194,6 @@ class Spider(Spider):
 
     def searchContent(self, key, quick, page='1'):
         try:
-            # 1. 優先嘗試海洋CMS標準 POST search.php
             url = f"{self.host}/search.php"
             post_data = {'searchword': key}
             headers = {
@@ -236,7 +205,6 @@ class Spider(Spider):
             root = self.parse_html(rsp.content)
             videos = self.extract_cards_with_fallback(root) if root is not None else []
 
-            # 2. 若 POST 無結果，自動改用 GET 偽靜態搜尋路由備援
             if not videos:
                 get_url = f"{self.host}/vod-search-pg-{page}-wd-{quote(key)}.html"
                 rsp_get = self.fetch(get_url, headers=self.headers)
@@ -257,46 +225,72 @@ class Spider(Spider):
 
         try:
             rsp = self.fetch(play_page_url, headers=req_headers)
-            _, html_content = self.parse_html(rsp.content, return_content=True)
+            _, raw_html = self.parse_html(rsp.content, return_content=True)
 
-            # 1. 精準解析 /player/aliplayer.html?url=https://...m3u8
+            # 將 JS 常見的轉義斜線 \/ 還原為 /，方便統一正則匹配
+            html_content = raw_html.replace(r"\/", "/")
+
+            # 1. 優先提取 /player/aliplayer.html?url=... 裡的真實影片串流
             ali_match = re.search(r'/player/aliplayer\.html\?[^"\'\s<>]+', html_content)
             if ali_match:
                 qs = parse_qs(urlparse(ali_match.group(0)).query)
                 if "url" in qs and qs["url"][0]:
-                    return {
-                        "parse": 0,
-                        "playUrl": "",
-                        "url": qs["url"][0],
-                        "header": req_headers,
-                    }
+                    real_url = unquote(qs["url"][0])
+                    return {"parse": 0, "playUrl": "", "url": real_url, "header": req_headers}
 
-            # 2. 追蹤 iframe
+            # 2. 提取 JS 變數中的播放位址 (海洋CMS 常見: var now="...", var url="...", player_data={...})
+            js_patterns = [
+                r'var\s+(?:now|url|playurl|video_url)\s*=\s*[\'"]([^\'"]+\.(?:m3u8|mp4)[^\'"]*)[\'"]',
+                r'"url"\s*:\s*[\'"](https?://[^\'"]+\.(?:m3u8|mp4)[^\'"]*)[\'"]',
+                r'aliplayer\.html\?url=[\'"]?\s*\+\s*[\'"]([^\'"]+)[\'"]',
+            ]
+            for pat in js_patterns:
+                m = re.search(pat, html_content, re.IGNORECASE)
+                if m:
+                    real_url = unquote(m.group(1))
+                    return {"parse": 0, "playUrl": "", "url": real_url, "header": req_headers}
+
+            # 3. 追蹤頁面中的 iframe 播放器或外部 player JS 檔案
             for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', html_content):
-                if "url=" in iframe_src and ".m3u8" in iframe_src:
+                if "url=" in iframe_src:
                     qs = parse_qs(urlparse(iframe_src).query)
-                    if "url" in qs:
-                        return {"parse": 0, "playUrl": "", "url": qs["url"][0], "header": req_headers}
+                    if "url" in qs and qs["url"][0]:
+                        return {"parse": 0, "playUrl": "", "url": unquote(qs["url"][0]), "header": req_headers}
 
                 full_iframe = urljoin(play_page_url, iframe_src)
                 try:
                     iframe_rsp = self.fetch(full_iframe, headers=req_headers)
-                    m3u8_match = re.search(r'https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*', iframe_rsp.text)
+                    iframe_text = iframe_rsp.text.replace(r"\/", "/")
+                    m3u8_match = re.search(r'https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*', iframe_text)
+                    if m3u8_match:
+                        return {"parse": 0, "playUrl": "", "url": unquote(m3u8_match.group(0)), "header": req_headers}
+                except Exception:
+                    continue
+
+            # 4. 追蹤海洋CMS 動態生成的播放資料 JS (常見為 /upload/playdata/...js)
+            for js_src in re.findall(r'<script[^>]*src=[\'"]([^\'"]*playdata[^\'"]*\.js[^\'"]*)[\'"]', html_content):
+                full_js = urljoin(play_page_url, js_src)
+                try:
+                    js_rsp = self.fetch(full_js, headers=req_headers)
+                    js_text = unquote(js_rsp.text.replace(r"\/", "/"))
+                    m3u8_match = re.search(r'https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*', js_text)
                     if m3u8_match:
                         return {"parse": 0, "playUrl": "", "url": m3u8_match.group(0), "header": req_headers}
                 except Exception:
                     continue
 
-            # 3. 頁面內直接搜尋 m3u8
-            m3u8_match = re.search(r'https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*', html_content)
+            # 5. 全文直接搜尋任何 m3u8 或 mp4 串流網址
+            m3u8_match = re.search(r'https?://[^\s"\'<>]+\.(?:m3u8|mp4)[^\s"\'<>]*', html_content)
             if m3u8_match:
-                return {"parse": 0, "playUrl": "", "url": m3u8_match.group(0), "header": req_headers}
+                return {"parse": 0, "playUrl": "", "url": unquote(m3u8_match.group(0)), "header": req_headers}
 
-            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
+            # 6. 若全部未命中，回傳 parse: 0 並帶入原始頁面嘗試播放器內建嗅探（避免無解析接口直接報錯）
+            return {"parse": 0, "playUrl": "", "url": play_page_url, "header": req_headers}
+
         except Exception:
-            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
+            return {"parse": 0, "playUrl": "", "url": play_page_url, "header": req_headers}
 
-    # ================= 片卡解析與診斷 =================
+    # ================= 片卡解析與輔助工具 =================
 
     def extract_cards_with_fallback(self, root):
         xpath_rules = [
@@ -366,14 +360,6 @@ class Spider(Spider):
                 continue
 
         return videos
-
-    def _debug_card(self, title, remark):
-        return {
-            "vod_id": "debug",
-            "vod_name": title,
-            "vod_pic": "",
-            "vod_remarks": remark,
-        }
 
     def parse_html(self, content, return_content=False):
         if isinstance(content, str):
