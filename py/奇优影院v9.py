@@ -294,7 +294,7 @@ class Spider(Spider):
             return {"parse": 1, "playUrl": "", "url": play_page_url, "header": page_headers}
 
     def localProxy(self, param):
-        """本地代理：自動嘗試多種 Referer 策略拉取 m3u8，並使用跳轉後真實網址展開切片"""
+        """本地代理：支援自動繞過系統代理、多 Referer 策略與真實錯誤透傳"""
         target_url = unquote(param.get("url", ""))
         ref_url = unquote(param.get("ref", ""))
         if not target_url:
@@ -310,23 +310,46 @@ class Spider(Spider):
         if ref_url:
             header_candidates.append({"User-Agent": self.headers["User-Agent"], "Referer": ref_url})
 
+        # 同時測試「預設網路」與「強制繞過系統代理直連」兩種模式
+        proxy_modes = [None, {"http": None, "https": None}]
+
         rsp = None
-        for h in header_candidates:
-            try:
-                r = requests.get(target_url, headers=h, verify=False, timeout=12, allow_redirects=True)
-                if r.status_code == 200 and len(r.content) > 0:
-                    if ".m3u8" in target_url:
-                        if "#EXTM3U" in r.text:
+        last_status = "無回應"
+        last_snippet = ""
+
+        for p_mode in proxy_modes:
+            for h in header_candidates:
+                try:
+                    r = requests.get(
+                        target_url,
+                        headers=h,
+                        proxies=p_mode,
+                        verify=False,
+                        timeout=10,
+                        allow_redirects=True,
+                    )
+                    last_status = f"HTTP {r.status_code}"
+                    last_snippet = r.text[:120].replace("\n", " ")
+
+                    if r.status_code == 200 and len(r.content) > 0:
+                        if ".m3u8" in target_url:
+                            if "#EXTM3U" in r.text:
+                                rsp = r
+                                break
+                        else:
                             rsp = r
                             break
-                    else:
-                        rsp = r
-                        break
-            except Exception:
-                continue
+                except Exception as e:
+                    last_status = f"連線異常: {type(e).__name__}"
+                    last_snippet = str(e)[:100]
+                    continue
+            if rsp is not None:
+                break
 
         if rsp is None:
-            return [502, "text/plain", f"Proxy fetch failed for {target_url}".encode("utf-8")]
+            # 回傳真實狀態與目標網址，方便在「复制错误信息」中直接看到原因
+            err_msg = f"[{last_status}] URL: {target_url} | Body: {last_snippet}"
+            return [502, "text/plain", err_msg.encode("utf-8")]
 
         final_base_url = rsp.url
         content_type = rsp.headers.get("Content-Type", "application/vnd.apple.mpegurl")
