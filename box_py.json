@@ -872,6 +872,16 @@
       "ext": "https://www.yemu.xyz"
     },
     {
+      "key": "lxyy_tv",
+      "name": "洛雪TV",
+      "type": 3,
+      "api": "./洛雪TV.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": ""
+    },
+    {
       "key": "py_可可影视",
       "name": "[PY] 可可影视 (41323ms)",
       "type": 3,
