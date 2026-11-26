@@ -12,13 +12,15 @@ from base.spider import Spider
 class Spider(Spider):
 
     def __init__(self):
-        # 集中管理最新網域，日後若網域變更只需修改此處
-        self.host = "http://qiyoudy5.com"
+        # 預設改用 https，並可透過 json 設定檔的 ext 欄位動態傳入最新網域
+        self.host = "https://www.qiyoudy5.com"
         self.headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
             ),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7",
             "Referer": f"{self.host}/",
         }
 
@@ -38,7 +40,6 @@ class Spider(Spider):
             "综艺": "4",
         }
         classes = [{'type_name': k, 'type_id': v} for k, v in cateManual.items()]
-
         sort_filter = [{
             "key": "by",
             "name": "排序",
@@ -48,23 +49,33 @@ class Spider(Spider):
             ],
         }]
         filters = {cid: sort_filter for cid in ["1", "2", "3", "4", "6"]}
-
         return {'class': classes, 'filters': filters}
 
     def homeVideoContent(self):
         try:
             rsp = self.fetch(f"{self.host}/", headers=self.headers)
-            root = self.parse_html(rsp.content)
+            root, html_text = self.parse_html(rsp.content, return_content=True)
             if root is None:
-                return {'list': []}
+                return {'list': [self._debug_card("HTML解析失敗", "root is None")]}
 
-            # 統一提取首頁所有 stui-vodlist__thumb 片卡（包含輪播與推薦列表）
-            videos = self.parse_vod_list(
-                root.xpath("//a[contains(@class,'stui-vodlist__thumb')]")
-            )
+            videos = self.extract_cards_with_fallback(root)
+
+            # 若抓不到片卡，回傳一筆診斷資訊卡片方便排查原因
+            if not videos:
+                page_title = self.get_first(root.xpath("//title/text()")).strip() or "無標題"
+                status = getattr(rsp, "status_code", "未知狀態碼")
+                return {
+                    'list': [
+                        self._debug_card(
+                            f"未抓到片卡 (HTTP {status})",
+                            f"網頁標題: {page_title} | 長度: {len(html_text)}",
+                        )
+                    ]
+                }
+
             return {'list': videos}
-        except Exception:
-            return {'list': []}
+        except Exception as e:
+            return {'list': [self._debug_card("請求異常", str(e))]}
 
     def categoryContent(self, tid, pg, filter, extend):
         try:
@@ -76,9 +87,7 @@ class Spider(Spider):
             if root is None:
                 return {'list': [], 'page': pg, 'pagecount': 1, 'limit': 90, 'total': 0}
 
-            videos = self.parse_vod_list(
-                root.xpath("//a[contains(@class,'stui-vodlist__thumb')]")
-            )
+            videos = self.extract_cards_with_fallback(root)
 
             active_pg = self.get_first(
                 root.xpath("//ul[contains(@class,'stui-page')]//a[@class='active']/text()")
@@ -142,7 +151,6 @@ class Spider(Spider):
                 year = ym.group(1) if ym else ""
                 desc = self.get_first(root.xpath("//meta[@property='og:description']/@content"))
 
-            # 解析分頁路線與集數
             playFrom, playUrl = [], []
             for tab in root.xpath("//ul[contains(@class,'nav-tabs')]/li"):
                 tab_name = self.get_first(tab.xpath(".//a/text()")).strip()
@@ -162,6 +170,20 @@ class Spider(Spider):
                         if episodes:
                             playFrom.append(tab_name)
                             playUrl.append("#".join(episodes))
+
+            # 若沒有 nav-tabs 分頁結構，直接抓取頁面上所有 playlist 區塊
+            if not playFrom:
+                playlists = root.xpath("//ul[contains(@class,'stui-content__playlist')]")
+                for idx, pl in enumerate(playlists, start=1):
+                    episodes = []
+                    for ep in pl.xpath(".//a"):
+                        ep_name = self.get_first(ep.xpath("./text()")).strip() or "播放"
+                        ep_url = self.get_first(ep.xpath("./@href")).strip()
+                        if ep_url:
+                            episodes.append(f"{ep_name}${ep_url}")
+                    if episodes:
+                        playFrom.append(f"线路{idx}")
+                        playUrl.append("#".join(episodes))
 
             vod = {
                 "vod_id": tid,
@@ -197,15 +219,7 @@ class Spider(Spider):
             if root is None:
                 return {'list': []}
 
-            # 優先直接抓取所有片卡 a 標籤，相容列表與媒體卡片模式
-            thumb_nodes = root.xpath("//a[contains(@class,'stui-vodlist__thumb')]")
-            videos = self.parse_vod_list(thumb_nodes)
-
-            # 備援：若搜尋頁改為純文字/詳情連結模式
-            if not videos:
-                fallback_nodes = root.xpath("//a[contains(@href,'vod-detail') or contains(@href,'/vod/')]")
-                videos = self.parse_vod_list(fallback_nodes)
-
+            videos = self.extract_cards_with_fallback(root)
             return {'list': videos}
         except Exception:
             return {'list': []}
@@ -221,7 +235,7 @@ class Spider(Spider):
             rsp = self.fetch(play_page_url, headers=req_headers)
             _, html_content = self.parse_html(rsp.content, return_content=True)
 
-            # 1. 【最高優先】精準解析 /player/aliplayer.html?url=https://...m3u8
+            # 1. 精準解析 /player/aliplayer.html?url=https://...m3u8
             ali_match = re.search(
                 r'/player/aliplayer\.html\?[^"\'\s<>]+', html_content
             )
@@ -229,35 +243,15 @@ class Spider(Spider):
                 parsed = urlparse(ali_match.group(0))
                 qs = parse_qs(parsed.query)
                 if "url" in qs and qs["url"][0]:
-                    real_m3u8 = qs["url"][0]
                     return {
                         "parse": 0,
                         "playUrl": "",
-                        "url": real_m3u8,
+                        "url": qs["url"][0],
                         "header": req_headers,
                     }
 
-            # 2. 備援：原站 API 介面
-            for pattern in [
-                r"http://api\.yongfan99\.com:81/content\.php\?[^'\"]+",
-                r"content\.php\?vid=[^&]+&type=[^'\"]+",
-            ]:
-                match = re.search(pattern, html_content)
-                if match:
-                    api_url = match.group(0)
-                    if not api_url.startswith('http'):
-                        api_url = "http://api.yongfan99.com:81/" + api_url
-                    try:
-                        api_rsp = self.fetch(api_url, headers=req_headers)
-                        m3u8_match = re.search(r'https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*', api_rsp.text)
-                        if m3u8_match:
-                            return {"parse": 0, "playUrl": "", "url": m3u8_match.group(0), "header": req_headers}
-                    except Exception:
-                        pass
-
-            # 3. 備援：追蹤其他 iframe 播放器
+            # 2. 追蹤 iframe 播放器
             for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', html_content):
-                # 若 iframe src 本身就夾帶 url=.m3u8 參數，直接拆解不需二次請求
                 if "url=" in iframe_src and ".m3u8" in iframe_src:
                     qs = parse_qs(urlparse(iframe_src).query)
                     if "url" in qs:
@@ -272,40 +266,53 @@ class Spider(Spider):
                 except Exception:
                     continue
 
-            # 4. 備援：頁面內直接暴露的 m3u8
+            # 3. 頁面內直接暴露的 m3u8
             m3u8_match = re.search(r'https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*', html_content)
             if m3u8_match:
                 return {"parse": 0, "playUrl": "", "url": m3u8_match.group(0), "header": req_headers}
 
-            # 5. 最終退回嗅探模式
             return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
 
         except Exception:
             return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
 
-    # ================= 統一解析與輔助方法 =================
+    # ================= 多層級片卡解析與診斷工具 =================
+
+    def extract_cards_with_fallback(self, root):
+        """依序嘗試多種 XPath 規則，確保抓得到片卡"""
+        xpath_rules = [
+            "//a[contains(@class,'stui-vodlist__thumb')]",
+            "//a[contains(@class,'vodlist__thumb')]",
+            "//a[contains(@href,'vod-detail-id-')]",
+            "//a[contains(@href,'/vod/') and (@title or .//img or @style)]",
+        ]
+        for rule in xpath_rules:
+            nodes = root.xpath(rule)
+            if nodes:
+                videos = self.parse_vod_list(nodes)
+                if videos:
+                    return videos
+        return []
 
     def parse_vod_list(self, a_nodes):
-        """統一解析片卡列表（相容 style="background: url(...)" 與 data-original）"""
         videos = []
         seen = set()
 
         for a in a_nodes:
             try:
                 href = self.get_first(a.xpath("./@href")).strip()
-                if not href or href in seen:
+                if not href or href in seen or href.startswith("javascript"):
                     continue
 
-                # 片名提取：優先 @title -> 內部 .pic-text -> 純文字
                 title = (
                     self.get_first(a.xpath("./@title")).strip()
                     or self.get_first(a.xpath(".//span[contains(@class,'pic-text')]/text()")).strip()
+                    or self.get_first(a.xpath(".//img/@alt")).strip()
                     or self.get_first(a.xpath(".//text()")).strip()
                 )
                 if not title:
                     continue
 
-                # 封面圖提取：優先從 style="background: url(...)" 抓取，備援 data-original / src
                 pic = ""
                 style = self.get_first(a.xpath("./@style"))
                 if style:
@@ -323,11 +330,9 @@ class Spider(Spider):
                 if pic:
                     pic = urljoin(self.host, pic)
 
-                # 狀態角標提取（如：更新至XX集 / HD中字 / 片名副標）
                 remark = self.get_first(
                     a.xpath(".//span[contains(@class,'pic-text')]/text()")
                 ).strip()
-                # 若角標文字跟片名完全相同（如你提供的範例），則不重複顯示在角標上
                 if remark == title:
                     remark = ""
 
@@ -342,6 +347,15 @@ class Spider(Spider):
                 continue
 
         return videos
+
+    def _debug_card(self, title, remark):
+        """在介面顯示診斷訊息，方便直接判讀失敗原因"""
+        return {
+            "vod_id": "debug",
+            "vod_name": title,
+            "vod_pic": "",
+            "vod_remarks": remark,
+        }
 
     def parse_html(self, content, return_content=False):
         if isinstance(content, str):
@@ -365,7 +379,6 @@ class Spider(Spider):
         return array[0] if array else default
 
     def clean_html(self, html_content):
-        # 移除不可見控制字元，保留合法 HTML 實體避免破壞 DOM 結構
         return re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', html_content)
 
     def isVideoFormat(self, url):
