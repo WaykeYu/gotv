@@ -6,6 +6,11 @@ import re
 import sys
 from urllib.parse import parse_qs, quote, unquote, urljoin, urlparse
 from lxml import etree
+import requests
+import urllib3
+
+# 關閉忽略 SSL 憑證時的警告訊息
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sys.path.append('..')
 from base.spider import Spider
@@ -219,72 +224,133 @@ class Spider(Spider):
 
     def playerContent(self, flag, id, vipFlags):
         play_page_url = urljoin(self.host, id)
-        req_headers = {
+        page_headers = {
             "User-Agent": self.headers["User-Agent"],
             "Referer": play_page_url,
         }
+        # 媒體串流請求頭：不帶網站 Referer，避免第三方切片 CDN (如 bfvvs.com) 防盜鏈拒絕連線
+        media_headers = {
+            "User-Agent": self.headers["User-Agent"],
+        }
 
         try:
-            rsp = self.fetch(play_page_url, headers=req_headers)
+            rsp = self.fetch(play_page_url, headers=page_headers)
             _, raw_html = self.parse_html(rsp.content, return_content=True)
 
-            # 1. 先從播放頁本體嘗試提取真實串流
             stream_url = self._find_stream_in_text(raw_html)
+
+            if not stream_url:
+                ignore_js = ("jquery", "bootstrap", "stui", "swiper", "layer", "lazyload", "tj", "tongji")
+                script_srcs = re.findall(r'<script[^>]*src=[\'"]([^\'"]+\.js[^\'"]*)[\'"]', raw_html, re.IGNORECASE)
+                for src in script_srcs:
+                    if any(k in src.lower() for k in ignore_js):
+                        continue
+                    full_js_url = urljoin(play_page_url, src)
+                    try:
+                        js_rsp = self.fetch(full_js_url, headers=page_headers)
+                        js_content = js_rsp.content.decode('utf-8', errors='replace')
+                        stream_url = self._find_stream_in_text(js_content)
+                        if stream_url:
+                            break
+                    except Exception:
+                        continue
+
+            if not stream_url:
+                for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', raw_html, re.IGNORECASE):
+                    stream_url = self._find_stream_in_text(iframe_src)
+                    if stream_url:
+                        break
+                    full_iframe = urljoin(play_page_url, iframe_src)
+                    try:
+                        iframe_rsp = self.fetch(full_iframe, headers=page_headers)
+                        stream_url = self._find_stream_in_text(iframe_rsp.text)
+                        if stream_url:
+                            break
+                    except Exception:
+                        continue
+
             if stream_url:
-                return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
+                # 若為 https 串流，透過本地代理 (localProxy) 忽略 SSL 憑證驗證轉發，徹底解決「与媒体服务器的安全连接失败」
+                if stream_url.startswith("https://") and ".m3u8" in stream_url:
+                    proxy_url = f"{self.getProxyUrl()}&url={quote(stream_url, safe='')}"
+                    return {
+                        "parse": 0,
+                        "playUrl": "",
+                        "url": proxy_url,
+                        "header": media_headers,
+                    }
 
-            # 2. 【核心關鍵】追蹤海洋CMS 播放頁載入的站內動態資料 JS（如 /upload/playdata/...js）
-            # 排除 jquery / bootstrap / stui 等常見前端框架檔，只抓資料腳本
-            ignore_js = ("jquery", "bootstrap", "stui", "swiper", "layer", "lazyload", "tj", "tongji")
-            script_srcs = re.findall(r'<script[^>]*src=[\'"]([^\'"]+\.js[^\'"]*)[\'"]', raw_html, re.IGNORECASE)
+                return {
+                    "parse": 0,
+                    "playUrl": "",
+                    "url": stream_url,
+                    "header": media_headers,
+                }
 
-            for src in script_srcs:
-                if any(k in src.lower() for k in ignore_js):
-                    continue
-                full_js_url = urljoin(play_page_url, src)
-                try:
-                    js_rsp = self.fetch(full_js_url, headers=req_headers)
-                    js_content = js_rsp.content.decode('utf-8', errors='replace')
-                    stream_url = self._find_stream_in_text(js_content)
-                    if stream_url:
-                        return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
-                except Exception:
-                    continue
-
-            # 3. 追蹤頁面中的 iframe 播放器
-            for iframe_src in re.findall(r'<iframe[^>]*src=[\'"]([^\'"]+)[\'"]', raw_html, re.IGNORECASE):
-                stream_url = self._find_stream_in_text(iframe_src)
-                if stream_url:
-                    return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
-
-                full_iframe = urljoin(play_page_url, iframe_src)
-                try:
-                    iframe_rsp = self.fetch(full_iframe, headers=req_headers)
-                    stream_url = self._find_stream_in_text(iframe_rsp.text)
-                    if stream_url:
-                        return {"parse": 0, "playUrl": "", "url": stream_url, "header": req_headers}
-                except Exception:
-                    continue
-
-            # 若仍未抓到，交由播放器內建嗅探
-            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
+            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": page_headers}
 
         except Exception:
-            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": req_headers}
+            return {"parse": 1, "playUrl": "", "url": play_page_url, "header": page_headers}
+
+    def localProxy(self, param):
+        """本地代理：以 verify=False 忽略媒體伺服器過期/無效的 SSL 憑證，並自動展開嵌套 m3u8 與切片路徑"""
+        target_url = unquote(param.get("url", ""))
+        if not target_url:
+            return [404, "text/plain", b"Missing url"]
+
+        req_headers = {
+            "User-Agent": self.headers["User-Agent"],
+        }
+
+        try:
+            rsp = requests.get(target_url, headers=req_headers, verify=False, timeout=15)
+            content_type = rsp.headers.get("Content-Type", "application/vnd.apple.mpegurl")
+
+            # 若為 m3u8 索引檔，將內部的相對路徑或子 m3u8 / ts 切片路徑轉換為完整且經過代理的網址
+            if ".m3u8" in target_url or "mpegurl" in content_type.lower() or rsp.text.lstrip().startswith("#EXTM3U"):
+                lines = []
+                for line in rsp.text.splitlines():
+                    stripped = line.strip()
+                    if not stripped:
+                        lines.append(line)
+                    elif stripped.startswith("#"):
+                        # 處理 #EXT-X-KEY:METHOD=AES-128,URI="key.key" 中的加密金鑰路徑
+                        if 'URI="' in stripped:
+                            def _replace_uri(m):
+                                full_key_url = urljoin(target_url, m.group(1))
+                                proxied_key = f"{self.getProxyUrl()}&url={quote(full_key_url, safe='')}"
+                                return f'URI="{proxied_key}"'
+                            stripped = re.sub(r'URI="([^"]+)"', _replace_uri, stripped)
+                        lines.append(stripped)
+                    else:
+                        # 媒體行（子 m3u8 或 .ts 切片）
+                        abs_url = urljoin(target_url, stripped)
+                        if ".m3u8" in abs_url:
+                            # 子 m3u8 繼續走本地代理
+                            lines.append(f"{self.getProxyUrl()}&url={quote(abs_url, safe='')}")
+                        else:
+                            # ts 切片改為 http 嘗試或走代理，確保全部忽略憑證
+                            lines.append(f"{self.getProxyUrl()}&url={quote(abs_url, safe='')}")
+
+                body = "\n".join(lines).encode("utf-8")
+                return [200, "application/vnd.apple.mpegurl", body]
+
+            # 若為 TS 切片或金鑰檔，直接回傳二進位串流
+            return [rsp.status_code, content_type, rsp.content]
+
+        except Exception as e:
+            return [502, "text/plain", str(e).encode("utf-8")]
 
     def _find_stream_in_text(self, text):
-        """通用串流提取器：支援反斜線轉義、URL編碼、JS unescape 與 Base64 解碼"""
         if not text:
             return ""
 
-        # A. 處理 JS unescape('%68%74%74%70...') 編碼區塊
         for unesc_match in re.findall(r'unescape\([\'"]([^\'"]+)[\'"]\)', text):
             decoded = unquote(unesc_match)
             res = self._find_stream_in_text(decoded)
             if res:
                 return res
 
-        # B. 處理 Base64 編碼區塊 (常見 atob('aHR0c...'))
         for b64_match in re.findall(r'atob\([\'"]([A-Za-z0-9+/=]+)[\'"]\)', text):
             try:
                 decoded = base64.b64decode(b64_match).decode('utf-8', errors='ignore')
@@ -294,17 +360,14 @@ class Spider(Spider):
             except Exception:
                 pass
 
-        # 還原轉義斜線與 URL 編碼
         cleaned = unquote(text.replace(r"\/", "/"))
 
-        # C. 精準匹配 /player/aliplayer.html?url=https://...m3u8
         ali_match = re.search(r'/player/aliplayer\.html\?[^"\'\s<>]+', cleaned)
         if ali_match:
             qs = parse_qs(urlparse(ali_match.group(0)).query)
             if "url" in qs and qs["url"][0]:
                 return unquote(qs["url"][0]).strip()
 
-        # D. 直接匹配任意 http(s)://...m3u8 或 .mp4 串流網址（排除 aliplayer 本身外殼）
         for m in re.finditer(r'https?://[^\s"\'<>\\$#]+\.(?:m3u8|mp4)(?:\?[^\s"\'<>\\$#]*)?', cleaned, re.IGNORECASE):
             candidate = m.group(0).strip()
             if "aliplayer.html" not in candidate:
@@ -412,6 +475,3 @@ class Spider(Spider):
 
     def manualVideoCheck(self):
         return True
-
-    def localProxy(self, param):
-        return {}
