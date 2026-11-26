@@ -2,18 +2,8 @@
   "spider": "./drpy.min.js;md5;auto",
   "sites": [
     {
-      "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (66ms)",
-      "type": 3,
-      "api": "./js/欧乐影院.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.oleol.com"
-    },
-    {
       "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (76ms)",
+      "name": "[JSON] pronlulu (64ms)",
       "type": 3,
       "api": "./js/ss/pronlulu.json",
       "searchable": 1,
@@ -23,7 +13,7 @@
     },
     {
       "key": "js_cilixiong",
-      "name": "[JS] cilixiong (122ms)",
+      "name": "[JS] cilixiong (96ms)",
       "type": 3,
       "api": "./js/cilixiong.js",
       "searchable": 1,
@@ -33,7 +23,7 @@
     },
     {
       "key": "js_注视影视",
-      "name": "[JS] 注视影视 (166ms)",
+      "name": "[JS] 注视影视 (123ms)",
       "type": 3,
       "api": "./js/注视影视.js",
       "searchable": 1,
@@ -42,8 +32,18 @@
       "ext": "https://gaze.run"
     },
     {
+      "key": "js_欧乐影院",
+      "name": "[JS] 欧乐影院 (127ms)",
+      "type": 3,
+      "api": "./js/欧乐影院.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.oleol.com"
+    },
+    {
       "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (356ms)",
+      "name": "[JS] 嘀嗒影视 (388ms)",
       "type": 3,
       "api": "./js/嘀嗒影视.js",
       "searchable": 1,
@@ -53,7 +53,7 @@
     },
     {
       "key": "js_B站",
-      "name": "[JS] B站 (882ms)",
+      "name": "[JS] B站 (908ms)",
       "type": 3,
       "api": "./js/B站.js",
       "searchable": 1,
@@ -62,18 +62,8 @@
       "ext": "https://www.bilibili.com"
     },
     {
-      "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (1170ms)",
-      "type": 3,
-      "api": "./js/ss/xp天堂.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://attack.bjidvlyog.com"
-    },
-    {
       "key": "js_央视频",
-      "name": "[JS] 央视频 (2232ms)",
+      "name": "[JS] 央视频 (918ms)",
       "type": 3,
       "api": "./js/央视频.js",
       "searchable": 1,
@@ -82,8 +72,18 @@
       "ext": "https://m.yangshipin.cn"
     },
     {
+      "key": "js_xp天堂",
+      "name": "[JS] xp天堂 (1120ms)",
+      "type": 3,
+      "api": "./js/ss/xp天堂.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://attack.bjidvlyog.com"
+    },
+    {
       "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (3088ms)",
+      "name": "[JSON] 农民影视 (1245ms)",
       "type": 3,
       "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
