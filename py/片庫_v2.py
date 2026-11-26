@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import base64
 import json
 import re
 import sys
@@ -22,7 +23,6 @@ class Spider(Spider):
         'Accept-Language': 'zh-TW,zh;q=0.9,zh-CN;q=0.8,en;q=0.7',
     }
 
-    # 記錄該網站實際使用的分類路徑前綴 (預設 /vodshow/)
     show_prefix = '/vodshow/'
 
     def getName(self):
@@ -47,7 +47,6 @@ class Spider(Spider):
         except Exception:
             pass
 
-        # 1. 自動從網頁導覽列抓取真實分類與 ID，若抓不到則使用預設值
         classes = self._parse_classes(html) if html else []
         if not classes:
             classes = [
@@ -60,7 +59,6 @@ class Spider(Spider):
             ]
         result['class'] = classes
 
-        # 2. 篩選條件
         filters = {}
         years = [
             {'n': '全部', 'v': ''},
@@ -109,8 +107,6 @@ class Spider(Spider):
                 {'key': 'by', 'name': '排序', 'value': sorts},
             ]
         result['filters'] = filters
-
-        # 3. 解析首頁推薦片單
         result['list'] = self._parse_vod_list(html) if html else []
         return result
 
@@ -124,7 +120,6 @@ class Spider(Spider):
         vod_class = urllib.parse.quote(extend.get('class', ''))
         year = extend.get('year', '')
 
-        # 支援無篩選條件時直接訪問分類頁，有篩選時走篩選路由
         if not any([area, vod_class, year]) and by == 'time':
             url = (
                 f'{self.host}/vodtype/{tid}-{pg}.html'
@@ -140,7 +135,6 @@ class Spider(Spider):
             rsp.encoding = 'utf-8'
             vod_list = self._parse_vod_list(rsp.text)
 
-            # 若 /vodtype/ 路徑結構不同 (如 /type/ 或 /vodshow/)，自動切換備用路徑重試
             if not vod_list:
                 alt_url = f'{self.host}{self.show_prefix}{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html'
                 if alt_url != url:
@@ -161,7 +155,6 @@ class Spider(Spider):
 
     def detailContent(self, ids):
         vid = ids[0]
-        # 直接使用片卡抓取到的完整相對路徑 (相容 /voddetail/、/detail/、/v/ 等各種路徑)
         if vid.startswith('http'):
             url = vid
         elif vid.startswith('/'):
@@ -181,7 +174,9 @@ class Spider(Spider):
         pic = ''
         for img in soup.find_all('img'):
             src = self._extract_img(img)
-            if src and ('wsyzy.org' in src or 'ykimg.com' in src or 'upload' in src):
+            if src and (
+                'wsyzy.org' in src or 'ykimg.com' in src or 'upload' in src
+            ):
                 pic = src
                 break
 
@@ -215,7 +210,6 @@ class Spider(Spider):
                     play_from.append(tab_name)
                     play_url.append('#'.join(ep_links))
         else:
-            # 備用：自動收集所有播放連結 (包含 play 關鍵字)
             play_from.append('預設線路')
             ep_links = []
             for a in soup.find_all('a', href=re.compile(r'play', re.I)):
@@ -242,7 +236,6 @@ class Spider(Spider):
 
     def searchContent(self, key, quick, pg='1'):
         encoded_key = urllib.parse.quote(key)
-        # 嘗試常見蘋果CMS搜尋路徑
         search_urls = [
             f'{self.host}/vodsearch/{encoded_key}----------{pg}---.html',
             f'{self.host}/vodsearch/-------------.html?wd={encoded_key}',
@@ -260,66 +253,145 @@ class Spider(Spider):
         return {'list': []}
 
     def playerContent(self, flag, id, vipFlags):
+        # 1. 若詳情頁直接帶入的就是 .m3u8 / .mp4 直鏈
+        if '.m3u8' in id or '.mp4' in id:
+            return self._build_video_response(id)
+
         play_page_url = (
             f'{self.host}{id}' if not id.startswith('http') else id
         )
-        result = {'parse': 0, 'playUrl': '', 'url': '', 'header': ''}
 
         try:
             rsp = requests.get(play_page_url, headers=self.headers, timeout=12)
             rsp.encoding = 'utf-8'
             html = rsp.text
 
-            # 提取 player_aaaa 內的真實影片網址
-            m = re.search(r'var\s+player_aaaa\s*=\s*(\{.*?\});', html, re.S)
-            if m:
-                player_data = json.loads(m.group(1))
-                raw_url = player_data.get('url', '')
+            # 2. 優先在當前播放頁尋找真實串流網址
+            real_url = self._extract_stream_url(html)
+            if real_url:
+                return self._build_video_response(real_url)
 
-                if player_data.get('encrypt') == 1:
-                    raw_url = urllib.parse.unquote(raw_url)
-                elif player_data.get('encrypt') == 2:
-                    import base64
+            # 3. 檢查是否有嵌套播放器 iframe (常見於 sviptq / lirose 解析頁)
+            soup = BeautifulSoup(html, 'html.parser')
+            for iframe in soup.find_all('iframe', src=True):
+                iframe_src = iframe.get('src', '').strip()
+                if not iframe_src or iframe_src.startswith('javascript'):
+                    continue
+                if iframe_src.startswith('//'):
+                    iframe_src = 'https:' + iframe_src
+                elif iframe_src.startswith('/'):
+                    iframe_src = self.host + iframe_src
 
-                    raw_url = urllib.parse.unquote(
-                        base64.b64decode(raw_url).decode('utf-8')
-                    )
+                # 若 iframe src 參數本身已包含 url=https://...m3u8
+                parsed_qs = urllib.parse.parse_qs(
+                    urllib.parse.urlparse(iframe_src).query
+                )
+                for q_val in parsed_qs.values():
+                    if q_val and ('.m3u8' in q_val[0] or '.mp4' in q_val[0]):
+                        return self._build_video_response(q_val[0])
 
-                if raw_url:
-                    result['url'] = raw_url
-                    result['parse'] = 0
-                    result['header'] = json.dumps({
-                        'User-Agent': self.headers['User-Agent'],
-                        'Referer': '',
-                    })
-                    return result
-
-            # 備用正則：直接匹配 .m3u8 網址
-            m3u8_match = re.search(
-                r'(https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*)', html
-            )
-            if m3u8_match:
-                result['url'] = m3u8_match.group(1).replace('\\/', '/')
-                result['parse'] = 0
-                result['header'] = json.dumps({
-                    'User-Agent': self.headers['User-Agent'],
-                    'Referer': '',
-                })
-                return result
+                # 請求 iframe 內部頁面提取串流
+                sub_headers = dict(self.headers)
+                sub_headers['Referer'] = play_page_url
+                sub_rsp = requests.get(
+                    iframe_src, headers=sub_headers, timeout=10
+                )
+                sub_rsp.encoding = 'utf-8'
+                sub_url = self._extract_stream_url(sub_rsp.text)
+                if sub_url:
+                    return self._build_video_response(sub_url)
 
         except Exception:
             pass
 
-        result['parse'] = 1
-        result['url'] = play_page_url
-        return result
+        # 4. 最後手段：交給 Yumilo 內建 WebView 嗅探器自動攔截網路請求中的 .m3u8
+        return {
+            'parse': 1,
+            'jx': 0,  # 關閉外部無效的 JSON 解析接口，改用瀏覽器嗅探
+            'playUrl': '',
+            'url': play_page_url,
+            'header': json.dumps(self.headers),
+        }
 
-    # --- 核心輔助解析函式 ---
+    def _extract_stream_url(self, html):
+        # A. 匹配 MacCMS player_aaaa 或 player_data 變數 (放寬大括號匹配)
+        m = re.search(
+            r'(?:player_aaaa|player_data)\s*=\s*(\{.*?\})\s*[;<]', html, re.S
+        )
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                raw_url = data.get('url', '')
+                encrypt = data.get('encrypt', 0)
+                if encrypt == 1:
+                    raw_url = urllib.parse.unquote(raw_url)
+                elif encrypt == 2:
+                    raw_url = urllib.parse.unquote(
+                        base64.b64decode(raw_url).decode('utf-8')
+                    )
+                if raw_url and ('.m3u8' in raw_url or '.mp4' in raw_url):
+                    return raw_url
+                # 若 player_aaaa 裡放的是解析器網址，繼續往下或追蹤該網址
+                if raw_url.startswith('http'):
+                    sub_rsp = requests.get(
+                        raw_url, headers=self.headers, timeout=10
+                    )
+                    found = self._regex_find_m3u8(sub_rsp.text)
+                    if found:
+                        return found
+            except Exception:
+                pass
+
+        # B. 直接從 HTML / JS 腳本正則提取帶參數的 .m3u8 (支援 @、&、= 等字元)
+        return self._regex_find_m3u8(html)
+
+    def _regex_find_m3u8(self, text):
+        # 處理跳脫斜線 \/
+        clean_text = text.replace('\\/', '/')
+        # 匹配引號內的完整 .m3u8 網址 (支援 sviptq.com 網址中的 @lirose_tv 等參數)
+        patterns = [
+            r'["\'](https?://[^"\'\s<>]+\.m3u8[^"\'\s<>]*)["\']',
+            r'["\'](https?://[^"\'\s<>]+\.mp4[^"\'\s<>]*)["\']',
+            r'(https?://[^\s"\'<>]+\.m3u8[^\s"\'<>]*)',
+        ]
+        for pat in patterns:
+            matches = re.findall(pat, clean_text)
+            for url in matches:
+                # 排除解析器自身的參數前綴 (如 https://jx.xxx/?url=https://...)
+                if 'url=http' in url:
+                    real = url.split('url=', 1)[1]
+                    return urllib.parse.unquote(real)
+                return url
+
+        # C. 嘗試尋找 Base64 編碼的 m3u8 網址 (常見格式: "url":"aHR0cHM6...")
+        b64_matches = re.findall(
+            r'["\'](aHR0c[A-Za-z0-9+/=]{20,})["\']', clean_text
+        )
+        for b64_str in b64_matches:
+            try:
+                decoded = base64.b64decode(b64_str).decode('utf-8')
+                if '.m3u8' in decoded or '.mp4' in decoded:
+                    return decoded
+            except Exception:
+                continue
+        return ''
+
+    def _build_video_response(self, stream_url):
+        return {
+            'parse': 0,
+            'playUrl': '',
+            'url': stream_url,
+            'header': json.dumps({
+                'User-Agent': self.headers['User-Agent'],
+                'Referer': '',
+            }),
+        }
+
+    # --- 輔助解析函式 ---
     def _parse_classes(self, html):
         soup = BeautifulSoup(html, 'html.parser')
         classes = []
         seen = set()
-        # 匹配 /vodtype/1.html 或 /type/1.html 等分類連結
         for a in soup.find_all(
             'a', href=re.compile(r'/(?:vodtype|type|vodshow)/(\d+)')
         ):
@@ -328,7 +400,12 @@ class Spider(Spider):
             name = a.get_text(strip=True)
             if m and name and 1 <= len(name) <= 6:
                 tid = m.group(1)
-                if tid not in seen and name not in ['首頁', '首页', '更多', '全部']:
+                if tid not in seen and name not in [
+                    '首頁',
+                    '首页',
+                    '更多',
+                    '全部',
+                ]:
                     seen.add(tid)
                     classes.append({'type_name': name, 'type_id': tid})
         return classes
@@ -338,17 +415,21 @@ class Spider(Spider):
         vod_list = []
         seen_hrefs = set()
 
-        # 通用片卡解析：直接尋找所有包含 <img> 的 <a> 標籤
         for a in soup.find_all('a', href=True):
             href = a.get('href', '').strip()
-            # 排除空連結、首頁、分類頁、播放頁與外部連結
             if (
                 not href
                 or href in ['/', '#']
                 or href.startswith('javascript')
                 or any(
                     x in href
-                    for x in ['/vodtype/', '/vodshow/', '/vodplay/', '/topic/', '/art/']
+                    for x in [
+                        '/vodtype/',
+                        '/vodshow/',
+                        '/vodplay/',
+                        '/topic/',
+                        '/art/',
+                    ]
                 )
             ):
                 continue
@@ -358,16 +439,15 @@ class Spider(Spider):
                 continue
 
             pic = self._extract_img(img)
-            # 過濾掉沒有圖片或非海報的小圖標 (logo/icon)
             if not pic or any(
-                k in pic.lower() for k in ['logo', 'icon', 'avatar', 'qr', 'ad']
+                k in pic.lower()
+                for k in ['logo', 'icon', 'avatar', 'qr', 'ad']
             ):
                 continue
 
             if href in seen_hrefs:
                 continue
 
-            # 多層級尋找片名 (因應新版標籤沒有 alt 屬性的狀況)
             title = (
                 a.get('title')
                 or img.get('alt')
@@ -375,7 +455,6 @@ class Spider(Spider):
                 or ''
             ).strip()
 
-            # 若 <a> 和 <img> 都沒有 title/alt，往卡片內部或父容器的標題元素尋找
             if not title:
                 title_el = a.select_one(
                     '.title, .name, .module-poster-item-title, h3, h4, p, span'
@@ -384,7 +463,6 @@ class Spider(Spider):
                     title = title_el.get_text(strip=True)
 
             if not title and a.parent:
-                # 尋找同卡片區塊內的下一個文字連結或標題標籤
                 for sibling_a in a.parent.find_all('a', href=href):
                     txt = sibling_a.get_text(strip=True)
                     if txt:
@@ -397,7 +475,6 @@ class Spider(Spider):
                     if p_title:
                         title = p_title.get_text(strip=True)
 
-            # 尋找更新集數 / 評分 / 清晰度標籤
             remarks = ''
             container = a.parent if a.parent else a
             note_el = container.select_one(
@@ -411,7 +488,7 @@ class Spider(Spider):
             if title:
                 seen_hrefs.add(href)
                 vod_list.append({
-                    'vod_id': href,  # 直接存完整相對路徑，避免詳情頁路徑拼錯
+                    'vod_id': href,
                     'vod_name': title,
                     'vod_pic': pic,
                     'vod_remarks': remarks,
@@ -422,7 +499,11 @@ class Spider(Spider):
     def _extract_img(self, img_tag):
         for attr in ['data-original', 'data-src', 'data-echo', 'src']:
             val = img_tag.get(attr, '').strip()
-            if val and '/load.gif' not in val and not val.startswith('data:image'):
+            if (
+                val
+                and '/load.gif' not in val
+                and not val.startswith('data:image')
+            ):
                 if val.startswith('//'):
                     return 'https:' + val
                 elif val.startswith('/'):
