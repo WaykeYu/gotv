@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import json
-import os
 import re
 import sys
 import urllib.parse
@@ -24,18 +23,7 @@ class Spider(Spider):
         'Accept-Language': 'zh-CN,zh;q=0.9,zh-TW;q=0.8,en;q=0.7',
     }
 
-    # 記錄偵測到的篩選網址模板 (預設蘋果CMS標準格式)
     show_template = '/vodshow/{tid}-{area}-{by}-{class}-----{pg}---{year}.html'
-
-    def _log(self, msg):
-        try:
-            log_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'pianku_debug.log'
-            )
-            with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(str(msg) + '\n')
-        except Exception:
-            pass
 
     def getName(self):
         return '片庫'
@@ -56,8 +44,8 @@ class Spider(Spider):
             rsp = requests.get(self.host, headers=self.headers, timeout=12)
             rsp.encoding = 'utf-8'
             html = rsp.text
-        except Exception as e:
-            self._log(f'homeContent error: {e}')
+        except Exception:
+            pass
 
         classes = self._parse_classes(html) if html else []
         if not classes:
@@ -71,14 +59,7 @@ class Spider(Spider):
             ]
         result['class'] = classes
 
-        # 動態從首個分類的篩選頁抓取真實篩選選項與網址結構
         filters = {}
-        dynamic_filters = {}
-        if classes:
-            first_tid = classes[0]['type_id']
-            dynamic_filters = self._scrape_filters_from_site(first_tid)
-
-        # 若動態抓取成功，套用到各分類；否則使用簡體相容的預設篩選值 (因為後端資料庫多為簡體)
         years = [
             {'n': '全部', 'v': ''},
             {'n': '2026', 'v': '2026'},
@@ -90,7 +71,6 @@ class Spider(Spider):
             {'n': '2020', 'v': '2020'},
             {'n': '更早', 'v': '2010'},
         ]
-        # 顯示繁體名稱(n)，實際傳給網站的篩選值(v)使用簡體以匹配資料庫
         areas = [
             {'n': '全部', 'v': ''},
             {'n': '大陸', 'v': '大陆'},
@@ -119,7 +99,6 @@ class Spider(Spider):
             {'n': '犯罪', 'v': '犯罪'},
             {'n': '懸疑', 'v': '悬疑'},
         ]
-
         fallback_filter_list = [
             {'key': 'class', 'name': '類型', 'value': default_cates},
             {'key': 'area', 'name': '地區', 'value': areas},
@@ -128,123 +107,11 @@ class Spider(Spider):
         ]
 
         for cls in classes:
-            cid = cls['type_id']
-            # 嘗試為每個分類獨立抓一次真實篩選標籤 (若失敗則用通用值)
-            cid_filters = (
-                dynamic_filters
-                if cid == classes[0]['type_id'] and dynamic_filters
-                else self._scrape_filters_from_site(cid)
-            )
-            filters[cid] = cid_filters if cid_filters else fallback_filter_list
+            filters[cls['type_id']] = fallback_filter_list
 
         result['filters'] = filters
         result['list'] = self._parse_vod_list(html) if html else []
         return result
-
-    def _scrape_filters_from_site(self, tid):
-        """訪問分類篩選頁，自動提取真實篩選參數與路徑格式"""
-        try:
-            test_urls = [
-                f'{self.host}/vodshow/{tid}-----------.html',
-                f'{self.host}/vodtype/{tid}.html',
-                f'{self.host}/show/{tid}-----------.html',
-            ]
-            html = ''
-            for u in test_urls:
-                rsp = requests.get(u, headers=self.headers, timeout=8)
-                if rsp.status_code == 200 and (
-                    '/vodshow/' in rsp.text or '/show/' in rsp.text
-                ):
-                    rsp.encoding = 'utf-8'
-                    html = rsp.text
-                    break
-            if not html:
-                return []
-
-            soup = BeautifulSoup(html, 'html.parser')
-            # 尋找包含篩選參數的連結，偵測路徑前綴 (/vodshow/ 或 /show/ 等)
-            sample_a = soup.find(
-                'a', href=re.compile(r'/(?:vodshow|show|type)/' + str(tid) + r'-')
-            )
-            if sample_a:
-                sample_href = sample_a.get('href', '')
-                prefix_m = re.match(r'^(/[^/]+/)', sample_href)
-                if prefix_m:
-                    prefix = prefix_m.group(1)
-                    # 計算連字號數量以還原完整蘋果CMS路由格式
-                    parts = sample_href.split('-')
-                    if len(parts) >= 11:
-                        self.show_template = (
-                            f'{prefix}{{tid}}-{{area}}-{{by}}-{{class}}-----{{pg}}---{{year}}.html'
-                        )
-                    elif len(parts) >= 8:
-                        self.show_template = (
-                            f'{prefix}{{tid}}-{{area}}-{{by}}-{{class}}---{{pg}}--{{year}}.html'
-                        )
-
-            # 解析頁面上的篩選群組 (如 類型、地區、年份、排序)
-            extracted_filters = []
-            groups = soup.select(
-                '.library-box, .module-class-item, .stui-screen__list, .myui-screen__list, dl, ul'
-            )
-            seen_keys = set()
-            for g in groups:
-                links = g.find_all(
-                    'a',
-                    href=re.compile(r'/(?:vodshow|show)/' + str(tid) + r'-'),
-                )
-                if len(links) < 3:
-                    continue
-
-                # 判斷這個群組屬於哪個維度 (area / class / year / by)
-                sample_vals = []
-                detected_key = ''
-                group_name = '篩選'
-
-                for a in links:
-                    txt = a.get_text(strip=True)
-                    href = a.get('href', '')
-                    if not txt or len(txt) > 10:
-                        continue
-                    # 從連結拆解出對應位置的參數值
-                    seg = href.split('/')[-1].replace('.html', '').split('-')
-                    # 標準蘋果CMS位置: [0]id, [1]area, [2]by, [3]class, [4]lang, [5]letter, [6]level, [7]order, [8]page, [9]state, [10]tag, [11]year
-                    if len(seg) >= 12:
-                        if seg[1] and seg[1] != '':
-                            detected_key = 'area'
-                            group_name = '地區'
-                            val = urllib.parse.unquote(seg[1])
-                        elif seg[3] and seg[3] != '':
-                            detected_key = 'class'
-                            group_name = '類型'
-                            val = urllib.parse.unquote(seg[3])
-                        elif seg[11] and seg[11] != '':
-                            detected_key = 'year'
-                            group_name = '年份'
-                            val = urllib.parse.unquote(seg[11])
-                        elif seg[2] and seg[2] in ['time', 'hits', 'score']:
-                            detected_key = 'by'
-                            group_name = '排序'
-                            val = seg[2]
-                        else:
-                            val = ''
-                        sample_vals.append({'n': txt, 'v': val})
-
-                if detected_key and detected_key not in seen_keys and len(sample_vals) >= 2:
-                    seen_keys.add(detected_key)
-                    # 確保第一個選項是「全部」
-                    if sample_vals[0]['v'] != '':
-                        sample_vals.insert(0, {'n': '全部', 'v': ''})
-                    extracted_filters.append({
-                        'key': detected_key,
-                        'name': group_name,
-                        'value': sample_vals,
-                    })
-
-            return extracted_filters
-        except Exception as e:
-            self._log(f'_scrape_filters error: {e}')
-            return []
 
     def homeVideoContent(self):
         return {'list': []}
@@ -265,41 +132,19 @@ class Spider(Spider):
                 else f'{self.host}/vodtype/{tid}.html'
             )
         else:
-            url = self.show_template.format(
-                tid=tid,
-                area=area,
-                by=by,
-                **{'class': vod_class},
-                pg=pg,
-                year=year,
-            )
-            if not url.startswith('http'):
-                url = self.host + url
+            url = f'{self.host}/vodshow/{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html'
 
-        self._log(f'categoryContent extend={extend}, url={url}')
         vod_list = []
         try:
             rsp = requests.get(url, headers=self.headers, timeout=12)
             rsp.encoding = 'utf-8'
             vod_list = self._parse_vod_list(rsp.text)
-
-            # 若無篩選時 /vodtype/ 為空，或有篩選時模板不符，嘗試備用路由
-            if not vod_list:
-                fallback_urls = [
-                    f'{self.host}/vodshow/{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html',
-                    f'{self.host}/show/{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html',
-                    f'{self.host}/vodshow/{tid}-----------.html?area={area}&by={by}&class={vod_class}&year={year}&page={pg}',
-                ]
-                for fb_url in fallback_urls:
-                    if fb_url == url:
-                        continue
-                    rsp = requests.get(fb_url, headers=self.headers, timeout=12)
-                    rsp.encoding = 'utf-8'
-                    vod_list = self._parse_vod_list(rsp.text)
-                    if vod_list:
-                        break
-        except Exception as e:
-            self._log(f'categoryContent error: {e}')
+            if not vod_list and not has_filter:
+                alt_url = f'{self.host}/vodshow/{tid}-{area}-{by}-{vod_class}-----{pg}---{year}.html'
+                rsp = requests.get(alt_url, headers=self.headers, timeout=12)
+                rsp.encoding = 'utf-8'
+                vod_list = self._parse_vod_list(rsp.text)
+        except Exception:
             vod_list = []
 
         result['list'] = vod_list
@@ -392,11 +237,52 @@ class Spider(Spider):
                 play_from.append('預設線路')
                 play_url.append('#'.join(ep_links))
 
+        # --- 畫面診斷資訊：預先測試第一集的播放頁結構並顯示在簡介最上方 ---
+        debug_info = f'[診斷] 詳情頁={url} | 線路數={len(play_from)}'
+        if play_url:
+            first_ep = play_url[0].split('#')[0]
+            first_href = first_ep.split('$')[-1] if '$' in first_ep else ''
+            debug_info += f' | 首集連結={first_href}'
+            if first_href:
+                test_play_url = (
+                    f'{self.host}{first_href}'
+                    if not first_href.startswith('http')
+                    else first_href
+                )
+                try:
+                    p_rsp = requests.get(
+                        test_play_url, headers=self.headers, timeout=8
+                    )
+                    p_rsp.encoding = 'utf-8'
+                    m = re.search(
+                        r'(?:player_aaaa|player_data)\s*=\s*(\{.*?\})\s*[;<]',
+                        p_rsp.text,
+                        re.S,
+                    )
+                    if m:
+                        debug_info += f' | player_aaaa={m.group(1)[:180]}'
+                    else:
+                        # 檢查是否有 iframe 或 m3u8 關鍵字
+                        iframes = [
+                            i.get('src')
+                            for i in BeautifulSoup(
+                                p_rsp.text, 'html.parser'
+                            ).find_all('iframe', src=True)
+                        ]
+                        debug_info += (
+                            f' | 無player_aaaa, 狀態碼={p_rsp.status_code},'
+                            f' iframes={iframes[:2]}'
+                        )
+                except Exception as e:
+                    debug_info += f' | 請求播放頁異常={e}'
+
+        full_desc = f'{debug_info}\n\n{desc}'
+
         vod = {
             'vod_id': vid,
             'vod_name': title,
             'vod_pic': pic,
-            'vod_content': desc,
+            'vod_content': full_desc,
             'vod_play_from': '$$$'.join(play_from),
             'vod_play_url': '$$$'.join(play_url),
         }
@@ -578,7 +464,6 @@ class Spider(Spider):
             }),
         }
 
-    # --- 輔助解析函式 ---
     def _parse_classes(self, html):
         soup = BeautifulSoup(html, 'html.parser')
         classes = []
