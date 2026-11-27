@@ -3,7 +3,7 @@
   "sites": [
     {
       "key": "json_pronlulu",
-      "name": "[JSON] pronlulu (57ms)",
+      "name": "[JSON] pronlulu (101ms)",
       "type": 3,
       "api": "./js/ss/pronlulu.json",
       "searchable": 1,
@@ -13,7 +13,7 @@
     },
     {
       "key": "js_欧乐影院",
-      "name": "[JS] 欧乐影院 (81ms)",
+      "name": "[JS] 欧乐影院 (121ms)",
       "type": 3,
       "api": "./js/欧乐影院.js",
       "searchable": 1,
@@ -23,7 +23,7 @@
     },
     {
       "key": "js_注视影视",
-      "name": "[JS] 注视影视 (147ms)",
+      "name": "[JS] 注视影视 (137ms)",
       "type": 3,
       "api": "./js/注视影视.js",
       "searchable": 1,
@@ -33,7 +33,7 @@
     },
     {
       "key": "js_cilixiong",
-      "name": "[JS] cilixiong (153ms)",
+      "name": "[JS] cilixiong (317ms)",
       "type": 3,
       "api": "./js/cilixiong.js",
       "searchable": 1,
@@ -43,7 +43,7 @@
     },
     {
       "key": "js_嘀嗒影视",
-      "name": "[JS] 嘀嗒影视 (447ms)",
+      "name": "[JS] 嘀嗒影视 (438ms)",
       "type": 3,
       "api": "./js/嘀嗒影视.js",
       "searchable": 1,
@@ -52,18 +52,8 @@
       "ext": "https://www.didahd.pro"
     },
     {
-      "key": "js_B站",
-      "name": "[JS] B站 (877ms)",
-      "type": 3,
-      "api": "./js/B站.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://www.bilibili.com"
-    },
-    {
       "key": "js_xp天堂",
-      "name": "[JS] xp天堂 (1259ms)",
+      "name": "[JS] xp天堂 (631ms)",
       "type": 3,
       "api": "./js/ss/xp天堂.js",
       "searchable": 1,
@@ -72,8 +62,18 @@
       "ext": "https://attack.bjidvlyog.com"
     },
     {
+      "key": "js_B站",
+      "name": "[JS] B站 (1069ms)",
+      "type": 3,
+      "api": "./js/B站.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "https://www.bilibili.com"
+    },
+    {
       "key": "js_央视频",
-      "name": "[JS] 央视频 (1663ms)",
+      "name": "[JS] 央视频 (1241ms)",
       "type": 3,
       "api": "./js/央视频.js",
       "searchable": 1,
@@ -83,7 +83,7 @@
     },
     {
       "key": "json_农民影视",
-      "name": "[JSON] 农民影视 (3288ms)",
+      "name": "[JSON] 农民影视 (2105ms)",
       "type": 3,
       "api": "./js/xiaosa/XBPQ/农民影视.json",
       "searchable": 1,
