@@ -2,5 +2,9 @@
   "collect/奥斯卡资源<18+>.json": {
     "first_fail_date": "2026-11-27",
     "last_fail_date": "2026-11-27"
+  },
+  "py/红果短剧解锁版.py": {
+    "first_fail_date": "2026-11-27",
+    "last_fail_date": "2026-11-27"
   }
 }
