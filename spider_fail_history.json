@@ -1,10 +1,6 @@
 {
-  "js/s/奇迹影视.json": {
-    "first_fail_date": "2026-11-26",
-    "last_fail_date": "2026-11-26"
-  },
-  "js/s/奇迹.json": {
-    "first_fail_date": "2026-11-26",
-    "last_fail_date": "2026-11-26"
+  "js/s/秀儿.json": {
+    "first_fail_date": "2026-11-27",
+    "last_fail_date": "2026-11-27"
   }
 }
